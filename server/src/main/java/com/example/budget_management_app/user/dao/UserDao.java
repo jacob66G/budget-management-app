@@ -20,6 +20,16 @@ public class UserDao {
         return Optional.ofNullable(em.find(User.class, id));
     }
 
+    public boolean userExists(Long id) {
+        Long count = em.createQuery("""
+                SELECT COUNT(u) FROM User u
+                WHERE u.id = :id
+                """, Long.class)
+                .setParameter("id", id)
+                .getSingleResult();
+        return count != null && count == 1;
+    }
+
     public Optional<User> findByEmail(String email) {
         List<User> users = em.createQuery("SELECT u FROM User u WHERE LOWER(u.email) =  LOWER(:email)", User.class)
                 .setParameter("email", email)

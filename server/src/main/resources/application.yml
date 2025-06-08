@@ -18,7 +18,6 @@ security:
 config:
   session:
     max-sessions: 5
-
 spring:
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:postgres}
@@ -29,13 +28,35 @@ spring:
     hibernate:
       ddl-auto: update
     defer-datasource-initialization: false
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        dialect:
+          enum_type: STRING
+  sql:
+    init:
+      mode: always
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
 
   jackson:
     mapper:
       accept-case-insensitive-enums: true
   ai:
     openai:
-      api-key: ${OPENAI_API_KEY:dummy_key}
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: ${OPENAI_CHAT_MODEL:gpt-4o}
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: ${SPRING_AI_SCHEMA_INITIALIZATION:always}
   mail:
     username: ${MAIL_USERNAME:username}
     password: ${MAIL_PASSWORD:password}
