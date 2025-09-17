@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Your Account</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+    <h2>Hello {{name}},</h2>
+    <p>Thank you for registering at <b>MyApp</b>!</p>
+    <p>To activate your account, please verify your email by clicking the link below:</p>
+    <p style="text-align: center;">
+        <a href="{{verificationLink}}"
+           style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+           Verify Email
+        </a>
+    </p>
+    <p>If the button above does not work, copy and paste this link into your browser:</p>
+    <p>{{verificationLink}}</p>
+    <p>Welcome aboard!<br>The MyApp Team</p>
+</body>
+</html>

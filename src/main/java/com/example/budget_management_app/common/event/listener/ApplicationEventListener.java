@@ -1,0 +1,23 @@
+package com.example.budget_management_app.common.event.listener;
+
+import com.example.budget_management_app.common.event.model.VerificationEvent;
+import com.example.budget_management_app.common.event.service.EmailService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
+
+@Component
+@RequiredArgsConstructor
+public class ApplicationEventListener {
+
+    private final EmailService emailService;
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleUserRegistered(VerificationEvent event) {
+        emailService.sendVerificationEmail(event.userEmail(), event.userName(), event.verificationCode(), event.resend());
+    }
+
+}
