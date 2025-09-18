@@ -1,0 +1,72 @@
+package com.example.budget_management_app.recurring_transaction.domain;
+
+import com.example.budget_management_app.account.domain.Account;
+import com.example.budget_management_app.category.domain.Category;
+import com.example.budget_management_app.transaction.domain.Transaction;
+import com.example.budget_management_app.transaction.domain.TransactionType;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Set;
+
+@Getter@Setter
+@NoArgsConstructor
+@Entity
+@Table(name = "recurring_transactions")
+public class RecurringTransaction {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private long id;
+
+    @Column(name = "amount", precision = 19, scale = 2, nullable = false)
+    private BigDecimal amount;
+
+    @Column(name = "title", nullable = false)
+    private String title;
+
+    @Column(name = "type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TransactionType type;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "start_date", nullable = false, updatable = false)
+    private LocalDateTime startDate;
+
+    @Column(name = "end_date")
+    private LocalDateTime endDate;
+
+    @Column(name = "recurring_interval", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RecurringInterval recurringInterval;
+
+    @Column(name = "recurring_value", nullable = false)
+    private int recurringValue;
+
+    @Column(name = "next_occurrence", nullable = false)
+    private LocalDateTime nextOccurrence;
+
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
+
+    @OneToMany(mappedBy = "recurringTransaction", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    private Set<Transaction> transactions;
+}
