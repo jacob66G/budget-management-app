@@ -1,13 +1,15 @@
 package com.example.budget_management_app.auth.service;
 
-import com.example.budget_management_app.auth.dto.*;
+import com.example.budget_management_app.auth.dto.LoginRequestDto;
+import com.example.budget_management_app.auth.dto.LoginResponseDto;
+import com.example.budget_management_app.auth.dto.RegistrationRequestDto;
+import com.example.budget_management_app.auth.dto.RegistrationResponseDto;
 import com.example.budget_management_app.auth.mapper.AuthMapper;
 import com.example.budget_management_app.common.dto.ResponseMessageDto;
 import com.example.budget_management_app.common.event.model.VerificationEvent;
 import com.example.budget_management_app.common.event.publisher.EventPublisher;
 import com.example.budget_management_app.common.exception.*;
 import com.example.budget_management_app.security.service.JwtService;
-import com.example.budget_management_app.session.service.UserSessionService;
 import com.example.budget_management_app.user.dao.UserDao;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.domain.UserStatus;
@@ -37,7 +39,6 @@ public class AuthService {
     private final AuthMapper mapper;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-    private final UserSessionService userSessionService;
     private final EventPublisher eventPublisher;
     @Value("${security.verification-code.expiration}")
     private long verificationCodeExpiration;

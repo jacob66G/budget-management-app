@@ -11,6 +11,7 @@ security:
   verification-code:
     expiration: 1800000 # 30 min
     retry: 1800000 # 30 min
+  secret-header-value: ${SECRET_HEADER:defaultSecretHeaderValue}
 
 config:
   session:
