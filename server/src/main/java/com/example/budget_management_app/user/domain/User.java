@@ -1,8 +1,6 @@
 package com.example.budget_management_app.user.domain;
 
 import com.example.budget_management_app.session.domain.UserSession;
-import com.example.budget_management_app.category.Category;
-import com.example.budget_management_app.investment.account.InvestmentAccount;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -63,12 +61,6 @@ public class User {
 
     @Column(name = "temp_two_factor_secret")
     private String tempSecret;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Category> categories = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<InvestmentAccount> investmentAccounts = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserSession> sessions = new ArrayList<>();
