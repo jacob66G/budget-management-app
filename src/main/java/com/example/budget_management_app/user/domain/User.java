@@ -55,6 +55,15 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    @Column(name = "mfa_enabled")
+    private boolean mfaEnabled;
+
+    @Column(name = "two_factor_secret")
+    private String secret;
+
+    @Column(name = "temp_two_factor_secret")
+    private String tempSecret;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Category> categories = new ArrayList<>();
 

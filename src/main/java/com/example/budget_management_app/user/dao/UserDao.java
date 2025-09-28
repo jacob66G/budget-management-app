@@ -37,4 +37,8 @@ public class UserDao {
         em.flush();
         return user;
     }
+
+    public User update(User user) {
+        return em.merge(user);
+    }
 }

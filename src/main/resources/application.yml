@@ -2,8 +2,8 @@ app:
   name: BudgetManagementApp
 
 security:
+  issuer: ${JWT_ISSUER:MyApp}
   jwt:
-    issuer: ${JWT_ISSUER:MyApp}
     secret: ${JWT_SECRET:defaultSecretKey}
     expiration: 600000 # 10 min
   refresh-token:

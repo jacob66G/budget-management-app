@@ -24,7 +24,8 @@ public class AuthMapper {
                 user.getId(),
                 user.getName(),
                 user.getSurname(),
-                user.getEmail()
+                user.getEmail(),
+                user.isMfaEnabled()
         );
     }
 

@@ -1,15 +1,13 @@
 package com.example.budget_management_app.auth.service;
 
-import com.example.budget_management_app.auth.dto.LoginRequestDto;
-import com.example.budget_management_app.auth.dto.LoginResponseDto;
-import com.example.budget_management_app.auth.dto.RegistrationRequestDto;
-import com.example.budget_management_app.auth.dto.RegistrationResponseDto;
+import com.example.budget_management_app.auth.dto.*;
 import com.example.budget_management_app.auth.mapper.AuthMapper;
 import com.example.budget_management_app.common.dto.ResponseMessageDto;
 import com.example.budget_management_app.common.event.model.VerificationEvent;
 import com.example.budget_management_app.common.event.publisher.EventPublisher;
 import com.example.budget_management_app.common.exception.*;
 import com.example.budget_management_app.security.service.JwtService;
+import com.example.budget_management_app.security.service.TwoFactorAuthenticationService;
 import com.example.budget_management_app.user.dao.UserDao;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.domain.UserStatus;
@@ -20,6 +18,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +39,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final EventPublisher eventPublisher;
+    private final TwoFactorAuthenticationService tfaService;
     @Value("${security.verification-code.expiration}")
     private long verificationCodeExpiration;
     @Value("${security.verification-code.retry}")
@@ -71,28 +71,49 @@ public class AuthService {
         return mapper.toRegistrationResponseDto(savedUser);
     }
 
-    public LoginResponseDto authenticateUser(LoginRequestDto loginRequestDto) {
+    public LoginResponseDto authenticateUser(LoginRequestDto loginRequest) {
         UsernamePasswordAuthenticationToken authentication =
-                UsernamePasswordAuthenticationToken.unauthenticated(loginRequestDto.email(), loginRequestDto.password());
+                UsernamePasswordAuthenticationToken.unauthenticated(loginRequest.email(), loginRequest.password());
         try {
            authenticationManager.authenticate(authentication);
 
         } catch (AuthenticationException e) {
-            log.warn("Failed login attempt for email: {}", loginRequestDto.email());
+            log.warn("Failed login attempt for email: {}", loginRequest.email());
             throw new BadCredentialsException("Invalid credentials");
         }
 
-        User user = userDao.findByEmail(loginRequestDto.email())
-                .orElseThrow(() -> {
-                    log.warn("Login attempt for non-existent email: {}", loginRequestDto.email());
-                    return new NotFoundException(User.class.getSimpleName(), "email", loginRequestDto.email(), ErrorCode.USER_NOT_FOUND);
-                });
+        User user = userDao.findByEmail(loginRequest.email()).orElseThrow(() -> {
+            log.warn("Login attempt for non-existent email: {}", loginRequest.email());
+            return new NotFoundException(User.class.getSimpleName(), "email", loginRequest.email(), ErrorCode.USER_NOT_FOUND);
+        });
 
         verifyUserStatus(user);
 
-        String accessToken = jwtService.generateToken(user.getEmail());
+        if (user.isMfaEnabled()) {
+            return new LoginResponseDto(user.getId(), true);
+        }
 
+        String accessToken = jwtService.generateToken(user.getEmail());
         log.info("User logged in: email={}", user.getEmail());
+
+        return mapper.toLoginResponseDto(user, accessToken);
+    }
+
+    public LoginResponseDto authenticateWith2fa(TwoFactorLoginRequest loginRequest) {
+        User user = userDao.findById(loginRequest.userId())
+                .orElseThrow(() -> new UsernameNotFoundException("User with id: " + loginRequest.userId() + " not found."));
+
+        if (!user.isMfaEnabled()) {
+            throw new TfaException("Multi-factor authentication (MFA) has not been configured.", ErrorCode.MFA_CONFIGURATION);
+        }
+
+        if (!tfaService.isOptValid(user.getSecret(), loginRequest.code())) {
+            throw new BadCredentialsException("Invalid code");
+        }
+
+        String accessToken = jwtService.generateToken(user.getEmail());
+        log.info("User logged in: email={}", user.getEmail());
+
         return mapper.toLoginResponseDto(user, accessToken);
     }
 

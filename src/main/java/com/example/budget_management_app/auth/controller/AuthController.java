@@ -30,32 +30,38 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class AuthController {
 
-    @Value("${SECRET_HEADER}")
+    @Value("${security.secret-header-value}")
     private String secretHeaderValue;
     private final AuthService authService;
     private final UserSessionService userSessionService;
 
     @PostMapping("/register")
     public ResponseEntity<RegistrationResponseDto> registerUser(@Valid @RequestBody RegistrationRequestDto registrationRequestDto) {
-        RegistrationResponseDto userResponse = this.authService.registerUser(registrationRequestDto);
+        RegistrationResponseDto response = this.authService.registerUser(registrationRequestDto);
         return ResponseEntity
                 .created(UriComponentsBuilder.fromPath(ApiPaths.BASE_API)
                         .pathSegment(ApiPaths.USERS)
-                        .pathSegment(String.valueOf(userResponse.userId()))
+                        .pathSegment(String.valueOf(response.userId()))
                         .build().toUri()
                 )
-                .body(userResponse);
+                .body(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> authenticate(@Valid @RequestBody LoginRequestDto loginRequestDto, HttpServletRequest request) {
-        String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
-        LoginResponseDto responseDto = authService.authenticateUser(loginRequestDto);
-        UserSession session = userSessionService.createUserSession(responseDto.userId(), userAgent);
+        LoginResponseDto response = authService.authenticateUser(loginRequestDto);
+        if (response.getIsTfaRequired()) {
+            return ResponseEntity.ok(response);
+        }
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, userSessionService.generateResponseCookie(session.getRawRefreshToken()).toString())
-                .body(responseDto);
+        return buildLoginResponseWithSession(response, request);
+    }
+
+    @PostMapping("/login/2fa")
+    public ResponseEntity<LoginResponseDto> verifyTfa(@Valid @RequestBody TwoFactorLoginRequest loginRequestDto, HttpServletRequest request) {
+        LoginResponseDto response = authService.authenticateWith2fa(loginRequestDto);
+
+        return buildLoginResponseWithSession(response, request);
     }
 
     @PostMapping("/refresh")
@@ -96,5 +102,14 @@ public class AuthController {
         return ResponseEntity
                 .ok()
                 .body(authService.resendVerification(requestDto.email()));
+    }
+
+    private ResponseEntity<LoginResponseDto> buildLoginResponseWithSession(LoginResponseDto response, HttpServletRequest request) {
+        String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
+        UserSession session = userSessionService.createUserSession(response.getUserId(), userAgent);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, userSessionService.generateResponseCookie(session.getRawRefreshToken()).toString())
+                .body(response);
     }
 }
