@@ -4,6 +4,7 @@ import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.InternalException;
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.UserSessionException;
+import com.example.budget_management_app.common.service.CacheService;
 import com.example.budget_management_app.constants.ApiConstants;
 import com.example.budget_management_app.security.service.JwtService;
 import com.example.budget_management_app.session.dao.UserSessionDao;
@@ -37,13 +38,14 @@ public class UserSessionService {
     private final UserSessionDao userSessionDao;
     private final UserDao userDao;
     private final JwtService jwtService;
+    private final CacheService cacheService;
 
     public RefreshTokenResult refreshToken(String token, String userAgent) {
         UserSession userSession = validateRefreshToken(token);
 
         User user = userSession.getUser();
         String accessToken = jwtService.generateToken(user.getEmail());
-        String newRefreshTokenValue = rotateRefreshToken(userSession, userAgent);
+        String newRefreshTokenValue = rotateRefreshToken(userSession, userAgent, token);
 
         ResponseCookie cookie = generateResponseCookie(newRefreshTokenValue);
 
@@ -59,15 +61,18 @@ public class UserSessionService {
 
         UserSession userSession = new UserSession();
         userSession.setUserAgent(userAgent);
-        userSession.setExpiryDate(Instant.now().plusMillis(refreshTokenExpiration));
         userSession.setCreatedAt(Instant.now());
 
         String refreshToken = generateTokenValue();
         userSession.setRawRefreshToken(refreshToken);
-        userSession.setRefreshToken(TokenHasher.hash(refreshToken));
         user.addSession(userSession);
 
-        return userSessionDao.save(userSession);
+        UserSession persistedSession = userSessionDao.save(userSession);
+
+        String refreshTokenHash = TokenHasher.hash(refreshToken);
+        cacheService.storeValue(CacheService.KeyPrefix.REFRESH_TOKEN, refreshTokenHash, String.valueOf(persistedSession.getId()), refreshTokenExpiration);
+
+        return persistedSession;
     }
 
     public ResponseCookie generateResponseCookie(String refreshToken) {
@@ -75,6 +80,7 @@ public class UserSessionService {
                 .httpOnly(true)
                 .maxAge(refreshTokenExpiration)
                 .sameSite("None")
+                .secure(false)
                 .path("/api/auth/refresh")
                 .build();
     }
@@ -94,31 +100,30 @@ public class UserSessionService {
         if (!StringUtils.hasText(token)) {
             throw new UserSessionException("Token cannot be empty", ErrorCode.INVALID_TOKEN);
         }
-        String tokenHash = TokenHasher.hash(token);
-        UserSession userSession = userSessionDao.findByToken(tokenHash)
-                .orElseThrow(()-> new UserSessionException("Invalid token", ErrorCode.SESSION_EXPIRED));
 
-        if(isExpired(userSession)) {
-            throw new UserSessionException("Session has expired", ErrorCode.SESSION_EXPIRED);
+        String tokenHash = TokenHasher.hash(token);
+        String userSessionId = cacheService.getValue(CacheService.KeyPrefix.REFRESH_TOKEN, tokenHash);
+        if (userSessionId == null)  {
+            throw new UserSessionException("Invalid token or session has expired", ErrorCode.INVALID_TOKEN);
         }
-        return userSession;
+
+        return userSessionDao.findById(Long.valueOf(userSessionId))
+                .orElseThrow(()-> new UserSessionException("Invalid token", ErrorCode.INVALID_TOKEN));
     }
 
-    private String rotateRefreshToken(UserSession session, String userAgent) {
+    private String rotateRefreshToken(UserSession session, String userAgent, String oldToken) {
         String newToken = generateTokenValue();
-        session.setExpiryDate(Instant.now().plusMillis(refreshTokenExpiration));
-        session.setRefreshToken(TokenHasher.hash(newToken));
         session.setUserAgent(userAgent);
         userSessionDao.save(session);
 
-        return newToken;
-    }
+        cacheService.delete(CacheService.KeyPrefix.REFRESH_TOKEN, TokenHasher.hash(oldToken));
+        cacheService.storeValue(CacheService.KeyPrefix.REFRESH_TOKEN, TokenHasher.hash(newToken), String.valueOf(session.getId()), refreshTokenExpiration);
 
-    private boolean isExpired(UserSession token) {
-        return token.getExpiryDate().isBefore(Instant.now());
+        return newToken;
     }
 
     private String generateTokenValue() {
         return UUID.randomUUID().toString();
     }
+
 }

@@ -55,7 +55,9 @@ public class AuthService {
         user.setEmail(requestDto.email());
         user.setEmailLastChanged(Instant.now());
         user.setPassword(encoder.encode(requestDto.password()));
-        user.setStatus(UserStatus.PENDING_CONFIRMATION);
+
+        //Zmien
+        user.setStatus(UserStatus.ACTIVE);
         user.setCreatedAt(Instant.now());
 
         String verificationCode = generateVerificationCode();
@@ -65,7 +67,7 @@ public class AuthService {
         //user.setCategories();\
 
         User savedUser = userDao.save(user);
-        eventPublisher.register(new VerificationEvent(savedUser.getEmail(), savedUser.getName(), verificationCode, false));
+       // eventPublisher.register(new VerificationEvent(savedUser.getEmail(), savedUser.getName(), verificationCode, false));
 
         log.info("New user registration: email={}", user.getEmail());
         return mapper.toRegistrationResponseDto(savedUser);

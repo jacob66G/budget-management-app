@@ -36,7 +36,7 @@ public class TwoFactorAuthenticationService {
                 .build();
 
         QrGenerator generator = new ZxingPngQrGenerator();
-        byte[] imageData = new byte[0];
+        byte[] imageData;
         try {
             imageData = generator.generate(data);
         } catch (QrGenerationException e) {

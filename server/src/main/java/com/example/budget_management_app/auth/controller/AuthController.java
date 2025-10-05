@@ -14,7 +14,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +29,6 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class AuthController {
 
-    @Value("${security.secret-header-value}")
-    private String secretHeaderValue;
     private final AuthService authService;
     private final UserSessionService userSessionService;
 
@@ -65,12 +62,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AccessTokenResponse> refreshToken(@RequestHeader(value = "X-Requested-With", required = false) String requestedWith, HttpServletRequest request) {
-        if (!secretHeaderValue.equals(requestedWith)) {
-            log.warn("Custom header missing in refresh request from IP {}", request.getRemoteAddr());
-            throw new UserSessionException("No custom header found in refresh request", ErrorCode.CUSTOM_HEADER_NOT_FOUND);
-        }
-
+    public ResponseEntity<AccessTokenResponse> refreshToken(HttpServletRequest request) {
         Cookie cookie = WebUtils.getCookie(request, ApiConstants.REFRESH_TOKEN_COOKIE);
         if (cookie == null) {
             log.warn("Refresh token missing in request from IP {}", request.getRemoteAddr());
