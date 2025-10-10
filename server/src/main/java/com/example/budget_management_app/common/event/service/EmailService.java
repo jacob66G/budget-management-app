@@ -37,6 +37,7 @@ public class EmailService {
         String verificationLink = UriComponentsBuilder
                 .fromPath("http://localhost:8080")
                 .pathSegment(ApiPaths.BASE_API, ApiPaths.AUTH, ApiPaths.VERIFY)
+                .queryParam("email", userEmail)
                 .queryParam("code", verificationCode)
                 .build().toUriString();
 

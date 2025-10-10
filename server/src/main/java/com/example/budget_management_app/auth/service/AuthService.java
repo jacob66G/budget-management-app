@@ -6,6 +6,7 @@ import com.example.budget_management_app.common.dto.ResponseMessageDto;
 import com.example.budget_management_app.common.event.model.VerificationEvent;
 import com.example.budget_management_app.common.event.publisher.EventPublisher;
 import com.example.budget_management_app.common.exception.*;
+import com.example.budget_management_app.common.service.CacheService;
 import com.example.budget_management_app.security.service.JwtService;
 import com.example.budget_management_app.security.service.TwoFactorAuthenticationService;
 import com.example.budget_management_app.user.dao.UserDao;
@@ -22,7 +23,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -44,6 +44,7 @@ public class AuthService {
     private long verificationCodeExpiration;
     @Value("${security.verification-code.retry}")
     private long verificationRetryTime;
+    private final CacheService cacheService;
 
     @Transactional
     public RegistrationResponseDto registerUser(RegistrationRequestDto requestDto) {
@@ -57,15 +58,10 @@ public class AuthService {
         user.setPassword(encoder.encode(requestDto.password()));
         user.setStatus(UserStatus.PENDING_CONFIRMATION);
         user.setCreatedAt(Instant.now());
-
-        String verificationCode = generateVerificationCode();
-        user.setVerificationCode(verificationCode);
-        user.setVerificationCodeExpiresAt(Instant.now().plusMillis(verificationCodeExpiration));
-        user.setLastVerificationSentAt(Instant.now());
         //user.setCategories();
 
         User savedUser = userDao.save(user);
-        eventPublisher.register(new VerificationEvent(savedUser.getEmail(), savedUser.getName(), verificationCode, false));
+        sendVerification(savedUser, false);
 
         log.info("New user registration: email={}", user.getEmail());
         return mapper.toRegistrationResponseDto(savedUser);
@@ -75,7 +71,7 @@ public class AuthService {
         UsernamePasswordAuthenticationToken authentication =
                 UsernamePasswordAuthenticationToken.unauthenticated(loginRequest.email(), loginRequest.password());
         try {
-           authenticationManager.authenticate(authentication);
+            authenticationManager.authenticate(authentication);
 
         } catch (AuthenticationException e) {
             log.warn("Failed login attempt for email: {}", loginRequest.email());
@@ -118,42 +114,54 @@ public class AuthService {
     }
 
     @Transactional
-    public void verifyUser(String verificationCode) {
-        User user = userDao.findByVerificationCode(verificationCode)
-                .orElseThrow(() -> new VerificationCodeException("Invalid verification code", ErrorCode.INVALID_CODE));
-        if (user.getVerificationCodeExpiresAt().isBefore(Instant.now())) {
-            log.warn("Verification attempt with expired code: {}", user.getEmail());
+    public void verifyUser(String email, String verificationCode) {
+        String expectedCode = cacheService.getValue(CacheService.KeyPrefix.VERIFICATION_CODE, email);
+
+        if (expectedCode == null) {
+            log.warn("Verification attempt with expired code: {}", email);
             throw new VerificationCodeException("Verification code has expired", ErrorCode.CODE_EXPIRED);
         }
+
+        if (!expectedCode.equals(verificationCode)) {
+            throw new VerificationCodeException("Invalid verification code", ErrorCode.INVALID_CODE);
+        }
+
+        User user = userDao.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.warn("Verification pass but user: {} not found in db.", email);
+                    return new NotFoundException(User.class.getSimpleName(), "email", email, ErrorCode.USER_NOT_FOUND);
+                });
+
         user.setStatus(UserStatus.ACTIVE);
-        user.setVerificationCode(null);
-        user.setVerificationCodeExpiresAt(null);
+        cacheService.delete(CacheService.KeyPrefix.VERIFICATION_CODE, email);
+        cacheService.delete(CacheService.KeyPrefix.VERIFICATION_LAST_SENT, email);
+
         log.info("User email={} has verified account", user.getEmail());
     }
 
-    @Transactional
     public ResponseMessageDto resendVerification(String email) {
         Optional<User> optionalUser = userDao.findByEmail(email);
-
         if (optionalUser.isEmpty()) {
             log.warn("User has tried resend verification with no exists email: {}", email);
             return new ResponseMessageDto("If an account with this email exists, a verification link has been sent.");
         }
 
         User user = optionalUser.get();
-        if (user.getStatus() == UserStatus.PENDING_CONFIRMATION && StringUtils.hasText(user.getVerificationCode())) {
-            if(!user.getLastVerificationSentAt().plusMillis(verificationRetryTime).isBefore(Instant.now())) {
-                log.warn("User email={} has tried resend verification again", user.getEmail());
+        if (!user.getStatus().equals(UserStatus.PENDING_CONFIRMATION)) {
+            log.warn("User email={} has tried resend verification with incorrect status", email);
+            return new ResponseMessageDto("You cannot resend verification code. Your account is already active or closed.");
+        }
+
+        String lastSentAtValue = cacheService.getValue(CacheService.KeyPrefix.VERIFICATION_LAST_SENT, email);
+        if (lastSentAtValue != null) {
+            long lastSentAt = Long.parseLong(lastSentAtValue);
+            if (Instant.now().isBefore(Instant.ofEpochMilli(lastSentAt).plusMillis(verificationRetryTime))) {
+                log.warn("User email={} has tried resend verification again", email);
                 return new ResponseMessageDto("You can request a new verification link later.");
             }
-            String verificationCode = generateVerificationCode();
-            user.setVerificationCode(verificationCode);
-            user.setVerificationCodeExpiresAt(Instant.now().plusMillis(verificationCodeExpiration));
-            user.setLastVerificationSentAt(Instant.now());
-            userDao.save(user);
-
-            eventPublisher.register(new VerificationEvent(email, user.getName(), verificationCode, true));
         }
+
+        sendVerification(user, true);
 
         log.info("User email={} has resent verification code", user.getEmail());
         return new ResponseMessageDto("If an account with this email exists, a verification link has been sent.");
@@ -181,5 +189,17 @@ public class AuthService {
                 throw new UserNotAllowedToLoginException("User: " + user.getEmail() + " account is not active", ErrorCode.USER_NOT_ACTIVE);
             }
         }
+    }
+
+    private void sendVerification(User user, boolean resend) {
+        String verificationCode = generateVerificationCode();
+        cacheService.storeValue(CacheService.KeyPrefix.VERIFICATION_CODE, user.getEmail(), verificationCode, verificationCodeExpiration);
+        cacheService.storeValue(
+                CacheService.KeyPrefix.VERIFICATION_LAST_SENT,
+                user.getEmail(),
+                String.valueOf(Instant.now().toEpochMilli()),
+                verificationRetryTime
+        );
+        eventPublisher.register(new VerificationEvent(user.getEmail(), user.getName(), verificationCode, resend));
     }
 }

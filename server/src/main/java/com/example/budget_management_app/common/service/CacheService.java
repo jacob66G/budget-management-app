@@ -15,8 +15,9 @@ public class CacheService {
 
     @Getter
     public enum KeyPrefix {
-        REFRESH_TOKEN("refreshToken"),
-        USER_SESSION("userSession");
+        REFRESH_TOKEN("refresh-token"),
+        VERIFICATION_CODE("verify"),
+        VERIFICATION_LAST_SENT("verify:last_sent");
 
         private final String value;
 

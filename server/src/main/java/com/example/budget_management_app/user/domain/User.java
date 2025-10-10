@@ -41,15 +41,6 @@ public class User {
     @Column(name = "email_last_changed", nullable = false)
     private Instant emailLastChanged;
 
-    @Column(name = "verification_code")
-    private String verificationCode;
-
-    @Column(name = "verification_expiration")
-    private Instant verificationCodeExpiresAt;
-
-    @Column(name = "last_verification_sent_at")
-    private Instant lastVerificationSentAt;
-
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
