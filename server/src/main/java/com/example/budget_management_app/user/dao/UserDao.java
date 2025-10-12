@@ -25,13 +25,6 @@ public class UserDao {
         return users.stream().findFirst();
     }
 
-    public Optional<User> findByVerificationCode(String code) {
-        List<User> users = em.createQuery("SELECT u FROM User u WHERE u.verificationCode =  :code", User.class)
-                .setParameter("code", code)
-                .getResultList();
-        return users.stream().findFirst();
-    }
-
     public User save(User user) {
         em.persist(user);
         em.flush();

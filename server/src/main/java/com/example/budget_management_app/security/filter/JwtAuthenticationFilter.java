@@ -1,5 +1,7 @@
 package com.example.budget_management_app.security.filter;
 
+import com.example.budget_management_app.security.service.CustomUserDetails;
+import com.example.budget_management_app.security.service.CustomUserDetailsService;
 import com.example.budget_management_app.security.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -52,8 +55,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throw new AuthenticationCredentialsNotFoundException("Token is missing");
         }
 
+
+        CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(claims.getSubject());
         UsernamePasswordAuthenticationToken authentication =
-                UsernamePasswordAuthenticationToken.authenticated(claims.getSubject(), null, new ArrayList<>());
+                UsernamePasswordAuthenticationToken.authenticated(userDetails, null, new ArrayList<>());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         filterChain.doFilter(request, response);

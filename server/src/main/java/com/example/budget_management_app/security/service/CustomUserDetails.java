@@ -1,19 +1,23 @@
 package com.example.budget_management_app.security.service;
 
-import com.example.budget_management_app.user.domain.User;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
 
-@RequiredArgsConstructor
+@Getter
 public class CustomUserDetails implements UserDetails {
+    private final Long id;
+    private final String email;
+    private final String password;
 
-    @Getter
-    private final User user;
+    public CustomUserDetails(Long id, String email, String password) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -22,11 +26,11 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return email;
     }
 }

@@ -11,6 +11,7 @@ security:
   verification-code:
     expiration: 1800000 # 30 min
     retry: 1800000 # 30 min
+  user-details-expiration: 600000 # 10 min
 
 config:
   session:
@@ -51,6 +52,17 @@ spring:
     redis:
       host: localhost
       port: 6379
+  servlet:
+    multipart:
+      max-file-size: 5MB #MAX FILE SIZE
+
+aws:
+  access-key: ${AWS_ACCESS_KEY:access-key}
+  secret-key: ${AWS_SECRET_KEY:secret-key}
+  region: eu-north-1
+  s3:
+    bucket-name: ${S3_BUCKET_NAME:bucket}
+
 
 logging:
   level:

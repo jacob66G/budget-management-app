@@ -1,44 +1,10 @@
 package com.example.budget_management_app.common.service;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
+public interface CacheService {
 
-import java.util.concurrent.TimeUnit;
+    void storeValue(RedisServiceImpl.KeyPrefix prefix, String key, Object value, Long expiration);
 
-@Service
-@RequiredArgsConstructor
-public class CacheService {
+    Object getValue(RedisServiceImpl.KeyPrefix prefix, String key);
 
-    private final RedisTemplate<String, String> redisTemplate;
-
-    @Getter
-    public enum KeyPrefix {
-        REFRESH_TOKEN("refresh-token"),
-        VERIFICATION_CODE("verify"),
-        VERIFICATION_LAST_SENT("verify:last_sent");
-
-        private final String value;
-
-        KeyPrefix(String value) {
-            this.value = value;
-        }
-    }
-
-    public void storeValue(KeyPrefix prefix, String key, String value, Long expiration) {
-        redisTemplate.opsForValue().set(buildKey(prefix, key), value, expiration, TimeUnit.SECONDS);
-    }
-
-    public String getValue(KeyPrefix prefix, String key) {
-        return redisTemplate.opsForValue().get(buildKey(prefix, key));
-    }
-
-    public void delete(KeyPrefix prefix, String key) {
-        redisTemplate.delete(buildKey(prefix, key));
-    }
-
-    private String buildKey(KeyPrefix prefix, String key) {
-        return prefix.getValue() + ":" + key;
-    }
+    void delete(RedisServiceImpl.KeyPrefix prefix, String key);
 }
