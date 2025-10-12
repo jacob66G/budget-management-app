@@ -1,5 +1,6 @@
 package com.example.budget_management_app.user.domain;
 
+import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.session.domain.UserSession;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -56,6 +57,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserSession> sessions = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Category> categories = new ArrayList<>();
+
     public void addSession(UserSession session) {
         sessions.add(session);
         session.setUser(this);
@@ -64,5 +68,15 @@ public class User {
     public void removeSession(UserSession session) {
         sessions.remove(session);
         session.setUser(null);
+    }
+
+    public void addCategory(Category category) {
+        categories.add(category);
+        category.setUser(this);
+    }
+
+    public void removeCategory(Category category) {
+        categories.remove(category);
+        category.setUser(null);
     }
 }
