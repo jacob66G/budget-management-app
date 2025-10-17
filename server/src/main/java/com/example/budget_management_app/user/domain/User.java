@@ -1,5 +1,6 @@
 package com.example.budget_management_app.user.domain;
 
+import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.session.domain.UserSession;
 import jakarta.persistence.*;
@@ -57,8 +58,11 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserSession> sessions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Category> categories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Account> accounts = new ArrayList<>();
 
     public void addSession(UserSession session) {
         sessions.add(session);
