@@ -2,6 +2,8 @@ package com.example.budget_management_app.transaction.service;
 
 import com.example.budget_management_app.transaction.domain.*;
 import com.example.budget_management_app.transaction.dto.PagedResponse;
+import com.example.budget_management_app.transaction.dto.TransactionCreate;
+import com.example.budget_management_app.transaction.dto.TransactionResponse;
 import com.example.budget_management_app.transaction.dto.TransactionView;
 
 import java.time.LocalDate;
@@ -18,4 +20,6 @@ public interface TransactionService {
                                                        LocalDate to,
                                                        SortedBy sortedBy,
                                                        SortDirection sortedType);
+
+    TransactionResponse createTransaction(TransactionCreate transactionCreate, long userId);
 }

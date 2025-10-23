@@ -1,8 +1,10 @@
 package com.example.budget_management_app.transaction.mapper;
 
+import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction.domain.TransactionType;
 import com.example.budget_management_app.transaction.dto.AccountSummary;
 import com.example.budget_management_app.transaction.dto.CategorySummary;
+import com.example.budget_management_app.transaction.dto.TransactionCreate;
 import com.example.budget_management_app.transaction.dto.TransactionView;
 import jakarta.persistence.Tuple;
 
@@ -34,5 +36,15 @@ public class Mapper {
                         )
                 ))
                 .toList();
+    }
+
+    public static Transaction fromDto(TransactionCreate transactionCreate) {
+        return new Transaction(
+                transactionCreate.amount(),
+                transactionCreate.title(),
+                transactionCreate.type(),
+                transactionCreate.description(),
+                LocalDateTime.now()
+        );
     }
 }

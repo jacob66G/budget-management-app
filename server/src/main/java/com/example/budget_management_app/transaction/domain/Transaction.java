@@ -52,4 +52,26 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recurring_transaction_id", insertable = false, updatable = false)
     private RecurringTransaction recurringTransaction;
+
+    public Transaction(BigDecimal amount, String title, TransactionType type, String description, LocalDateTime transactionDate) {
+        this.amount = amount;
+        this.title = title;
+        this.type = type;
+        this.description = description;
+        this.transactionDate = transactionDate;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+        if (category.getTransactions() != null) {
+            category.getTransactions().add(this);
+        }
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+        if ( account.getTransactions() != null) {
+            account.getTransactions().add(this);
+        }
+    }
 }

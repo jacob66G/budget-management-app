@@ -1,20 +1,22 @@
 package com.example.budget_management_app.transaction.controller;
 
+import com.example.budget_management_app.security.service.CustomUserDetails;
 import com.example.budget_management_app.transaction.domain.SortDirection;
 import com.example.budget_management_app.transaction.domain.SortedBy;
 import com.example.budget_management_app.transaction.domain.TransactionModeFilter;
 import com.example.budget_management_app.transaction.domain.TransactionTypeFilter;
 import com.example.budget_management_app.transaction.dto.PagedResponse;
+import com.example.budget_management_app.transaction.dto.TransactionCreate;
+import com.example.budget_management_app.transaction.dto.TransactionResponse;
 import com.example.budget_management_app.transaction.dto.TransactionView;
 import com.example.budget_management_app.transaction.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -48,5 +50,19 @@ public class TransactionController {
                 to,
                 sortedBy,
                 sortDirection));
+    }
+
+    @PostMapping
+    public ResponseEntity<TransactionResponse> createTransaction(
+            @RequestBody TransactionCreate transactionCreate,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        TransactionResponse response = transactionService.createTransaction(transactionCreate, userDetails.getId());
+
+        URI location = URI.create("/api/v1/transactions/" + response.id());
+
+        return ResponseEntity
+                .created(location)
+                .body(response);
     }
 }

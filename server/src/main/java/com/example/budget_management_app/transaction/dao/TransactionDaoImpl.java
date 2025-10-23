@@ -137,6 +137,14 @@ public class TransactionDaoImpl implements TransactionDao{
                 .getSingleResult();
     }
 
+    @Transactional
+    @Override
+    public Transaction saveTransaction(Transaction transaction) {
+        em.persist(transaction);
+        em.flush();
+        return transaction;
+    }
+
     private List<Predicate> setPredicates(
                                 Join<Transaction, Account> account,
                                 Join<Transaction, RecurringTransaction> recTransaction,

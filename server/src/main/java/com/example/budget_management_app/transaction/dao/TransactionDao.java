@@ -1,9 +1,6 @@
 package com.example.budget_management_app.transaction.dao;
 
-import com.example.budget_management_app.transaction.domain.SortDirection;
-import com.example.budget_management_app.transaction.domain.SortedBy;
-import com.example.budget_management_app.transaction.domain.TransactionModeFilter;
-import com.example.budget_management_app.transaction.domain.TransactionTypeFilter;
+import com.example.budget_management_app.transaction.domain.*;
 import jakarta.persistence.Tuple;
 
 import java.time.LocalDate;
@@ -27,4 +24,6 @@ public interface TransactionDao {
                               List<Long> accounts,
                               LocalDate since,
                               LocalDate to);
+
+    Transaction saveTransaction(Transaction transaction);
 }
