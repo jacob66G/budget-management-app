@@ -8,10 +8,7 @@ import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.transaction.dao.TransactionDao;
 import com.example.budget_management_app.transaction.domain.*;
-import com.example.budget_management_app.transaction.dto.PagedResponse;
-import com.example.budget_management_app.transaction.dto.TransactionCreate;
-import com.example.budget_management_app.transaction.dto.TransactionResponse;
-import com.example.budget_management_app.transaction.dto.TransactionView;
+import com.example.budget_management_app.transaction.dto.*;
 import com.example.budget_management_app.transaction.mapper.Mapper;
 import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
@@ -89,10 +86,22 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional
     @Override
-    public void deleteTransaction(long transactionId, long userId) {
+    public void updateTransaction(long id, long userId, TransactionUpdateRequest req) {
 
-        Transaction transaction = transactionDao.findByIdAndUserId(transactionId, userId)
-                .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), transactionId, ErrorCode.NOT_FOUND));
+        Transaction transaction = transactionDao.findByIdAndUserId(id, userId)
+                .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
+
+        transaction.setAmount(req.amount());
+        transaction.setTitle(req.title());
+        transaction.setDescription(req.description());
+    }
+
+    @Transactional
+    @Override
+    public void deleteTransaction(long id, long userId) {
+
+        Transaction transaction = transactionDao.findByIdAndUserId(id, userId)
+                .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
         transaction.removeCategory();
         transaction.removeAccount();

@@ -5,10 +5,7 @@ import com.example.budget_management_app.transaction.domain.SortDirection;
 import com.example.budget_management_app.transaction.domain.SortedBy;
 import com.example.budget_management_app.transaction.domain.TransactionModeFilter;
 import com.example.budget_management_app.transaction.domain.TransactionTypeFilter;
-import com.example.budget_management_app.transaction.dto.PagedResponse;
-import com.example.budget_management_app.transaction.dto.TransactionCreate;
-import com.example.budget_management_app.transaction.dto.TransactionResponse;
-import com.example.budget_management_app.transaction.dto.TransactionView;
+import com.example.budget_management_app.transaction.dto.*;
 import com.example.budget_management_app.transaction.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -64,6 +61,18 @@ public class TransactionController {
         return ResponseEntity
                 .created(location)
                 .body(response);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> updateTransaction(
+            @PathVariable long id,
+            @RequestBody TransactionUpdateRequest updateReq,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+            ) {
+
+        transactionService.updateTransaction(id, userDetails.getId(), updateReq);
+
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
