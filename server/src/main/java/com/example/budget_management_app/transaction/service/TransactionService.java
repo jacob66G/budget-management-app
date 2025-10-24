@@ -22,4 +22,6 @@ public interface TransactionService {
                                                        SortDirection sortedType);
 
     TransactionResponse createTransaction(TransactionCreate transactionCreate, long userId);
+
+    void deleteTransaction(long transactionId, long userId);
 }

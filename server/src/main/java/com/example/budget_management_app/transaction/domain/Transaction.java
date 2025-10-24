@@ -74,4 +74,18 @@ public class Transaction {
             account.getTransactions().add(this);
         }
     }
+
+    public void removeCategory() {
+        if (this.category != null) {
+            this.category.getTransactions().remove(this);
+            this.category = null;
+        }
+    }
+
+    public void removeAccount() {
+        if (this.account != null) {
+            this.account.getTransactions().remove(this);
+            this.account = null;
+        }
+    }
 }

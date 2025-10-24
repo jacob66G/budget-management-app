@@ -86,4 +86,16 @@ public class TransactionServiceImpl implements TransactionService{
 
         return new TransactionResponse(savedTransaction.getId(), savedTransaction.getTransactionDate());
     }
+
+    @Transactional
+    @Override
+    public void deleteTransaction(long transactionId, long userId) {
+
+        Transaction transaction = transactionDao.findByIdAndUserId(transactionId, userId)
+                .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), transactionId, ErrorCode.NOT_FOUND));
+
+        transaction.removeCategory();
+        transaction.removeAccount();
+        transactionDao.deleteTransaction(transaction);
+    }
 }

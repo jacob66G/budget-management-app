@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class TransactionDaoImpl implements TransactionDao{
@@ -143,6 +144,28 @@ public class TransactionDaoImpl implements TransactionDao{
         em.persist(transaction);
         em.flush();
         return transaction;
+    }
+
+    @Transactional
+    @Override
+    public void deleteTransaction(Transaction transaction) {
+        em.remove(transaction);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<Transaction> findByIdAndUserId(long id, long userId) {
+
+         List<Transaction> results = em.createQuery("""
+                SELECT t FROM Transaction t
+                JOIN t.account a
+                WHERE t.id = :id AND a.user.id = :userId
+                """, Transaction.class)
+                .setParameter("id", id)
+                .setParameter("userId", userId)
+                .getResultList();
+
+        return results.stream().findFirst();
     }
 
     private List<Predicate> setPredicates(

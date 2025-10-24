@@ -65,4 +65,14 @@ public class TransactionController {
                 .created(location)
                 .body(response);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTransaction(
+            @PathVariable long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        transactionService.deleteTransaction(id, userDetails.getId());
+
+        return ResponseEntity.noContent().build();
+    }
 }
