@@ -63,7 +63,7 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional
     @Override
-    public TransactionResponse createTransaction(TransactionCreate transactionCreate, long userId) {
+    public TransactionResponse createTransaction(TransactionCreateRequest transactionCreate, long userId) {
 
         // checking if category exists and belongs to the logged user
         long categoryId = transactionCreate.categoryId();
@@ -82,6 +82,23 @@ public class TransactionServiceImpl implements TransactionService{
         Transaction savedTransaction = transactionDao.saveTransaction(transaction);
 
         return new TransactionResponse(savedTransaction.getId(), savedTransaction.getTransactionDate());
+    }
+
+    @Transactional
+    @Override
+    public TransactionCategoryUpdateResponse updateTransactionCategory(long id, long userId, TransactionCategoryUpdateRequest updateReq) {
+
+        Transaction transaction = transactionDao.findByIdAndUserIdAndCategoryId(id, userId, updateReq.currentTransactionCategoryId())
+                .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
+
+        long newCategoryId = updateReq.newTransactionCategoryId();
+        Category category = categoryDao.findByIdAndUser(newCategoryId, userId)
+                .orElseThrow( () -> new NotFoundException(Category.class.getSimpleName(), newCategoryId, ErrorCode.NOT_FOUND));
+
+        transaction.removeCategory();
+        transaction.setCategory(category);
+
+        return new TransactionCategoryUpdateResponse(newCategoryId, category.getName(), category.getIconPath());
     }
 
     @Transactional

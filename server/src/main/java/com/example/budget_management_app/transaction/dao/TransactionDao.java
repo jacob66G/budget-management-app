@@ -31,4 +31,6 @@ public interface TransactionDao {
     void deleteTransaction(Transaction transaction);
 
     Optional<Transaction> findByIdAndUserId(long id, long userId);
+
+    Optional<Transaction> findByIdAndUserIdAndCategoryId(long id, long userId, long categoryId);
 }

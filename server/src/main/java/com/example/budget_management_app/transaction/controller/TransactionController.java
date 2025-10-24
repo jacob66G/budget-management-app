@@ -51,7 +51,7 @@ public class TransactionController {
 
     @PostMapping
     public ResponseEntity<TransactionResponse> createTransaction(
-            @RequestBody TransactionCreate transactionCreate,
+            @RequestBody TransactionCreateRequest transactionCreate,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         TransactionResponse response = transactionService.createTransaction(transactionCreate, userDetails.getId());
@@ -61,6 +61,20 @@ public class TransactionController {
         return ResponseEntity
                 .created(location)
                 .body(response);
+    }
+
+    @PatchMapping("/{id}/category")
+    public ResponseEntity<TransactionCategoryUpdateResponse> updateTransactionCategory(
+            @PathVariable long id,
+            @RequestBody TransactionCategoryUpdateRequest updateReq,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+
+        return ResponseEntity.ok(transactionService.updateTransactionCategory(
+                id,
+                userDetails.getId(),
+                updateReq
+        ));
     }
 
     @PatchMapping("/{id}")

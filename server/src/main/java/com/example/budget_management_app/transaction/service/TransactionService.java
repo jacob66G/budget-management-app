@@ -18,7 +18,9 @@ public interface TransactionService {
                                                        SortedBy sortedBy,
                                                        SortDirection sortedType);
 
-    TransactionResponse createTransaction(TransactionCreate transactionCreate, long userId);
+    TransactionResponse createTransaction(TransactionCreateRequest transactionCreate, long userId);
+
+    TransactionCategoryUpdateResponse updateTransactionCategory(long id, long userId, TransactionCategoryUpdateRequest updateReq);
 
     void updateTransaction(long Id, long userId, TransactionUpdateRequest req);
 

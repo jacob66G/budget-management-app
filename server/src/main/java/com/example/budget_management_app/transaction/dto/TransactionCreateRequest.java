@@ -4,7 +4,7 @@ import com.example.budget_management_app.transaction.domain.TransactionType;
 
 import java.math.BigDecimal;
 
-public record TransactionCreate(
+public record TransactionCreateRequest(
         BigDecimal amount,
         String title,
         TransactionType type,

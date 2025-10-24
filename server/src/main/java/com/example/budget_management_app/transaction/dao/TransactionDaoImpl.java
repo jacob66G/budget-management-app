@@ -168,6 +168,22 @@ public class TransactionDaoImpl implements TransactionDao{
         return results.stream().findFirst();
     }
 
+    @Override
+    public Optional<Transaction> findByIdAndUserIdAndCategoryId(long id, long userId, long categoryId) {
+
+        List<Transaction> results = em.createQuery("""
+                SELECT t FROM Transaction t
+                JOIN t.category c
+                WHERE t.id = :id AND c.id = :categoryId AND c.user.id = :userId
+                """, Transaction.class)
+                .setParameter("id", id)
+                .setParameter("categoryId", categoryId)
+                .setParameter("userId", userId)
+                .getResultList();
+
+        return results.stream().findFirst();
+    }
+
     private List<Predicate> setPredicates(
                                 Join<Transaction, Account> account,
                                 Join<Transaction, RecurringTransaction> recTransaction,
