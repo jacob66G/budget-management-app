@@ -13,4 +13,6 @@ public interface RecurringTransactionDao {
     Long getSummaryTuplesCountByUserId(long userId);
 
     Optional<RecurringTransaction> findByIdAndUserId(long id, long userId);
+
+    RecurringTransaction create(RecurringTransaction recurringTransaction);
 }

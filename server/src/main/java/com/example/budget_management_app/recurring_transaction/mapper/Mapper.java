@@ -1,13 +1,17 @@
 package com.example.budget_management_app.recurring_transaction.mapper;
 
+import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.account.domain.SupportedCurrency;
+import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
 import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionDetailsResponse;
 import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionSummary;
+import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction.domain.TransactionType;
 import com.example.budget_management_app.transaction.dto.AccountSummary;
 import com.example.budget_management_app.transaction.dto.CategorySummary;
+import com.example.budget_management_app.transaction.dto.TransactionView;
 import jakarta.persistence.Tuple;
 
 import java.math.BigDecimal;
@@ -48,5 +52,13 @@ public class Mapper {
                 recurringTransaction.getStartDate().toLocalDate(),
                 recurringTransaction.getEndDate().toLocalDate(),
                 recurringTransaction.getCreatedAt());
+    }
+
+    public static TransactionView toTransactionView(Transaction transaction) {
+        Account account = transaction.getAccount();
+        Category category = transaction.getCategory();
+        return new TransactionView(transaction.getId(), transaction.getAmount(), transaction.getType(), transaction.getDescription(), transaction.getTransactionDate(),
+                new AccountSummary(account.getId(), account.getName(), account.getCurrency()),
+                new CategorySummary(category.getId(), category.getName(), category.getIconPath()));
     }
 }

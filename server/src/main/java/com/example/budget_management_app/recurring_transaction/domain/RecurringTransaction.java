@@ -69,4 +69,18 @@ public class RecurringTransaction {
 
     @OneToMany(mappedBy = "recurringTransaction", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Set<Transaction> transactions;
+
+    public RecurringTransaction(BigDecimal amount, String title, TransactionType type, String description, LocalDateTime startDate, LocalDateTime endDate, RecurringInterval recurringInterval, int recurringValue, LocalDateTime nextOccurrence, boolean isActive, LocalDateTime createdAt) {
+        this.amount = amount;
+        this.title = title;
+        this.type = type;
+        this.description = description;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.recurringInterval = recurringInterval;
+        this.recurringValue = recurringValue;
+        this.nextOccurrence = nextOccurrence;
+        this.isActive = isActive;
+        this.createdAt = createdAt;
+    }
 }

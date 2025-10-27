@@ -105,4 +105,16 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao{
 
         return result.stream().findFirst();
     }
+
+    /**
+     * @param recurringTransaction
+     * @return
+     */
+    @Transactional
+    @Override
+    public RecurringTransaction create(RecurringTransaction recurringTransaction) {
+        em.persist(recurringTransaction);
+        em.flush();
+        return recurringTransaction;
+    }
 }
