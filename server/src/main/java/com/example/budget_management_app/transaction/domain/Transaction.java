@@ -50,7 +50,7 @@ public class Transaction {
     private Account account;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recurring_transaction_id", insertable = false, updatable = false)
+    @JoinColumn(name = "recurring_transaction_id", updatable = false)
     private RecurringTransaction recurringTransaction;
 
     public Transaction(BigDecimal amount, String title, TransactionType type, String description, LocalDateTime transactionDate) {

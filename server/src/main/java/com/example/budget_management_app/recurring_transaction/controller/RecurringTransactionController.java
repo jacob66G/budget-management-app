@@ -1,5 +1,6 @@
 package com.example.budget_management_app.recurring_transaction.controller;
 
+import com.example.budget_management_app.recurring_transaction.domain.RemovalRange;
 import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.security.service.CustomUserDetails;
@@ -67,4 +68,17 @@ public class RecurringTransactionController {
         recurringTransactionService.changeStatus(id, userDetails.getId(), updateReq.isActive());
 
         return ResponseEntity.noContent().build();
-    }}
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+            @PathVariable long id,
+            @RequestParam(name = "range") RemovalRange range,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+            ) {
+
+        recurringTransactionService.delete(id, userDetails.getId(), range);
+
+        return ResponseEntity.noContent().build();
+    }
+}

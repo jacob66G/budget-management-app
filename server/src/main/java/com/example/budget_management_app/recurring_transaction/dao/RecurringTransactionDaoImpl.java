@@ -117,4 +117,13 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao{
         em.flush();
         return recurringTransaction;
     }
+
+    /**
+     * @param recurringTransaction
+     */
+    @Transactional
+    @Override
+    public void delete(RecurringTransaction recurringTransaction) {
+        em.remove(recurringTransaction);
+    }
 }

@@ -11,6 +11,7 @@ import com.example.budget_management_app.common.exception.StatusAlreadySetExcept
 import com.example.budget_management_app.recurring_transaction.dao.RecurringTransactionDao;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
+import com.example.budget_management_app.recurring_transaction.domain.RemovalRange;
 import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionCreateRequest;
 import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionCreateResponse;
 import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionDetailsResponse;
@@ -156,6 +157,27 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
         }
 
         recurringTransaction.setActive(isActive);
+    }
+
+    /**
+     * @param id
+     * @param userId
+     * @param range
+     */
+    @Transactional
+    @Override
+    public void delete(long id, long userId, RemovalRange range) {
+
+        RecurringTransaction recurringTransaction = recurringTransactionDao.findByIdAndUserId(id, userId)
+                .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
+
+        recurringTransaction.setAccount(null);
+        recurringTransaction.setCategory(null);
+
+        if (range.equals(RemovalRange.TEMPLATE)) {
+            recurringTransaction.detachTransactions();
+        }
+        recurringTransactionDao.delete(recurringTransaction);
     }
 
     private LocalDate calculateNextOccurrence(RecurringInterval interval, int recurringValue) {

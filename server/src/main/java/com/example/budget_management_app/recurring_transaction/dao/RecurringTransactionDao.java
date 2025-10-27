@@ -15,4 +15,6 @@ public interface RecurringTransactionDao {
     Optional<RecurringTransaction> findByIdAndUserId(long id, long userId);
 
     RecurringTransaction create(RecurringTransaction recurringTransaction);
+
+    void delete(RecurringTransaction recurringTransaction);
 }

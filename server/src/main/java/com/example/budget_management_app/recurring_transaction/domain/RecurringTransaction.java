@@ -67,7 +67,7 @@ public class RecurringTransaction {
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
-    @OneToMany(mappedBy = "recurringTransaction", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "recurringTransaction", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private Set<Transaction> transactions;
 
     public RecurringTransaction(BigDecimal amount, String title, TransactionType type, String description, LocalDateTime startDate, LocalDateTime endDate, RecurringInterval recurringInterval, int recurringValue, LocalDateTime nextOccurrence, boolean isActive, LocalDateTime createdAt) {
@@ -82,5 +82,13 @@ public class RecurringTransaction {
         this.nextOccurrence = nextOccurrence;
         this.isActive = isActive;
         this.createdAt = createdAt;
+    }
+
+    public void detachTransactions(){
+
+        for (Transaction t : getTransactions()) {
+            t.setRecurringTransaction(null);
+        }
+        setTransactions(null);
     }
 }
