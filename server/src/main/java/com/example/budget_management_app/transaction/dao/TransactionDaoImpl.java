@@ -54,6 +54,7 @@ public class TransactionDaoImpl implements TransactionDao{
                 root.get("transactionDate").alias("transactionDate"),
                 account.get("id").alias("accountId"),
                 account.get("name").alias("accountName"),
+                account.get("currency").alias("currency"),
                 category.get("id").alias("categoryId"),
                 category.get("name").alias("categoryName"),
                 category.get("iconPath").alias("iconPath"),

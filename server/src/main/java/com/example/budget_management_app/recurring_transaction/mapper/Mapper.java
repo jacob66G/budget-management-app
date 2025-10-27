@@ -1,31 +1,32 @@
-package com.example.budget_management_app.transaction.mapper;
+package com.example.budget_management_app.recurring_transaction.mapper;
 
 import com.example.budget_management_app.account.domain.SupportedCurrency;
-import com.example.budget_management_app.transaction.domain.Transaction;
+import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
+import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionSummary;
 import com.example.budget_management_app.transaction.domain.TransactionType;
 import com.example.budget_management_app.transaction.dto.AccountSummary;
 import com.example.budget_management_app.transaction.dto.CategorySummary;
-import com.example.budget_management_app.transaction.dto.TransactionCreateRequest;
-import com.example.budget_management_app.transaction.dto.TransactionView;
 import jakarta.persistence.Tuple;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class Mapper {
 
     private Mapper(){}
 
-    public static List<TransactionView> toDto(List<Tuple> tuples) {
+    public static List<RecurringTransactionSummary> fromTuples(List<Tuple> tuples) {
 
         return tuples.stream()
-                .map( tuple -> new TransactionView(
-                        tuple.get("transactionId", Long.class),
+                .map( tuple -> new RecurringTransactionSummary(
+                        tuple.get("recId", Long.class),
+                        tuple.get("title", String.class),
                         tuple.get("amount", BigDecimal.class),
                         tuple.get("type", TransactionType.class),
-                        tuple.get("description", String.class),
-                        tuple.get("transactionDate", LocalDateTime.class),
+                        tuple.get("isActive", Boolean.class),
+                        tuple.get("desc", String.class),
+                        tuple.get("recInterval", RecurringInterval.class),
+                        tuple.get("recValue", Integer.class),
                         new AccountSummary(
                                 tuple.get("accountId", Long.class),
                                 tuple.get("accountName", String.class),
@@ -36,17 +37,6 @@ public class Mapper {
                                 tuple.get("categoryName", String.class),
                                 tuple.get("iconPath", String.class)
                         )
-                ))
-                .toList();
-    }
-
-    public static Transaction fromDto(TransactionCreateRequest transactionCreate) {
-        return new Transaction(
-                transactionCreate.amount(),
-                transactionCreate.title(),
-                transactionCreate.type(),
-                transactionCreate.description(),
-                LocalDateTime.now()
-        );
+                )).toList();
     }
 }
