@@ -7,6 +7,7 @@ import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.InternalException;
 import com.example.budget_management_app.common.exception.NotFoundException;
+import com.example.budget_management_app.common.exception.StatusAlreadySetException;
 import com.example.budget_management_app.recurring_transaction.dao.RecurringTransactionDao;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
@@ -136,6 +137,25 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
                     null
             );
         }
+    }
+
+    /**
+     * @param id
+     * @param userId
+     * @param isActive
+     */
+    @Transactional
+    @Override
+    public void changeStatus(long id, long userId, boolean isActive) {
+
+        RecurringTransaction recurringTransaction = recurringTransactionDao.findByIdAndUserId(id, userId)
+                .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
+
+        if (recurringTransaction.isActive() == isActive) {
+            throw new StatusAlreadySetException(RecurringTransaction.class.getSimpleName(), recurringTransaction.getId(), (isActive) ? "active" : "not active" , ErrorCode.STATUS_ALREADY_SET);
+        }
+
+        recurringTransaction.setActive(isActive);
     }
 
     private LocalDate calculateNextOccurrence(RecurringInterval interval, int recurringValue) {

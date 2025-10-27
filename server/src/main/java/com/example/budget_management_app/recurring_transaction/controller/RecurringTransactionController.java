@@ -1,9 +1,6 @@
 package com.example.budget_management_app.recurring_transaction.controller;
 
-import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionCreateRequest;
-import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionCreateResponse;
-import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionDetailsResponse;
-import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionSummary;
+import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.security.service.CustomUserDetails;
 import com.example.budget_management_app.transaction.dto.PagedResponse;
@@ -60,4 +57,14 @@ public class RecurringTransactionController {
                 .created(location)
                 .body(response);
     }
-}
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Void> changeStatus(
+            @PathVariable long id,
+            @RequestBody RecurringTransactionStatusUpdateRequest updateReq,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        recurringTransactionService.changeStatus(id, userDetails.getId(), updateReq.isActive());
+
+        return ResponseEntity.noContent().build();
+    }}

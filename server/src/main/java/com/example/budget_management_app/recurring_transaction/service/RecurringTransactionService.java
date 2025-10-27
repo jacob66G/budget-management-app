@@ -13,4 +13,6 @@ public interface RecurringTransactionService {
     RecurringTransactionDetailsResponse getDetails(long id, long userId);
 
     RecurringTransactionCreateResponse create(long userId, RecurringTransactionCreateRequest createReq);
+
+    void changeStatus(long id, long userId, boolean isActive);
 }
