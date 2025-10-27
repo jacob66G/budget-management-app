@@ -2,6 +2,8 @@ package com.example.budget_management_app.recurring_transaction.mapper;
 
 import com.example.budget_management_app.account.domain.SupportedCurrency;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
+import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
+import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionDetailsResponse;
 import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionSummary;
 import com.example.budget_management_app.transaction.domain.TransactionType;
 import com.example.budget_management_app.transaction.dto.AccountSummary;
@@ -38,5 +40,13 @@ public class Mapper {
                                 tuple.get("iconPath", String.class)
                         )
                 )).toList();
+    }
+
+    public static RecurringTransactionDetailsResponse toDetails(RecurringTransaction recurringTransaction) {
+        return new RecurringTransactionDetailsResponse(
+                recurringTransaction.getNextOccurrence().toLocalDate(),
+                recurringTransaction.getStartDate().toLocalDate(),
+                recurringTransaction.getEndDate().toLocalDate(),
+                recurringTransaction.getCreatedAt());
     }
 }

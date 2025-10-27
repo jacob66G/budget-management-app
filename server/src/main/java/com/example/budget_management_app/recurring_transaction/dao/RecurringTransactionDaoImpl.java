@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class RecurringTransactionDaoImpl implements RecurringTransactionDao{
@@ -82,5 +83,26 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao{
 
         return em.createQuery(countQuery)
                 .getSingleResult();
+    }
+
+    /**
+     * @param id
+     * @param userId
+     * @return
+     */
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<RecurringTransaction> findByIdAndUserId(long id, long userId) {
+
+        List<RecurringTransaction> result = em.createQuery("""
+                SELECT r FROM RecurringTransaction r
+                JOIN r.account a
+                WHERE r.id = :id AND a.user.id = :userId
+                """, RecurringTransaction.class)
+                .setParameter("id", id)
+                .setParameter("userId", userId)
+                .getResultList();
+
+        return result.stream().findFirst();
     }
 }
