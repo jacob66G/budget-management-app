@@ -1,10 +1,8 @@
 package com.example.budget_management_app.recurring_transaction.service;
 
 import com.example.budget_management_app.recurring_transaction.domain.RemovalRange;
-import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionCreateRequest;
-import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionCreateResponse;
-import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionDetailsResponse;
-import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionSummary;
+import com.example.budget_management_app.recurring_transaction.domain.UpdateRange;
+import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.transaction.dto.PagedResponse;
 
 public interface RecurringTransactionService {
@@ -18,4 +16,6 @@ public interface RecurringTransactionService {
     void changeStatus(long id, long userId, boolean isActive);
 
     void delete(long id, long userId, RemovalRange range);
+
+    void update(long id, long userId, RecurringTransactionUpdateRequest updateReq, UpdateRange range);
 }

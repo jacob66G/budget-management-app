@@ -33,4 +33,6 @@ public interface TransactionDao {
     Optional<Transaction> findByIdAndUserId(long id, long userId);
 
     Optional<Transaction> findByIdAndUserIdAndCategoryId(long id, long userId, long categoryId);
+
+    List<Transaction> findByRecurringTransactionId(long recurringTransactionId);
 }

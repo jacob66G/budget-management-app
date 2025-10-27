@@ -12,11 +12,10 @@ import com.example.budget_management_app.recurring_transaction.dao.RecurringTran
 import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
 import com.example.budget_management_app.recurring_transaction.domain.RemovalRange;
-import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionCreateRequest;
-import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionCreateResponse;
-import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionDetailsResponse;
-import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionSummary;
+import com.example.budget_management_app.recurring_transaction.domain.UpdateRange;
+import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.recurring_transaction.mapper.Mapper;
+import com.example.budget_management_app.transaction.dao.TransactionDao;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction.dto.PagedResponse;
 import jakarta.persistence.Tuple;
@@ -35,6 +34,7 @@ import java.util.Set;
 public class RecurringTransactionServiceImpl implements RecurringTransactionService{
 
     private final RecurringTransactionDao recurringTransactionDao;
+    private final TransactionDao transactionDao;
     private final AccountDao accountDao;
     private final CategoryDao categoryDao;
     /**
@@ -178,6 +178,32 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
             recurringTransaction.detachTransactions();
         }
         recurringTransactionDao.delete(recurringTransaction);
+    }
+
+    /**
+     * @param id
+     * @param userId
+     * @param updateReq
+     */
+    @Transactional
+    @Override
+    public void update(long id, long userId, RecurringTransactionUpdateRequest updateReq, UpdateRange range) {
+
+        RecurringTransaction recurringTransaction = recurringTransactionDao.findByIdAndUserId(id, userId)
+                .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
+
+        recurringTransaction.setAmount(updateReq.amount());
+        recurringTransaction.setTitle(updateReq.title());
+        recurringTransaction.setDescription(updateReq.description());
+
+        if (range.equals(UpdateRange.ALL)) {
+            List<Transaction> transactions = transactionDao.findByRecurringTransactionId(id);
+            transactions.stream().forEach( transaction -> {
+                transaction.setAmount(updateReq.amount());
+                transaction.setTitle(updateReq.title());
+                transaction.setDescription(updateReq.description());
+            });
+        }
     }
 
     private LocalDate calculateNextOccurrence(RecurringInterval interval, int recurringValue) {

@@ -1,6 +1,7 @@
 package com.example.budget_management_app.recurring_transaction.controller;
 
 import com.example.budget_management_app.recurring_transaction.domain.RemovalRange;
+import com.example.budget_management_app.recurring_transaction.domain.UpdateRange;
 import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.security.service.CustomUserDetails;
@@ -35,7 +36,7 @@ public class RecurringTransactionController {
 
     @GetMapping("/{id}/details")
     public ResponseEntity<RecurringTransactionDetailsResponse> getDetails(
-            @PathVariable long id,
+            @PathVariable(name = "id") long id,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ResponseEntity.ok(recurringTransactionService.getDetails(
@@ -61,7 +62,7 @@ public class RecurringTransactionController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> changeStatus(
-            @PathVariable long id,
+            @PathVariable(name = "id") long id,
             @RequestBody RecurringTransactionStatusUpdateRequest updateReq,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
@@ -70,9 +71,21 @@ public class RecurringTransactionController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> update(
+            @PathVariable(name = "id") long id,
+            @RequestParam(name = "range") UpdateRange range,
+            @RequestBody RecurringTransactionUpdateRequest updateReq,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        recurringTransactionService.update(id, userDetails.getId(), updateReq, range);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
-            @PathVariable long id,
+            @PathVariable(name = "id") long id,
             @RequestParam(name = "range") RemovalRange range,
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {

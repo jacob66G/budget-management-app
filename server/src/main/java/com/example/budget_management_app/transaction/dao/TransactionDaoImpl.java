@@ -185,6 +185,21 @@ public class TransactionDaoImpl implements TransactionDao{
         return results.stream().findFirst();
     }
 
+    /**
+     * @param recurringTransactionId
+     * @return
+     */
+    @Override
+    public List<Transaction> findByRecurringTransactionId(long recurringTransactionId) {
+
+        return em.createQuery("""
+                SELECT t FROM Transaction t
+                WHERE t.recurringTransaction.id = :recurringTransactionId
+                """, Transaction.class)
+                .setParameter("recurringTransactionId", recurringTransactionId)
+                .getResultList();
+    }
+
     private List<Predicate> setPredicates(
                                 Join<Transaction, Account> account,
                                 Join<Transaction, RecurringTransaction> recTransaction,
