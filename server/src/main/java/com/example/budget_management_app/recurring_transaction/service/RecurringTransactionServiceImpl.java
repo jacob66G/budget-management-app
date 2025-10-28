@@ -156,6 +156,36 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
             throw new StatusAlreadySetException(RecurringTransaction.class.getSimpleName(), recurringTransaction.getId(), (isActive) ? "active" : "not active" , ErrorCode.STATUS_ALREADY_SET);
         }
 
+        if (isActive) {
+
+            if (recurringTransaction.getNextOccurrence().isEqual(LocalDate.now()) && LocalTime.now().isAfter(LocalTime.NOON)) {
+                LocalDate nextOccurrence = this.calculateNextOccurrence(recurringTransaction.getRecurringInterval(), recurringTransaction.getRecurringValue());
+                recurringTransaction.setNextOccurrence(nextOccurrence);
+                recurringTransaction.addTransaction(
+                        new Transaction(recurringTransaction.getAmount(), recurringTransaction.getTitle(), recurringTransaction.getType(),
+                                recurringTransaction.getDescription(), LocalDateTime.now())
+                );
+            }
+
+            if (recurringTransaction.getNextOccurrence().isBefore(LocalDate.now())) {
+
+                LocalDate incrementDate = recurringTransaction.getNextOccurrence();
+                while(!(incrementDate.isAfter(LocalDate.now()) || incrementDate.isEqual(LocalDate.now()))) {
+                    incrementDate = this.calculateNextOccurrence(recurringTransaction.getRecurringInterval(), recurringTransaction.getRecurringValue());
+                }
+                if (incrementDate.isEqual(LocalDate.now()) && LocalTime.now().isAfter(LocalTime.NOON)) {
+                    LocalDate nextOccurrence = this.calculateNextOccurrence(recurringTransaction.getRecurringInterval(), recurringTransaction.getRecurringValue());
+                    recurringTransaction.setNextOccurrence(nextOccurrence);
+                    recurringTransaction.addTransaction(
+                            new Transaction(recurringTransaction.getAmount(), recurringTransaction.getTitle(), recurringTransaction.getType(),
+                                    recurringTransaction.getDescription(), LocalDateTime.now())
+                    );
+                } else if (incrementDate.isAfter(LocalDate.now())){
+                    recurringTransaction.setNextOccurrence(incrementDate);
+                }
+            }
+        }
+
         recurringTransaction.setActive(isActive);
     }
 
