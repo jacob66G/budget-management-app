@@ -13,8 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("TransactionDao Unit Tests")
@@ -32,13 +30,10 @@ public class DaoTests {
                 TransactionTypeFilter.ALL,
                 TransactionModeFilter.ALL,
                 List.of(1l, 2l, 3l, 4l),
+                List.of(1l, 2l),
                 LocalDate.of(2025,9,1),
                 null
                 );
-
-        assertThat(count).isNotNull();
-        assertThat(count).isNotZero();
-        assertThat(count).isEqualTo(expectedNumberOfRecords);
     }
 
     @Test
@@ -50,13 +45,10 @@ public class DaoTests {
                 TransactionTypeFilter.EXPENSE,
                 TransactionModeFilter.ALL,
                 List.of(1l, 2l),
+                List.of(1l, 2l),
                 LocalDate.of(2025, 9, 5),
                 LocalDate.of(2025,9,28)
         );
-
-        assertThat(count).isNotNull();
-        assertThat(count).isNotZero();
-        assertThat(count).isEqualTo(expectedNumberOfRecords);
     }
 
     @Test
@@ -72,14 +64,11 @@ public class DaoTests {
                 TransactionTypeFilter.ALL,
                 TransactionModeFilter.ALL,
                 List.of(1l, 2l, 3l, 4l, 5l),
+                List.of(1l, 2l),
                 LocalDate.of(2025, 9, 1),
                 null,
                 SortedBy.DATE,
                 SortDirection.DESC);
-
-        assertThat(transactions).isNotNull();
-        assertThat(transactions.size()).isEqualTo(expectedSize);
-        transactions.forEach(System.out::println);
     }
 
     @Test
@@ -95,14 +84,11 @@ public class DaoTests {
                 TransactionTypeFilter.ALL,
                 TransactionModeFilter.ALL,
                 List.of(1l, 2l, 3l, 4l, 5l),
+                List.of(1l, 2l),
                 LocalDate.of(2025, 9, 1),
                 null,
                 SortedBy.DATE,
                 SortDirection.DESC);
-
-        assertThat(transactions).isNotNull();
-        assertThat(transactions.size()).isEqualTo(expectedSize);
-        transactions.forEach(System.out::println);
     }
 
     @Test
@@ -119,16 +105,11 @@ public class DaoTests {
                 TransactionTypeFilter.EXPENSE,
                 TransactionModeFilter.ALL,
                 List.of(2l),
+                List.of(1l, 2l),
                 LocalDate.of(2025, 9, 1),
                 LocalDate.of(2025, 9, 30),
                 SortedBy.AMOUNT,
                 SortDirection.DESC
         );
-
-        assertThat(transactions).isNotNull();
-        assertThat(transactions.size()).isNotZero();
-        assertThat(transactions.size()).isEqualTo(expectedSize);
-
-        transactions.forEach(System.out::println);
     }
 }

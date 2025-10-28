@@ -13,10 +13,12 @@ public interface TransactionService {
                                                        TransactionTypeFilter type,
                                                        TransactionModeFilter mode,
                                                        List<Long> accounts,
+                                                       List<Long> categories,
                                                        LocalDate since,
                                                        LocalDate to,
                                                        SortedBy sortedBy,
-                                                       SortDirection sortedType);
+                                                       SortDirection sortedType,
+                                                       long id);
 
     TransactionResponse createTransaction(TransactionCreateRequest transactionCreate, long userId);
 

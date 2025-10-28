@@ -42,6 +42,17 @@ public class CategoryDao {
         return count > 0;
     }
 
+    public boolean areCategoriesBelongToUser(Long userId, List<Long> categories) {
+        Long count = em.createQuery("""
+            SELECT COUNT(c) FROM Category c
+            WHERE c.id IN :categories AND c.user.id = :userId
+            """, Long.class)
+                .setParameter("categories", categories)
+                .setParameter("userId", userId)
+                .getSingleResult();
+        return count != null && count == categories.size();
+    }
+
     public Category save(Category category) {
         em.persist(category);
         em.flush();

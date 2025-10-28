@@ -35,10 +35,20 @@ public class TransactionServiceImpl implements TransactionService{
                                                               TransactionTypeFilter type,
                                                               TransactionModeFilter mode,
                                                               List<Long> accounts,
+                                                              List<Long> categories,
                                                               LocalDate since,
                                                               LocalDate to,
                                                               SortedBy sortedBy,
-                                                              SortDirection sortedType) {
+                                                              SortDirection sortedType,
+                                                              long userId) {
+
+        if(!accountDao.areAccountsBelongToUser(userId, accounts)) {
+            throw new NotFoundException(Account.class.getSimpleName(), accounts, ErrorCode.NOT_FOUND);
+        }
+
+        if (!categoryDao.areCategoriesBelongToUser(userId, categories)) {
+            throw new NotFoundException(Category.class.getSimpleName(), categories, ErrorCode.NOT_FOUND);
+        }
 
         List<Tuple> transactionTuples = transactionDao.getTransactions(
                 page,
@@ -46,6 +56,7 @@ public class TransactionServiceImpl implements TransactionService{
                 type,
                 mode,
                 accounts,
+                categories,
                 since,
                 to,
                 sortedBy,
@@ -55,6 +66,7 @@ public class TransactionServiceImpl implements TransactionService{
                 type,
                 mode,
                 accounts,
+                categories,
                 since,
                 to);
 

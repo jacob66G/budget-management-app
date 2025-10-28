@@ -33,6 +33,7 @@ public class TransactionDaoImpl implements TransactionDao{
                                        TransactionTypeFilter type,
                                        TransactionModeFilter mode,
                                        List<Long> accounts,
+                                       List<Long> categories,
                                        LocalDate since,
                                        LocalDate to,
                                        SortedBy sortedBy,
@@ -63,12 +64,14 @@ public class TransactionDaoImpl implements TransactionDao{
 
         List<Predicate> predicates = this.setPredicates(
                 account,
+                category,
                 recTransaction,
                 root,
                 cb,
                 type,
                 mode,
                 accounts,
+                categories,
                 since,
                 to
                 );
@@ -113,6 +116,7 @@ public class TransactionDaoImpl implements TransactionDao{
     public Long getTransactionsCount(TransactionTypeFilter type,
                                      TransactionModeFilter mode,
                                      List<Long> accounts,
+                                     List<Long> categories,
                                      LocalDate since,
                                      LocalDate to) {
 
@@ -120,16 +124,19 @@ public class TransactionDaoImpl implements TransactionDao{
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<Transaction> root = countQuery.from(Transaction.class);
         Join<Transaction, Account> account = root.join("account", JoinType.INNER);
+        Join<Transaction, Category> category = root.join("category", JoinType.INNER);
         Join<Transaction, RecurringTransaction> recTransaction = root.join("recurringTransaction", JoinType.LEFT);
 
         List<Predicate> predicates = this.setPredicates(
                 account,
+                category,
                 recTransaction,
                 root,
                 cb,
                 type,
                 mode,
                 accounts,
+                categories,
                 since,
                 to);
 
@@ -169,6 +176,7 @@ public class TransactionDaoImpl implements TransactionDao{
         return results.stream().findFirst();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Optional<Transaction> findByIdAndUserIdAndCategoryId(long id, long userId, long categoryId) {
 
@@ -189,6 +197,7 @@ public class TransactionDaoImpl implements TransactionDao{
      * @param recurringTransactionId
      * @return
      */
+    @Transactional(readOnly = true)
     @Override
     public List<Transaction> findByRecurringTransactionId(long recurringTransactionId) {
 
@@ -202,12 +211,14 @@ public class TransactionDaoImpl implements TransactionDao{
 
     private List<Predicate> setPredicates(
                                 Join<Transaction, Account> account,
+                                Join<Transaction, Category> category,
                                 Join<Transaction, RecurringTransaction> recTransaction,
                                 Root<Transaction> root,
                                 CriteriaBuilder cb,
                                 TransactionTypeFilter type,
                                 TransactionModeFilter mode,
                                 List<Long> accounts,
+                                List<Long> categories,
                                 LocalDate since,
                                 LocalDate to) {
 
@@ -226,7 +237,9 @@ public class TransactionDaoImpl implements TransactionDao{
         if (!accounts.isEmpty()) {
             predicates.add(account.get("id").in(accounts));
         }
-
+        if(!categories.isEmpty()) {
+            predicates.add(category.get("id").in(categories));
+        }
         if (since != null) {
             LocalDateTime startDate = since.atStartOfDay();
             predicates.add(cb.greaterThanOrEqualTo(root.get("transactionDate"), startDate));

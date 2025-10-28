@@ -31,10 +31,12 @@ public class TransactionController {
             @RequestParam(name = "type", defaultValue = "ALL") TransactionTypeFilter type,
             @RequestParam(name = "mode", defaultValue = "ALL")TransactionModeFilter mode,
             @RequestParam(name = "accounts") List<Long> accounts,
+            @RequestParam(name = "categories") List<Long> categories,
             @RequestParam(name = "since") LocalDate since,
             @RequestParam(name = "to", required = false) LocalDate to,
             @RequestParam(name = "sortedBy", defaultValue = "DATE") SortedBy sortedBy,
-            @RequestParam(name = "sortDirection", defaultValue = "DESC") SortDirection sortDirection
+            @RequestParam(name = "sortDirection", defaultValue = "DESC") SortDirection sortDirection,
+            @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
 
         return ResponseEntity.ok(transactionService.getTransactionViews(
@@ -43,10 +45,12 @@ public class TransactionController {
                 type,
                 mode,
                 accounts,
+                categories,
                 since,
                 to,
                 sortedBy,
-                sortDirection));
+                sortDirection,
+                userDetails.getId()));
     }
 
     @PostMapping

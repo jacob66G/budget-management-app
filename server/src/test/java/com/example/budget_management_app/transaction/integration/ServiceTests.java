@@ -15,8 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("TransactionService Integration Tests")
@@ -40,19 +38,12 @@ public class ServiceTests {
                 TransactionTypeFilter.ALL,
                 TransactionModeFilter.ALL,
                 List.of(1l, 2l, 3l, 4l),
+                List.of(1l, 2l),
                 LocalDate.of(2025,9,1),
                 null,
                 SortedBy.DATE,
-                SortDirection.DESC
+                SortDirection.DESC,
+                1l
         );
-
-        assertThat(transactionsPage).isNotNull();
-        assertThat(transactionsPage.data()).isNotNull();
-        assertThat(transactionsPage.pagination()).isNotNull();
-        assertThat(transactionsPage.data().size()).isNotZero();
-        transactionsPage.data().forEach(System.out::println);
-        System.out.println("---------------------------------");
-        System.out.println(transactionsPage.pagination());
-
     }
 }

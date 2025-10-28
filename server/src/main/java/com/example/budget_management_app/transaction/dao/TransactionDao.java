@@ -14,6 +14,7 @@ public interface TransactionDao {
                                 TransactionTypeFilter type,
                                 TransactionModeFilter mode,
                                 List<Long> accounts,
+                                List<Long> categories,
                                 LocalDate since,
                                 LocalDate to,
                                 SortedBy sortedBy,
@@ -23,6 +24,7 @@ public interface TransactionDao {
     Long getTransactionsCount(TransactionTypeFilter type,
                               TransactionModeFilter mode,
                               List<Long> accounts,
+                              List<Long> categories,
                               LocalDate since,
                               LocalDate to);
 
