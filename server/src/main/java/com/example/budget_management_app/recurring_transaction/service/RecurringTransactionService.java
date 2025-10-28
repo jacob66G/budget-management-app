@@ -18,4 +18,6 @@ public interface RecurringTransactionService {
     void delete(long id, long userId, RemovalRange range);
 
     void update(long id, long userId, RecurringTransactionUpdateRequest updateReq, UpdateRange range);
+
+    void generateRecurringTransactions();
 }

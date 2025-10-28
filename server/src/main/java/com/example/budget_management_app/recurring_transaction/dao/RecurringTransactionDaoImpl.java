@@ -11,6 +11,7 @@ import jakarta.persistence.criteria.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -125,5 +126,20 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao{
     @Override
     public void delete(RecurringTransaction recurringTransaction) {
         em.remove(recurringTransaction);
+    }
+
+    /**
+     * @return
+     */
+    @Transactional(readOnly = true)
+    @Override
+    public List<RecurringTransaction> searchForRecurringTransactionsToCreate() {
+
+        return em.createQuery("""
+                SELECT r FROM RecurringTransaction r
+                WHERE r.isActive = TRUE AND r.nextOccurrence = :today
+                """, RecurringTransaction.class)
+                .setParameter("today", LocalDate.now())
+                .getResultList();
     }
 }

@@ -17,4 +17,6 @@ public interface RecurringTransactionDao {
     RecurringTransaction create(RecurringTransaction recurringTransaction);
 
     void delete(RecurringTransaction recurringTransaction);
+
+    List<RecurringTransaction> searchForRecurringTransactionsToCreate();
 }

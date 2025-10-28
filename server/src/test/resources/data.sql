@@ -22,24 +22,24 @@ INSERT INTO recurring_transactions (
     created_at, category_id, account_id
 ) VALUES
     (100.00, 'Monthly Subscription', 'EXPENSE', 'Spotify subscription monthly',
-     '2025-09-01 00:00:00', NULL,
+     '2025-09-01', NULL,
      'MONTH', 1,
-     '2025-10-01 00:00:00', TRUE,
+     '2025-10-01', TRUE,
      '2025-09-01 00:00:00', 1, 1),
     (50.00, 'Gym Membership', 'EXPENSE', 'Gym fee every 3 months',
-     '2025-07-01 00:00:00', NULL,
+     '2025-07-01', NULL,
      'MONTH', 3,
-     '2025-10-01 00:00:00', TRUE,
+     '2025-10-01', TRUE,
      '2025-07-01 00:00:00', 2, 1),
     (2000.00, 'Salary', 'INCOME', 'Monthly salary from employer',
-     '2025-01-01 00:00:00', NULL,
+     '2025-01-01', NULL,
      'MONTH', 1,
-     '2025-10-01 00:00:00', TRUE,
+     '2025-10-01', TRUE,
      '2025-01-01 00:00:00', 3, 2),
     (20.00, 'Weekly allowance', 'INCOME', 'Allowance every week',
-     '2025-09-20 00:00:00', '2025-12-31 00:00:00',
+     '2025-09-20', '2025-12-31',
      'MONTH', 1,
-     '2025-09-27 00:00:00', TRUE,
+     '2025-09-27', TRUE,
      '2025-09-20 00:00:00', 4, 1);
 
 INSERT INTO transactions (amount, title, type, description, transaction_date, photo_path, category_id, account_id, recurring_transaction_id)

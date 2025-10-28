@@ -48,9 +48,9 @@ public class Mapper {
 
     public static RecurringTransactionDetailsResponse toDetails(RecurringTransaction recurringTransaction) {
         return new RecurringTransactionDetailsResponse(
-                recurringTransaction.getNextOccurrence().toLocalDate(),
-                recurringTransaction.getStartDate().toLocalDate(),
-                recurringTransaction.getEndDate().toLocalDate(),
+                recurringTransaction.getNextOccurrence(),
+                recurringTransaction.getStartDate(),
+                recurringTransaction.getEndDate(),
                 recurringTransaction.getCreatedAt());
     }
 

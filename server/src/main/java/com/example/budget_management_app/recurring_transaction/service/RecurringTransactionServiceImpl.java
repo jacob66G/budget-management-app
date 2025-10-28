@@ -90,8 +90,8 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
         if (startDate.isEqual(LocalDate.now()) && LocalTime.now().isAfter(LocalTime.NOON)) {
             nextOccurrence = calculateNextOccurrence(interval, recurringValue);
             RecurringTransaction recurringTransaction = new RecurringTransaction(
-                    createReq.amount(), createReq.title(), createReq.type(), createReq.description(), startDate.atStartOfDay(), createReq.endDate().atStartOfDay(),
-                    interval, recurringValue, nextOccurrence.atStartOfDay(), true, LocalDateTime.now()
+                    createReq.amount(), createReq.title(), createReq.type(), createReq.description(), startDate, createReq.endDate(),
+                    interval, recurringValue, nextOccurrence, true, LocalDateTime.now()
             );
             Transaction transaction = new Transaction(
                           createReq.amount(), createReq.title(), createReq.type(), createReq.description(), LocalDateTime.now()
@@ -111,7 +111,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
 
             return new RecurringTransactionCreateResponse(
                     createdRecurringTransaction.getId(),
-                    createdRecurringTransaction.getNextOccurrence().toLocalDate(),
+                    createdRecurringTransaction.getNextOccurrence(),
                     true,
                     true,
                     Mapper.toTransactionView(createdTransaction)
@@ -121,8 +121,8 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
 
             nextOccurrence = startDate;
             RecurringTransaction recurringTransaction = new RecurringTransaction(
-                    createReq.amount(), createReq.title(), createReq.type(), createReq.description(), startDate.atStartOfDay(), createReq.endDate().atStartOfDay(),
-                    interval, recurringValue, nextOccurrence.atStartOfDay(), true, LocalDateTime.now()
+                    createReq.amount(), createReq.title(), createReq.type(), createReq.description(), startDate, createReq.endDate(),
+                    interval, recurringValue, nextOccurrence, true, LocalDateTime.now()
             );
 
             recurringTransaction.setAccount(account);
@@ -132,7 +132,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
 
             return new RecurringTransactionCreateResponse(
                     createdRecurringTransaction.getId(),
-                    createdRecurringTransaction.getNextOccurrence().toLocalDate(),
+                    createdRecurringTransaction.getNextOccurrence(),
                     true,
                     false,
                     null
@@ -203,6 +203,27 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
                 transaction.setTitle(updateReq.title());
                 transaction.setDescription(updateReq.description());
             });
+        }
+    }
+
+    @Transactional
+    @Override
+    public void generateRecurringTransactions() {
+
+        List<RecurringTransaction> recurringTransactionsToCreate = recurringTransactionDao.searchForRecurringTransactionsToCreate();
+
+        if (!recurringTransactionsToCreate.isEmpty()) {
+            recurringTransactionsToCreate.forEach(
+                    recTransaction -> {
+                        LocalDate nextOccurrence = this.calculateNextOccurrence(recTransaction.getRecurringInterval(), recTransaction.getRecurringValue());
+                        recTransaction.setNextOccurrence(nextOccurrence);
+                        Transaction transaction = new Transaction(
+                                recTransaction.getAmount(), recTransaction.getTitle(), recTransaction.getType(),
+                                recTransaction.getDescription(), LocalDateTime.now()
+                        );
+                        recTransaction.addTransaction(transaction);
+                    }
+            );
         }
     }
 

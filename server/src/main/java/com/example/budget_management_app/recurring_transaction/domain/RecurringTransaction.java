@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter@Setter
@@ -38,10 +40,10 @@ public class RecurringTransaction {
     private String description;
 
     @Column(name = "start_date", nullable = false, updatable = false)
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date")
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
     @Column(name = "recurring_interval", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -51,7 +53,7 @@ public class RecurringTransaction {
     private int recurringValue;
 
     @Column(name = "next_occurrence", nullable = false)
-    private LocalDateTime nextOccurrence;
+    private LocalDate nextOccurrence;
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
@@ -70,7 +72,7 @@ public class RecurringTransaction {
     @OneToMany(mappedBy = "recurringTransaction", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private Set<Transaction> transactions;
 
-    public RecurringTransaction(BigDecimal amount, String title, TransactionType type, String description, LocalDateTime startDate, LocalDateTime endDate, RecurringInterval recurringInterval, int recurringValue, LocalDateTime nextOccurrence, boolean isActive, LocalDateTime createdAt) {
+    public RecurringTransaction(BigDecimal amount, String title, TransactionType type, String description, LocalDate startDate, LocalDate endDate, RecurringInterval recurringInterval, int recurringValue, LocalDate nextOccurrence, boolean isActive, LocalDateTime createdAt) {
         this.amount = amount;
         this.title = title;
         this.type = type;
@@ -90,5 +92,14 @@ public class RecurringTransaction {
             t.setRecurringTransaction(null);
         }
         setTransactions(null);
+    }
+
+    public void addTransaction(Transaction transaction) {
+
+        if (transactions == null) {
+            transactions = new HashSet<>();
+        }
+        transactions.add(transaction);
+        transaction.setRecurringTransaction(this);
     }
 }
