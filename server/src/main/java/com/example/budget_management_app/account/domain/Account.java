@@ -33,6 +33,14 @@ public class Account {
     private BigDecimal totalExpense = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "account_status", nullable = false)
+    private AccountStatus accountStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_type", nullable = false)
+    private AccountType accountType;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SupportedCurrency currency;
 
@@ -41,17 +49,22 @@ public class Account {
 
     private String description;
 
-    @Column(name = "monthly_budget")
-    private BigDecimal monthlyBudget;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "budget_type", nullable = false)
+    private BudgetType budgetType;
 
-    @Column(name = "weekly_budget")
-    private BigDecimal weeklyBudget;
+    private BigDecimal budget;
 
     @Column(name = "alter_treshold")
     private Double alertThreshold;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
+
+    private String iconPath;
+
+    @Column(name = "include_in_total_balance", nullable = false)
+    private boolean includeInTotalBalance = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
