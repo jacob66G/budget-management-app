@@ -2,17 +2,17 @@ package com.example.budget_management_app.auth.service;
 
 import com.example.budget_management_app.auth.dto.*;
 import com.example.budget_management_app.auth.mapper.AuthMapper;
-import com.example.budget_management_app.category.service.CategoryService;
 import com.example.budget_management_app.common.dto.ResponseMessageDto;
+import com.example.budget_management_app.common.event.model.VerificationEvent;
 import com.example.budget_management_app.common.event.publisher.EventPublisher;
 import com.example.budget_management_app.common.exception.*;
 import com.example.budget_management_app.common.service.CacheService;
 import com.example.budget_management_app.common.service.RedisServiceImpl;
 import com.example.budget_management_app.security.service.JwtService;
 import com.example.budget_management_app.security.service.TwoFactorAuthenticationService;
-import com.example.budget_management_app.user.dao.UserDao;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.domain.UserStatus;
+import com.example.budget_management_app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +21,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,8 +33,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final UserDao userDao;
-    private final PasswordEncoder encoder;
     private final AuthMapper mapper;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
@@ -46,30 +43,16 @@ public class AuthServiceImpl implements AuthService {
     @Value("${security.verification-code.retry}")
     private long verificationRetryTime;
     private final CacheService cacheService;
-    private final CategoryService categoryService;
+    private final UserService userService;
 
     @Transactional
     @Override
-    public RegistrationResponseDto registerUser(RegistrationRequestDto requestDto) {
-        validateEmailUniqueness(requestDto.email());
-
-        User user = new User();
-        user.setName(requestDto.name());
-        user.setSurname(requestDto.surname());
-        user.setEmail(requestDto.email());
-        user.setEmailLastChanged(Instant.now());
-        user.setPassword(encoder.encode(requestDto.password()));
-
-        user.setStatus(UserStatus.ACTIVE);
-        //user.setStatus(UserStatus.PENDING_CONFIRMATION);
-        user.setCreatedAt(Instant.now());
-        categoryService.assignInitialCategories(user);
-
-        User savedUser = userDao.save(user);
+    public RegistrationResponseDto registerUser(RegistrationRequestDto dto) {
+        User savedUser = userService.createUser(dto);
 
         sendVerification(savedUser, false);
 
-        log.info("New user registration: email={}", user.getEmail());
+        log.info("New user registration: email={}", savedUser.getEmail());
         return mapper.toRegistrationResponseDto(savedUser);
     }
 
@@ -85,7 +68,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("Invalid credentials");
         }
 
-        User user = userDao.findByEmail(loginRequest.email()).orElseThrow(() -> {
+        User user = userService.findUserByEmail(loginRequest.email()).orElseThrow(() -> {
             log.warn("Login attempt for non-existent email: {}", loginRequest.email());
             return new NotFoundException(User.class.getSimpleName(), "email", loginRequest.email(), ErrorCode.USER_NOT_FOUND);
         });
@@ -97,14 +80,14 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String accessToken = jwtService.generateToken(user.getEmail());
-        log.info("User logged in: email={}", user.getEmail());
 
+        log.info("User logged in: email={}", user.getEmail());
         return mapper.toLoginResponseDto(user, accessToken);
     }
 
     @Override
     public LoginResponseDto authenticateWith2fa(TwoFactorLoginRequest loginRequest) {
-        User user = userDao.findById(loginRequest.userId())
+        User user = userService.findUserById(loginRequest.userId())
                 .orElseThrow(() -> new UsernameNotFoundException("User with id: " + loginRequest.userId() + " not found."));
 
         if (!user.isMfaEnabled()) {
@@ -116,8 +99,8 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String accessToken = jwtService.generateToken(user.getEmail());
-        log.info("User logged in: email={}", user.getEmail());
 
+        log.info("User logged in: email={}", user.getEmail());
         return mapper.toLoginResponseDto(user, accessToken);
     }
 
@@ -135,22 +118,17 @@ public class AuthServiceImpl implements AuthService {
             throw new VerificationCodeException("Invalid verification code", ErrorCode.INVALID_CODE);
         }
 
-        User user = userDao.findByEmail(email)
-                .orElseThrow(() -> {
-                    log.warn("Verification pass but user: {} not found in db.", email);
-                    return new NotFoundException(User.class.getSimpleName(), "email", email, ErrorCode.USER_NOT_FOUND);
-                });
+        userService.activateUser(email);
 
-        user.setStatus(UserStatus.ACTIVE);
         cacheService.delete(RedisServiceImpl.KeyPrefix.VERIFICATION_CODE, email);
         cacheService.delete(RedisServiceImpl.KeyPrefix.VERIFICATION_LAST_SENT, email);
 
-        log.info("User email={} has verified account", user.getEmail());
+        log.info("User email={} has verified account", email);
     }
 
     @Override
     public ResponseMessageDto resendVerification(String email) {
-        Optional<User> optionalUser = userDao.findByEmail(email);
+        Optional<User> optionalUser = userService.findUserByEmail(email);
         if (optionalUser.isEmpty()) {
             log.warn("User has tried resend verification with no exists email: {}", email);
             return new ResponseMessageDto("If an account with this email exists, a verification link has been sent.");
@@ -177,12 +155,6 @@ public class AuthServiceImpl implements AuthService {
         return new ResponseMessageDto("If an account with this email exists, a verification link has been sent.");
     }
 
-    private void validateEmailUniqueness(String email) {
-        if (userDao.findByEmail(email).isPresent()) {
-            throw new ValidationException("This email: " + email + " is already used", ErrorCode.EMAIL_ALREADY_USED);
-        }
-    }
-
     private String generateVerificationCode() {
         return UUID.randomUUID().toString();
     }
@@ -194,7 +166,7 @@ public class AuthServiceImpl implements AuthService {
                 throw new UserNotAllowedToLoginException("User: " + user.getEmail() + " account is not confirmed", ErrorCode.USER_NOT_ACTIVE);
             }
             if (status == UserStatus.PENDING_DELETION) {
-                ///TODO handle user activation
+                userService.activateUser(user.getEmail());
             } else {
                 throw new UserNotAllowedToLoginException("User: " + user.getEmail() + " account is not active", ErrorCode.USER_NOT_ACTIVE);
             }
@@ -210,6 +182,6 @@ public class AuthServiceImpl implements AuthService {
                 String.valueOf(Instant.now().toEpochMilli()),
                 verificationRetryTime
         );
-        //eventPublisher.register(new VerificationEvent(user.getEmail(), user.getName(), verificationCode, resend));
+        eventPublisher.register(new VerificationEvent(user.getEmail(), user.getName(), verificationCode, resend));
     }
 }

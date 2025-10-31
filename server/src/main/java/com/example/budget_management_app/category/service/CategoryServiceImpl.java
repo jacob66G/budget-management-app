@@ -46,7 +46,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Transactional
     @Override
-    public CategoryResponseDto addCategory(Long userId, CategoryCreateRequestDto dto) {
+    public CategoryResponseDto createCategory(Long userId, CategoryCreateRequestDto dto) {
         User user = userService.getUserById(userId);
         validateCategory(dto, user.getId());
 
@@ -55,7 +55,8 @@ public class CategoryServiceImpl implements CategoryService {
         category.setType(CategoryType.valueOf(dto.type().toUpperCase()));
         category.setDefault(false);
         category.setIconPath(dto.iconPath());
-        category.setUser(user);
+
+        user.addCategory(category);
 
         return mapper.toCategoryResponseDto(categoryDao.save(category));
     }
@@ -76,7 +77,7 @@ public class CategoryServiceImpl implements CategoryService {
             category.setType(CategoryType.valueOf(dto.type().toUpperCase()));
         }
         if (StringUtils.hasText(dto.iconPath())) {
-            validateIconPathExists(dto.iconPath());
+            validateIconExists(dto.iconPath());
             category.setIconPath(dto.iconPath());
         }
 
@@ -95,7 +96,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void assignInitialCategories(User user) {
-        for (InitialCategory def: InitialCategory.values()) {
+        for (InitialCategory def : InitialCategory.values()) {
             Category category = new Category();
             category.setName(def.getName());
             category.setType(def.getType());
@@ -109,11 +110,11 @@ public class CategoryServiceImpl implements CategoryService {
     private void validateCategory(CategoryCreateRequestDto categoryRequest, Long userId) {
         validateNameUniqueness(userId, categoryRequest.name(), null);
         validateType(categoryRequest.type());
-        validateIconPathExists(categoryRequest.iconPath());
+        validateIconExists(categoryRequest.iconPath());
     }
 
-    private void validateNameUniqueness(Long userId, String name, Long categoryId) {
-        if (categoryDao.existsByNameAndUser(name, userId, categoryId)) {
+    private void validateNameUniqueness(Long userId, String name, Long existingCategoryId) {
+        if (categoryDao.existsByNameAndUser(name, userId, existingCategoryId)) {
             throw new ValidationException("You already have category with name: " + name, ErrorCode.NAME_ALREADY_USED);
         }
     }
@@ -127,7 +128,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    private void validateIconPathExists(String path) {
+    private void validateIconExists(String path) {
         if (!storageService.exists(path)) {
             log.warn("Resource with path: {} does not exists in storage", path);
             throw new NotFoundException("This image does not exist", ErrorCode.NOT_FOUND);
@@ -139,6 +140,8 @@ public class CategoryServiceImpl implements CategoryService {
             throw new ValidationException("This category is default and cannot be modify", ErrorCode.MODIFY_DEFAULT_CATEGORY);
         }
 
-        //TODO check is category is assign to transaction/recurring
+        ///TODO check is category is assign to transaction/recurring
+
+        ///TODO The user should be able to assign a different category to a transaction that contains a category to be deleted.
     }
 }

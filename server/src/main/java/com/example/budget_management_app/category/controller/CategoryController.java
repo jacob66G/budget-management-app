@@ -44,7 +44,7 @@ public class CategoryController {
             @RequestBody CategoryCreateRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        CategoryResponseDto response = categoryService.addCategory(userDetails.getId(), requestDto);
+        CategoryResponseDto response = categoryService.createCategory(userDetails.getId(), requestDto);
         return ResponseEntity.created(UriComponentsBuilder.fromPath(ApiPaths.BASE_API)
                         .pathSegment(ApiPaths.CATEGORIES)
                         .pathSegment(String.valueOf(response.id()))

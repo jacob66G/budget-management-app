@@ -77,7 +77,7 @@ public class AuthController {
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<?> verifyUser(@RequestParam String email, @RequestParam String code) {
+    public ResponseEntity<Void> verifyUser(@RequestParam String email, @RequestParam String code) {
         authService.verifyUser(email, code);
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(UriComponentsBuilder.fromPath(ApiPaths.BASE_API)

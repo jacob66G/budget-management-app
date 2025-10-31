@@ -40,9 +40,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
-    @Column(name = "email_last_changed", nullable = false)
-    private Instant emailLastChanged;
-
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -79,8 +76,9 @@ public class User {
         category.setUser(this);
     }
 
-    public void removeCategory(Category category) {
-        categories.remove(category);
-        category.setUser(null);
+    public void addAccount(Account account) {
+        accounts.add(account);
+        account.setUser(this);
     }
+
 }

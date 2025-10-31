@@ -13,7 +13,7 @@ public interface CategoryService {
 
     CategoryResponseDto getCategory(Long userId, Long categoryId);
 
-    CategoryResponseDto addCategory(Long userId, CategoryCreateRequestDto dto);
+    CategoryResponseDto createCategory(Long userId, CategoryCreateRequestDto dto);
 
     CategoryResponseDto updateCategory(Long userId, Long categoryId, CategoryUpdateRequestDto dto);
 

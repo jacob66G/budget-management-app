@@ -11,8 +11,8 @@ import com.example.budget_management_app.security.service.JwtService;
 import com.example.budget_management_app.session.dao.UserSessionDao;
 import com.example.budget_management_app.session.domain.UserSession;
 import com.example.budget_management_app.session.dto.RefreshTokenResult;
-import com.example.budget_management_app.user.dao.UserDao;
 import com.example.budget_management_app.user.domain.User;
+import com.example.budget_management_app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,10 +37,11 @@ public class UserSessionServiceImpl implements UserSessionService {
     @Value("${config.session.max-sessions}")
     private long maxSessions;
     private final UserSessionDao userSessionDao;
-    private final UserDao userDao;
+    private final UserService userService;
     private final JwtService jwtService;
     private final CacheService cacheService;
 
+    @Transactional
     @Override
     public RefreshTokenResult refreshToken(String token, String userAgent) {
         UserSession userSession = validateRefreshToken(token);
@@ -58,7 +59,7 @@ public class UserSessionServiceImpl implements UserSessionService {
     @Transactional
     @Override
     public UserSession createUserSession(Long userId, String userAgent) {
-        User user = userDao.findById(userId)
+        User user = userService.findUserById(userId)
                 .orElseThrow(() -> new NotFoundException(User.class.getSimpleName(), userId, ErrorCode.USER_NOT_FOUND));
 
         enforceMaxSessions(user);
@@ -117,7 +118,6 @@ public class UserSessionServiceImpl implements UserSessionService {
                 .orElseThrow(() -> new UserSessionException("Invalid token", ErrorCode.INVALID_TOKEN));
     }
 
-    @Transactional
     public String rotateRefreshToken(UserSession session, String userAgent, String oldToken) {
         String newToken = generateTokenValue();
         session.setUserAgent(userAgent);

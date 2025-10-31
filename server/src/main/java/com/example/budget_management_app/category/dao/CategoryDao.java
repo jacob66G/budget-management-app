@@ -30,13 +30,13 @@ public class CategoryDao {
         return result.stream().findFirst();
     }
 
-    public boolean existsByNameAndUser(String name, Long userId, Long categoryId) {
-        String query = "SELECT COUNT(c) FROM Category c WHERE c.user.id = :userId AND LOWER(c.name) = LOWER(:name) AND (:categoryId IS NULL OR c.id != :categoryId)";
+    public boolean existsByNameAndUser(String name, Long userId, Long existingCategoryId) {
+        String query = "SELECT COUNT(c) FROM Category c WHERE c.user.id = :userId AND LOWER(c.name) = LOWER(:name) AND (:existingCategoryId IS NULL OR c.id != :existingCategoryId)";
 
         Long count = em.createQuery(query, Long.class)
                 .setParameter("userId", userId)
                 .setParameter("name", name)
-                .setParameter("categoryId", categoryId)
+                .setParameter("existingCategoryId", existingCategoryId)
                 .getSingleResult();
 
         return count > 0;
