@@ -4,6 +4,7 @@ import com.example.budget_management_app.account.dao.AccountDao;
 import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.dao.CategoryDao;
 import com.example.budget_management_app.category.domain.Category;
+import com.example.budget_management_app.common.exception.CategoryChangeNotAllowedException;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.transaction.dao.TransactionDao;
@@ -30,7 +31,7 @@ public class TransactionServiceImpl implements TransactionService{
      * @return TransactionPage object
      */
     @Override
-    public PagedResponse<TransactionView> getTransactionViews(int page,
+    public PagedResponse<TransactionView> getViews(int page,
                                                               int limit,
                                                               TransactionTypeFilter type,
                                                               TransactionModeFilter mode,
@@ -50,7 +51,7 @@ public class TransactionServiceImpl implements TransactionService{
             throw new NotFoundException(Category.class.getSimpleName(), categories, ErrorCode.NOT_FOUND);
         }
 
-        List<Tuple> transactionTuples = transactionDao.getTransactions(
+        List<Tuple> transactionTuples = transactionDao.getTuples(
                 page,
                 limit,
                 type,
@@ -62,7 +63,7 @@ public class TransactionServiceImpl implements TransactionService{
                 sortedBy,
                 sortedType);
 
-        long transactionCount = transactionDao.getTransactionsCount(
+        long transactionCount = transactionDao.getCount(
                 type,
                 mode,
                 accounts,
@@ -75,33 +76,37 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional
     @Override
-    public TransactionResponse createTransaction(TransactionCreateRequest transactionCreate, long userId) {
+    public TransactionResponse create(TransactionCreateRequest createReq, long userId) {
 
         // checking if category exists and belongs to the logged user
-        long categoryId = transactionCreate.categoryId();
+        long categoryId = createReq.categoryId();
         Category category = categoryDao.findByIdAndUser(categoryId, userId)
                 .orElseThrow( () -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
 
         // checking if account exists and belongs to the logged user
-        long accountId = transactionCreate.accountId();
+        long accountId = createReq.accountId();
         Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow( () -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
 
-        Transaction transaction = Mapper.fromDto(transactionCreate);
+        Transaction transaction = Mapper.fromDto(createReq);
         transaction.setCategory(category);
         transaction.setAccount(account);
 
-        Transaction savedTransaction = transactionDao.saveTransaction(transaction);
+        Transaction savedTransaction = transactionDao.save(transaction);
 
         return new TransactionResponse(savedTransaction.getId(), savedTransaction.getTransactionDate());
     }
 
     @Transactional
     @Override
-    public TransactionCategoryUpdateResponse updateTransactionCategory(long id, long userId, TransactionCategoryUpdateRequest updateReq) {
+    public TransactionCategoryUpdateResponse changeCategory(long id, long userId, TransactionCategoryUpdateRequest updateReq) {
 
         Transaction transaction = transactionDao.findByIdAndUserIdAndCategoryId(id, userId, updateReq.currentTransactionCategoryId())
                 .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
+
+        if (transaction.getRecurringTransaction() != null) {
+            throw new CategoryChangeNotAllowedException(transaction.getId(), ErrorCode.TRANSACTION_IS_RECURRING);
+        }
 
         long newCategoryId = updateReq.newTransactionCategoryId();
         Category category = categoryDao.findByIdAndUser(newCategoryId, userId)
@@ -115,7 +120,7 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional
     @Override
-    public void updateTransaction(long id, long userId, TransactionUpdateRequest req) {
+    public void update(long id, long userId, TransactionUpdateRequest req) {
 
         Transaction transaction = transactionDao.findByIdAndUserId(id, userId)
                 .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
@@ -127,13 +132,13 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional
     @Override
-    public void deleteTransaction(long id, long userId) {
+    public void delete(long id, long userId) {
 
         Transaction transaction = transactionDao.findByIdAndUserId(id, userId)
                 .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
         transaction.removeCategory();
         transaction.removeAccount();
-        transactionDao.deleteTransaction(transaction);
+        transactionDao.delete(transaction);
     }
 }

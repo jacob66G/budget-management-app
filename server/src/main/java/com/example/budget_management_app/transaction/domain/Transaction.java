@@ -50,7 +50,7 @@ public class Transaction {
     private Account account;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recurring_transaction_id", updatable = false)
+    @JoinColumn(name = "recurring_transaction_id")
     private RecurringTransaction recurringTransaction;
 
     public Transaction(BigDecimal amount, String title, TransactionType type, String description, LocalDateTime transactionDate) {
@@ -87,5 +87,18 @@ public class Transaction {
             this.account.getTransactions().remove(this);
             this.account = null;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "id=" + id +
+                ", amount=" + amount +
+                ", title='" + title + '\'' +
+                ", type=" + type +
+                ", description='" + description + '\'' +
+                ", transactionDate=" + transactionDate +
+                ", photoPath='" + photoPath + '\'' +
+                '}';
     }
 }

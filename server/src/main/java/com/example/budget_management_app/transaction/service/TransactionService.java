@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface TransactionService {
 
-    PagedResponse<TransactionView> getTransactionViews(int page,
+    PagedResponse<TransactionView> getViews(int page,
                                                        int limit,
                                                        TransactionTypeFilter type,
                                                        TransactionModeFilter mode,
@@ -20,11 +20,11 @@ public interface TransactionService {
                                                        SortDirection sortedType,
                                                        long id);
 
-    TransactionResponse createTransaction(TransactionCreateRequest transactionCreate, long userId);
+    TransactionResponse create(TransactionCreateRequest transactionCreate, long userId);
 
-    TransactionCategoryUpdateResponse updateTransactionCategory(long id, long userId, TransactionCategoryUpdateRequest updateReq);
+    TransactionCategoryUpdateResponse changeCategory(long id, long userId, TransactionCategoryUpdateRequest updateReq);
 
-    void updateTransaction(long Id, long userId, TransactionUpdateRequest req);
+    void update(long Id, long userId, TransactionUpdateRequest req);
 
-    void deleteTransaction(long Id, long userId);
+    void delete(long Id, long userId);
 }

@@ -67,7 +67,6 @@ aws:
   s3:
     bucket-name: ${S3_BUCKET_NAME:bucket}
 
-
 logging:
   level:
     org.hibernate.SQL: DEBUG

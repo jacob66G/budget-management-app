@@ -28,7 +28,7 @@ public class TransactionDaoImpl implements TransactionDao{
      */
     @Transactional(readOnly = true)
     @Override
-    public List<Tuple> getTransactions(int page,
+    public List<Tuple> getTuples(int page,
                                        int limit,
                                        TransactionTypeFilter type,
                                        TransactionModeFilter mode,
@@ -113,7 +113,7 @@ public class TransactionDaoImpl implements TransactionDao{
      */
     @Transactional(readOnly = true)
     @Override
-    public Long getTransactionsCount(TransactionTypeFilter type,
+    public Long getCount(TransactionTypeFilter type,
                                      TransactionModeFilter mode,
                                      List<Long> accounts,
                                      List<Long> categories,
@@ -148,7 +148,7 @@ public class TransactionDaoImpl implements TransactionDao{
 
     @Transactional
     @Override
-    public Transaction saveTransaction(Transaction transaction) {
+    public Transaction save(Transaction transaction) {
         em.persist(transaction);
         em.flush();
         return transaction;
@@ -156,7 +156,7 @@ public class TransactionDaoImpl implements TransactionDao{
 
     @Transactional
     @Override
-    public void deleteTransaction(Transaction transaction) {
+    public void delete(Transaction transaction) {
         em.remove(transaction);
     }
 

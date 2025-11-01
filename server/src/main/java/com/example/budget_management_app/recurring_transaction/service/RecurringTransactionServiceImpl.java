@@ -27,7 +27,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Set;
 
 @RequiredArgsConstructor
 @Service
@@ -88,7 +87,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
         LocalDate startDate = createReq.startDate();
         LocalDate nextOccurrence;
         if (startDate.isEqual(LocalDate.now()) && LocalTime.now().isAfter(LocalTime.NOON)) {
-            nextOccurrence = calculateNextOccurrence(interval, recurringValue);
+            nextOccurrence = calculateNextOccurrence(interval, recurringValue, LocalDate.now());
             RecurringTransaction recurringTransaction = new RecurringTransaction(
                     createReq.amount(), createReq.title(), createReq.type(), createReq.description(), startDate, createReq.endDate(),
                     interval, recurringValue, nextOccurrence, true, LocalDateTime.now()
@@ -99,7 +98,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
             transaction.setAccount(account);
             transaction.setCategory(category);
 
-            recurringTransaction.setTransactions(Set.of(transaction));
+            recurringTransaction.addTransaction(transaction);
             recurringTransaction.setAccount(account);
             recurringTransaction.setCategory(category);
             RecurringTransaction createdRecurringTransaction = recurringTransactionDao.create(recurringTransaction);
@@ -159,29 +158,19 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
         if (isActive) {
 
             if (recurringTransaction.getNextOccurrence().isEqual(LocalDate.now()) && LocalTime.now().isAfter(LocalTime.NOON)) {
-                LocalDate nextOccurrence = this.calculateNextOccurrence(recurringTransaction.getRecurringInterval(), recurringTransaction.getRecurringValue());
+                LocalDate nextOccurrence = this.calculateNextOccurrence(recurringTransaction.getRecurringInterval(), recurringTransaction.getRecurringValue(), LocalDate.now());
                 recurringTransaction.setNextOccurrence(nextOccurrence);
-                recurringTransaction.addTransaction(
-                        new Transaction(recurringTransaction.getAmount(), recurringTransaction.getTitle(), recurringTransaction.getType(),
-                                recurringTransaction.getDescription(), LocalDateTime.now())
-                );
-            }
-
-            if (recurringTransaction.getNextOccurrence().isBefore(LocalDate.now())) {
-
+            } else if (recurringTransaction.getNextOccurrence().isBefore(LocalDate.now())) {
                 LocalDate incrementDate = recurringTransaction.getNextOccurrence();
                 while(!(incrementDate.isAfter(LocalDate.now()) || incrementDate.isEqual(LocalDate.now()))) {
-                    incrementDate = this.calculateNextOccurrence(recurringTransaction.getRecurringInterval(), recurringTransaction.getRecurringValue());
+                    incrementDate = this.calculateNextOccurrence(recurringTransaction.getRecurringInterval(), recurringTransaction.getRecurringValue(), incrementDate);
                 }
-                if (incrementDate.isEqual(LocalDate.now()) && LocalTime.now().isAfter(LocalTime.NOON)) {
-                    LocalDate nextOccurrence = this.calculateNextOccurrence(recurringTransaction.getRecurringInterval(), recurringTransaction.getRecurringValue());
-                    recurringTransaction.setNextOccurrence(nextOccurrence);
-                    recurringTransaction.addTransaction(
-                            new Transaction(recurringTransaction.getAmount(), recurringTransaction.getTitle(), recurringTransaction.getType(),
-                                    recurringTransaction.getDescription(), LocalDateTime.now())
-                    );
-                } else if (incrementDate.isAfter(LocalDate.now())){
+
+                if (incrementDate.isAfter(LocalDate.now()) || (incrementDate.isEqual(LocalDate.now()) && LocalTime.now().isBefore(LocalTime.NOON))){
                     recurringTransaction.setNextOccurrence(incrementDate);
+                } else {
+                    LocalDate nextOccurrence = this.calculateNextOccurrence(recurringTransaction.getRecurringInterval(), recurringTransaction.getRecurringValue(), LocalDate.now());
+                    recurringTransaction.setNextOccurrence(nextOccurrence);
                 }
             }
         }
@@ -245,28 +234,30 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
         if (!recurringTransactionsToCreate.isEmpty()) {
             recurringTransactionsToCreate.forEach(
                     recTransaction -> {
-                        LocalDate nextOccurrence = this.calculateNextOccurrence(recTransaction.getRecurringInterval(), recTransaction.getRecurringValue());
+                        LocalDate nextOccurrence = this.calculateNextOccurrence(recTransaction.getRecurringInterval(), recTransaction.getRecurringValue(), LocalDate.now());
                         recTransaction.setNextOccurrence(nextOccurrence);
                         Transaction transaction = new Transaction(
                                 recTransaction.getAmount(), recTransaction.getTitle(), recTransaction.getType(),
                                 recTransaction.getDescription(), LocalDateTime.now()
                         );
+                        transaction.setAccount(recTransaction.getAccount());
+                        transaction.setCategory(recTransaction.getCategory());
                         recTransaction.addTransaction(transaction);
                     }
             );
         }
     }
 
-    private LocalDate calculateNextOccurrence(RecurringInterval interval, int recurringValue) {
+    private LocalDate calculateNextOccurrence(RecurringInterval interval, int recurringValue, LocalDate relativeDate) {
         LocalDate nextOccurrence;
         if (interval.equals(RecurringInterval.DAY)) {
-            nextOccurrence = LocalDate.now().plusDays(recurringValue);
+            nextOccurrence = relativeDate.plusDays(recurringValue);
         } else if (interval.equals(RecurringInterval.WEEK)) {
-            nextOccurrence = LocalDate.now().plusWeeks(recurringValue);
+            nextOccurrence = relativeDate.plusWeeks(recurringValue);
         } else if (interval.equals(RecurringInterval.MONTH)) {
-            nextOccurrence = LocalDate.now().plusMonths(recurringValue);
+            nextOccurrence = relativeDate.plusMonths(recurringValue);
         } else {
-            nextOccurrence = LocalDate.now().plusYears(recurringValue);
+            nextOccurrence = relativeDate.plusYears(recurringValue);
         }
         return nextOccurrence;
     }

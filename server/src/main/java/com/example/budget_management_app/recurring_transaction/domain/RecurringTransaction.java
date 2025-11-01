@@ -102,4 +102,22 @@ public class RecurringTransaction {
         transactions.add(transaction);
         transaction.setRecurringTransaction(this);
     }
+
+    @Override
+    public String toString() {
+        return "RecurringTransaction{" +
+                "id=" + id +
+                ", amount=" + amount +
+                ", title='" + title + '\'' +
+                ", type=" + type +
+                ", description='" + description + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", recurringInterval=" + recurringInterval +
+                ", recurringValue=" + recurringValue +
+                ", nextOccurrence=" + nextOccurrence +
+                ", isActive=" + isActive +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

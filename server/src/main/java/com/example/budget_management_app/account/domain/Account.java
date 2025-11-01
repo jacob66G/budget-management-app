@@ -7,11 +7,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
+@ToString(exclude = "transactions")
 @Entity
 @Getter
 @Setter
@@ -58,7 +60,7 @@ public class Account {
 
     private BigDecimal budget;
 
-    @Column(name = "alter_treshold")
+    @Column(name = "alert_threshold")
     private Double alertThreshold;
 
     @Column(name = "created_at", nullable = false)

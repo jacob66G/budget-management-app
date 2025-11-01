@@ -25,7 +25,7 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @GetMapping
-    public ResponseEntity<PagedResponse<TransactionView>> getTransactionsPage(
+    public ResponseEntity<PagedResponse<TransactionView>> getPage(
             @RequestParam(name = "page") int page,
             @RequestParam(name = "limit") int limit,
             @RequestParam(name = "type", defaultValue = "ALL") TransactionTypeFilter type,
@@ -39,7 +39,7 @@ public class TransactionController {
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
 
-        return ResponseEntity.ok(transactionService.getTransactionViews(
+        return ResponseEntity.ok(transactionService.getViews(
                 page,
                 limit,
                 type,
@@ -54,11 +54,11 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<TransactionResponse> createTransaction(
+    public ResponseEntity<TransactionResponse> create(
             @RequestBody TransactionCreateRequest transactionCreate,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        TransactionResponse response = transactionService.createTransaction(transactionCreate, userDetails.getId());
+        TransactionResponse response = transactionService.create(transactionCreate, userDetails.getId());
 
         URI location = URI.create("/api/v1/transactions/" + response.id());
 
@@ -68,13 +68,13 @@ public class TransactionController {
     }
 
     @PatchMapping("/{id}/category")
-    public ResponseEntity<TransactionCategoryUpdateResponse> updateTransactionCategory(
+    public ResponseEntity<TransactionCategoryUpdateResponse> changeCategory(
             @PathVariable long id,
             @RequestBody TransactionCategoryUpdateRequest updateReq,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        return ResponseEntity.ok(transactionService.updateTransactionCategory(
+        return ResponseEntity.ok(transactionService.changeCategory(
                 id,
                 userDetails.getId(),
                 updateReq
@@ -82,23 +82,23 @@ public class TransactionController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateTransaction(
+    public ResponseEntity<Void> update(
             @PathVariable long id,
             @RequestBody TransactionUpdateRequest updateReq,
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
 
-        transactionService.updateTransaction(id, userDetails.getId(), updateReq);
+        transactionService.update(id, userDetails.getId(), updateReq);
 
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTransaction(
+    public ResponseEntity<Void> delete(
             @PathVariable long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        transactionService.deleteTransaction(id, userDetails.getId());
+        transactionService.delete(id, userDetails.getId());
 
         return ResponseEntity.noContent().build();
     }

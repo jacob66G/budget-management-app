@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface TransactionDao {
 
-    List<Tuple> getTransactions(int page,
+    List<Tuple> getTuples(int page,
                                 int limit,
                                 TransactionTypeFilter type,
                                 TransactionModeFilter mode,
@@ -21,16 +21,16 @@ public interface TransactionDao {
                                 SortDirection sortedType
     );
 
-    Long getTransactionsCount(TransactionTypeFilter type,
+    Long getCount(TransactionTypeFilter type,
                               TransactionModeFilter mode,
                               List<Long> accounts,
                               List<Long> categories,
                               LocalDate since,
                               LocalDate to);
 
-    Transaction saveTransaction(Transaction transaction);
+    Transaction save(Transaction transaction);
 
-    void deleteTransaction(Transaction transaction);
+    void delete(Transaction transaction);
 
     Optional<Transaction> findByIdAndUserId(long id, long userId);
 
