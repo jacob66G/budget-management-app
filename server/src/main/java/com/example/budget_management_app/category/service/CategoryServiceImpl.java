@@ -11,6 +11,7 @@ import com.example.budget_management_app.category.mapper.CategoryMapper;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.ValidationException;
+import com.example.budget_management_app.common.service.S3PathValidator;
 import com.example.budget_management_app.common.service.StorageService;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.service.UserService;
@@ -31,6 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final UserService userService;
     private final StorageService storageService;
     private final CategoryMapper mapper;
+    private final S3PathValidator s3PathValidator;
 
     @Override
     public List<CategoryResponseDto> getCategories(Long userId, String type) {
@@ -67,17 +69,19 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryDao.findByIdAndUser(categoryId, userId)
                 .orElseThrow(() -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
 
+        validateCategoryCanBeModify(category);
+
         if (StringUtils.hasText(dto.name())) {
             validateNameUniqueness(userId, dto.name(), categoryId);
             category.setName(dto.name());
         }
         if (StringUtils.hasText(dto.type())) {
-            validateCategoryCanBeModify(category);
+            //TODO check if transactions with category has the same type
             validateType(dto.type());
             category.setType(CategoryType.valueOf(dto.type().toUpperCase()));
         }
         if (StringUtils.hasText(dto.iconPath())) {
-            validateIconExists(dto.iconPath());
+            validateIcon(dto.iconPath());
             category.setIconPath(dto.iconPath());
         }
 
@@ -91,6 +95,8 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
 
         validateCategoryCanBeModify(category);
+        ///TODO check is category is assign to transaction/recurring
+        ///TODO The user should be able to assign a different category to a transaction that contains a category to be deleted.
         categoryDao.delete(category);
     }
 
@@ -107,10 +113,16 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
+    @Transactional
+    @Override
+    public void deleteAllUserCategories(Long userId) {
+        categoryDao.deleteAll(userId);
+    }
+
     private void validateCategory(CategoryCreateRequestDto categoryRequest, Long userId) {
         validateNameUniqueness(userId, categoryRequest.name(), null);
         validateType(categoryRequest.type());
-        validateIconExists(categoryRequest.iconPath());
+        validateIcon(categoryRequest.iconPath());
     }
 
     private void validateNameUniqueness(Long userId, String name, Long existingCategoryId) {
@@ -128,7 +140,16 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    private void validateIconExists(String path) {
+    private void validateIcon(String path) {
+        if (path == null) {
+            return;
+        }
+
+        if (!s3PathValidator.isValidPathForCategory(path)) {
+            log.warn("Provided icon path: {} does not match required structure for categories.", path);
+            throw new ValidationException("Icon points to a wrong resource.", ErrorCode.INVALID_RESOURCE_PATH);
+        }
+
         if (!storageService.exists(path)) {
             log.warn("Resource with path: {} does not exists in storage", path);
             throw new NotFoundException("This image does not exist", ErrorCode.NOT_FOUND);
@@ -139,9 +160,5 @@ public class CategoryServiceImpl implements CategoryService {
         if (category.isDefault()) {
             throw new ValidationException("This category is default and cannot be modify", ErrorCode.MODIFY_DEFAULT_CATEGORY);
         }
-
-        ///TODO check is category is assign to transaction/recurring
-
-        ///TODO The user should be able to assign a different category to a transaction that contains a category to be deleted.
     }
 }

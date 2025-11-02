@@ -56,4 +56,9 @@ public class CategoryDao {
         em.remove(category);
     }
 
+    public void deleteAll(Long userId) {
+        em.createQuery("DELETE FROM Category c WHERE c.user.id = :userId")
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
 }

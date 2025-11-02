@@ -20,4 +20,6 @@ public interface CategoryService {
     void deleteCategory(Long userId, Long categoryId);
 
     void assignInitialCategories(User user);
+
+    void deleteAllUserCategories(Long userId);
 }

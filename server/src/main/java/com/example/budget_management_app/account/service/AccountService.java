@@ -17,10 +17,15 @@ public interface AccountService {
 
     void createDefaultAccount(User user);
 
-    void deleteAccount(Long userId, Long accountId);
-
     void activateAccount(Long userId, Long accountId);
 
     void deactivateAccount(Long userId, Long accountId);
 
+    void activateAllUserAccounts(Long id);
+
+    void deactivateAllUserAccounts(Long userId);
+
+    void deleteAccount(Long userId, Long accountId);
+
+    void deleteAllUserAccounts(Long userId);
 }

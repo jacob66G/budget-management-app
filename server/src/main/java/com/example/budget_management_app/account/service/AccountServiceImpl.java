@@ -1,12 +1,17 @@
 package com.example.budget_management_app.account.service;
 
 import com.example.budget_management_app.account.dao.AccountDao;
-import com.example.budget_management_app.account.domain.*;
+import com.example.budget_management_app.account.domain.Account;
+import com.example.budget_management_app.account.domain.AccountStatus;
+import com.example.budget_management_app.account.domain.AccountType;
+import com.example.budget_management_app.account.domain.BudgetType;
 import com.example.budget_management_app.account.dto.*;
 import com.example.budget_management_app.account.mapper.AccountMapper;
+import com.example.budget_management_app.common.enums.SupportedCurrency;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.ValidationException;
+import com.example.budget_management_app.common.service.S3PathValidator;
 import com.example.budget_management_app.common.service.StorageService;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.service.UserService;
@@ -29,6 +34,7 @@ public class AccountServiceImpl implements AccountService {
     private final AccountMapper mapper;
     private final UserService userService;
     private final StorageService storageService;
+    private final S3PathValidator s3PathValidator;
 
     @Override
     public AccountDetailsResponseDto getAccount(Long userId, Long accountId) {
@@ -68,6 +74,7 @@ public class AccountServiceImpl implements AccountService {
         user.addAccount(account);
         Account savedAccount = accountDao.save(account);
 
+        log.info("User: {} created new account: {}.", userId, savedAccount.getId());
         return mapper.toDetailsResponseDto(savedAccount);
     }
 
@@ -77,9 +84,7 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountDao.findByIdAndUser(userId, accountId)
                 .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
 
-        if (account.getAccountStatus().equals(AccountStatus.INACTIVE)) {
-            throw new ValidationException("You cannot modify an inactive account.", ErrorCode.INACTIVE_ACCOUNT);
-        }
+        validateAccountIsActive(account);
 
         if (StringUtils.hasText(dto.name()) && !account.getName().equals(dto.name())) {
             validateNameUniqueness(userId, dto.name(), accountId);
@@ -102,12 +107,13 @@ public class AccountServiceImpl implements AccountService {
             account.setIncludeInTotalBalance(dto.includeInTotalBalance());
         }
         if (dto.iconPath() != null) {
-            validateIconExists(dto.iconPath());
+            validateIcon(dto.iconPath());
             account.setIconPath(dto.iconPath());
         }
 
         changeBudget(account, dto);
 
+        log.info("User: {} modified account: {}.", userId, accountId);
         return mapper.toDetailsResponseDto(accountDao.update(account));
     }
 
@@ -126,12 +132,6 @@ public class AccountServiceImpl implements AccountService {
         user.addAccount(account);
     }
 
-
-    @Override
-    public void deleteAccount(Long userId, Long accountId) {
-        //TODO remove all transactions / recurring, transaction images assigned to account
-    }
-
     @Transactional
     @Override
     public void activateAccount(Long userId, Long accountId) {
@@ -142,10 +142,11 @@ public class AccountServiceImpl implements AccountService {
             return;
         }
 
-        account.setIncludeInTotalBalance(true);
         account.setAccountStatus(AccountStatus.ACTIVE);
-        // TODO activate recurring transactions
+        account.setIncludeInTotalBalance(true);
+        // TODO activate recurring transactions - recurringTransactionService.activateAllTransactions(accountId)
 
+        log.info("User: {} activated account: {}.", userId, accountId);
         accountDao.update(account);
     }
 
@@ -159,66 +160,45 @@ public class AccountServiceImpl implements AccountService {
             return;
         }
 
-        account.setIncludeInTotalBalance(false);
         account.setAccountStatus(AccountStatus.INACTIVE);
-        // TODO dectivate recurring transactions
+        account.setIncludeInTotalBalance(false);
+        // TODO deactivate recurring transactions - recurringTransactionService.deactivateAllTransactions(accountId)
+
+        log.info("User: {} deactivated account: {}.", userId, accountId);
         accountDao.update(account);
     }
 
-    private void validateAccount(Long userId, AccountCreateRequestDto dto) {
-        validateAccountType(dto.type());
-        validateNameUniqueness(userId, dto.name(), null);
-        validateCurrency(dto.currency());
-        validateBudgetType(dto.budgetType());
-
-        BudgetType budgetType = BudgetType.valueOf(dto.budgetType().toUpperCase());
-        validateBudgetAlertRelation(budgetType, dto.budget(), dto.alertThreshold());
-        validateIconExists(dto.iconPath());
+    @Transactional
+    @Override
+    public void activateAllUserAccounts(Long userId) {
+        accountDao.activateAll(userId);
+        log.info("Activated all accounts for user {}", userId);
     }
 
-    private void validateNameUniqueness(Long userId, String name, Long existingAccountId) {
-        if (accountDao.existsByNameAndUser(name, userId, existingAccountId)) {
-            throw new ValidationException("You already have account with name: " + name, ErrorCode.NAME_ALREADY_USED);
-        }
+    @Transactional
+    @Override
+    public void deactivateAllUserAccounts(Long userId) {
+        accountDao.deactivateAll(userId);
+        log.info("Deactivated all accounts for user {}", userId);
     }
 
-    private void validateAccountType(String type) {
-        try {
-            AccountType.valueOf(type.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            log.warn("Incorrect account type provided: {}", type);
-            throw new ValidationException("Incorrect type: " + type, ErrorCode.WRONG_TYPE);
-        }
+    @Transactional
+    @Override
+    public void deleteAccount(Long userId, Long accountId) {
+        Account account = accountDao.findByIdAndUser(userId, accountId)
+                .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
+
+        validateAccountCanBeDeleted(account);
+
+        //TODO transasctionService.deleteAllByAccount(accountId);
+        accountDao.delete(account);
+        log.info("User: {} has removed account: {}.", userId, accountId);
     }
 
-    private void validateCurrency(String currency) {
-        try {
-            SupportedCurrency.valueOf(currency.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            log.warn("Incorrect currency provided: {}", currency);
-            throw new ValidationException("Incorrect currency: " + currency, ErrorCode.WRONG_CURRENCY);
-        }
-    }
-
-    private void validateBudgetType(String budgetType) {
-        try {
-            BudgetType.valueOf(budgetType.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            log.warn("Incorrect budget type provided: {}", budgetType);
-            throw new ValidationException("Incorrect budget type: " + budgetType, ErrorCode.WRONG_BUDGET_TYPE);
-        }
-    }
-
-    private void validateCurrencyConsistency(Long accountId, String currency) {
-        //TODO check if exists transactions with other currency
-
-    }
-
-    private void validateIconExists(String path) {
-        if (!storageService.exists(path)) {
-            log.warn("Resource with path: {} does not exists in storage", path);
-            throw new NotFoundException("This image does not exist", ErrorCode.NOT_FOUND);
-        }
+    @Transactional
+    @Override
+    public void deleteAllUserAccounts(Long userId) {
+        accountDao.deleteAll(userId);
     }
 
     private void changeBudget(Account account, AccountUpdateRequestDto dto) {
@@ -278,6 +258,86 @@ public class AccountServiceImpl implements AccountService {
         if (account.getBudgetType() == BudgetType.NONE) {
             account.setBudget(null);
             account.setAlertThreshold(null);
+        }
+    }
+
+    private void validateAccount(Long userId, AccountCreateRequestDto dto) {
+        validateAccountType(dto.type());
+        validateNameUniqueness(userId, dto.name(), null);
+        validateCurrency(dto.currency());
+        validateBudgetType(dto.budgetType());
+
+        BudgetType budgetType = BudgetType.valueOf(dto.budgetType().toUpperCase());
+        validateBudgetAlertRelation(budgetType, dto.budget(), dto.alertThreshold());
+        validateIcon(dto.iconPath());
+    }
+
+    private void validateNameUniqueness(Long userId, String name, Long existingAccountId) {
+        if (accountDao.existsByNameAndUser(name, userId, existingAccountId)) {
+            throw new ValidationException("You already have account with name: " + name, ErrorCode.NAME_ALREADY_USED);
+        }
+    }
+
+    private void validateAccountType(String type) {
+        try {
+            AccountType.valueOf(type.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.warn("Incorrect account type provided: {}", type);
+            throw new ValidationException("Incorrect type: " + type, ErrorCode.WRONG_TYPE);
+        }
+    }
+
+    private void validateCurrency(String currency) {
+        try {
+            SupportedCurrency.valueOf(currency.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.warn("Incorrect currency provided: {}", currency);
+            throw new ValidationException("Incorrect currency: " + currency, ErrorCode.WRONG_CURRENCY);
+        }
+    }
+
+    private void validateBudgetType(String budgetType) {
+        try {
+            BudgetType.valueOf(budgetType.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.warn("Incorrect budget type provided: {}", budgetType);
+            throw new ValidationException("Incorrect budget type: " + budgetType, ErrorCode.WRONG_BUDGET_TYPE);
+        }
+    }
+
+    private void validateCurrencyConsistency(Long accountId, String currency) {
+        //TODO check if exists transactions with other currency
+
+    }
+
+    private void validateIcon(String path) {
+        if (path == null) {
+            return;
+        }
+
+        if (!s3PathValidator.isValidPathForAccount(path)) {
+            log.warn("Provided icon path: {} does not match required structure for accounts.", path);
+            throw new ValidationException("Icon path points to wrong resource.", ErrorCode.INVALID_RESOURCE_PATH);
+        }
+        if (!storageService.exists(path)) {
+            log.warn("Resource with path: {} does not exists in storage", path);
+            throw new NotFoundException("This image does not exist", ErrorCode.NOT_FOUND);
+        }
+    }
+
+    private void validateAccountIsActive(Account account) {
+        if (!account.getAccountStatus().equals(AccountStatus.ACTIVE)) {
+            throw new ValidationException("You cannot modify an inactive account.", ErrorCode.INACTIVE_ACCOUNT);
+        }
+    }
+
+    private void validateAccountCanBeDeleted(Account account) {
+        if (!account.getAccountStatus().equals(AccountStatus.INACTIVE)) {
+            throw new ValidationException("Incorrect account status: " + account.getAccountStatus().name(), ErrorCode.DELETE_ACTIVE_ACCOUNT);
+        }
+
+        if (account.isDefault()) {
+            throw new ValidationException("Cannot delete default account", ErrorCode.DELETE_DEFAULT_ACCOUNT);
         }
     }
 

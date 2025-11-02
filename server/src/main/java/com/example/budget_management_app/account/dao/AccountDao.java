@@ -1,7 +1,8 @@
 package com.example.budget_management_app.account.dao;
 
 import com.example.budget_management_app.account.domain.Account;
-import com.example.budget_management_app.account.dto.AccountSortableField;
+import com.example.budget_management_app.account.domain.AccountSortableField;
+import com.example.budget_management_app.account.domain.AccountStatus;
 import com.example.budget_management_app.account.dto.SearchCriteria;
 import com.example.budget_management_app.user.domain.User;
 import jakarta.persistence.EntityManager;
@@ -55,39 +56,39 @@ public class AccountDao {
             predicates.add(cb.equal(root.get("accountType"), criteria.type().toUpperCase()));
         }
         if (StringUtils.hasText(criteria.name())) {
-            predicates.add(cb.like(cb.lower(root.get("name")), "%"+ criteria.name().toLowerCase()+"%"));
+            predicates.add(cb.like(cb.lower(root.get("name")), "%" + criteria.name().toLowerCase() + "%"));
         }
         if (criteria.status() != null && !criteria.status().isEmpty()) {
             predicates.add(root.get("accountStatus").in(criteria.status().stream().map(String::toUpperCase).toList()));
         }
         if (criteria.currencies() != null && !criteria.currencies().isEmpty()) {
-          predicates.add(root.get("currency").in(criteria.currencies().stream().map(String::toUpperCase).toList()));
+            predicates.add(root.get("currency").in(criteria.currencies().stream().map(String::toUpperCase).toList()));
         }
         if (criteria.budgetTypes() != null && !criteria.budgetTypes().isEmpty()) {
             predicates.add(root.get("budgetType").in(criteria.budgetTypes().stream().map(String::toUpperCase).toList()));
         }
-        if (criteria.minBalance() !=  null) {
+        if (criteria.minBalance() != null) {
             predicates.add(cb.greaterThanOrEqualTo(root.get("balance"), criteria.minBalance()));
         }
-        if (criteria.maxBalance() !=  null) {
+        if (criteria.maxBalance() != null) {
             predicates.add(cb.lessThanOrEqualTo(root.get("balance"), criteria.maxBalance()));
         }
-        if (criteria.minTotalIncome() !=  null) {
+        if (criteria.minTotalIncome() != null) {
             predicates.add(cb.greaterThanOrEqualTo(root.get("totalIncome"), criteria.minTotalIncome()));
         }
-        if (criteria.maxTotalIncome() !=  null) {
+        if (criteria.maxTotalIncome() != null) {
             predicates.add(cb.lessThanOrEqualTo(root.get("totalIncome"), criteria.maxTotalIncome()));
         }
-        if (criteria.minTotalExpense() !=  null) {
+        if (criteria.minTotalExpense() != null) {
             predicates.add(cb.greaterThanOrEqualTo(root.get("totalExpense"), criteria.minTotalExpense()));
         }
-        if (criteria.maxTotalExpense() !=  null) {
+        if (criteria.maxTotalExpense() != null) {
             predicates.add(cb.lessThanOrEqualTo(root.get("totalExpense"), criteria.maxTotalExpense()));
         }
-        if (criteria.minBudget() !=  null) {
+        if (criteria.minBudget() != null) {
             predicates.add(cb.greaterThanOrEqualTo(root.get("budget"), criteria.minBudget()));
         }
-        if (criteria.maxBudget() !=  null) {
+        if (criteria.maxBudget() != null) {
             predicates.add(cb.lessThanOrEqualTo(root.get("budget"), criteria.maxBudget()));
         }
         if (criteria.includedInTotalBalance() != null) {
@@ -141,5 +142,33 @@ public class AccountDao {
                 .getSingleResult();
 
         return count > 0;
+    }
+
+    public void activateAll(Long userId) {
+        em.createQuery(
+                        "UPDATE Account a SET a.accountStatus = :status, a.includeInTotalBalance = true " +
+                                "WHERE a.user.id = :userId AND a.accountStatus != :status")
+                .setParameter("status", AccountStatus.ACTIVE)
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
+
+    public void deactivateAll(Long userId) {
+        em.createQuery(
+                        "UPDATE Account a SET a.accountStatus = :status, a.includeInTotalBalance = false " +
+                                "WHERE a.user.id = :userId AND a.accountStatus != :status")
+                .setParameter("status", AccountStatus.INACTIVE)
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
+
+    public void delete(Account account) {
+        em.remove(account);
+    }
+
+    public void deleteAll(Long userId) {
+        em.createQuery("DELETE FROM Account a WHERE a.user.id = :userId")
+                .setParameter("userId", userId)
+                .executeUpdate();
     }
 }
