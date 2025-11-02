@@ -1,10 +1,12 @@
 package com.example.budget_management_app.user.controller;
 
-import com.example.budget_management_app.user.dto.TfaQRCode;
-import com.example.budget_management_app.user.dto.TfaVerifyRequest;
+import com.example.budget_management_app.common.dto.ResponseMessageDto;
+import com.example.budget_management_app.security.service.CustomUserDetails;
+import com.example.budget_management_app.user.dto.*;
 import com.example.budget_management_app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -16,20 +18,55 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/2fa/setup/{id}")
-    public ResponseEntity<TfaQRCode> tfaSetup(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.tfaSetup(id));
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDto> getUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(userService.getUser(userDetails.getId()));
     }
 
-    @PostMapping("/2fa/verify/{id}")
-    public ResponseEntity<Void> verifyTfaSetup(@PathVariable Long id, @Valid @RequestBody TfaVerifyRequest request) {
-        userService.verifyTfaSetup(id, request.code());
+    @PatchMapping("/me")
+    public ResponseEntity<UserResponseDto> updateUser(
+            @Valid @RequestBody UpdateUserRequestDto requestDto,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        UserResponseDto response = userService.updateUser(userDetails.getId(), requestDto);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/me/change-password")
+    public ResponseEntity<Void> changePassword(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody ChangePasswordRequestDto requestDto
+    ) {
+        userService.changePassword(userDetails.getId(), requestDto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/me/close-account")
+    public ResponseEntity<ResponseMessageDto> closeUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        ResponseMessageDto response = userService.closeUser(userDetails.getId());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/me/2fa/setup")
+    public ResponseEntity<TfaQRCode> tfaSetup(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(userService.tfaSetup(userDetails.getId()));
+    }
+
+    @PostMapping("/me/2fa/verify")
+    public ResponseEntity<Void> verifyTfaSetup(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody TfaVerifyRequest request
+    ) {
+        userService.verifyTfaSetup(userDetails.getId(), request.code());
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/2fa/disable/{id}")
-    public ResponseEntity<Void> disableTfa(@PathVariable Long id, @Valid @RequestBody TfaVerifyRequest request) {
-        userService.tfaDisable(id, request.code());
+    @PostMapping("/me/2fa/disable")
+    public ResponseEntity<Void> disableTfa(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody TfaVerifyRequest request
+    ) {
+        userService.tfaDisable(userDetails.getId(), request.code());
         return ResponseEntity.ok().build();
     }
 }

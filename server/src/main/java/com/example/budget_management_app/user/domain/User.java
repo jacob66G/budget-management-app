@@ -52,13 +52,16 @@ public class User {
     @Column(name = "temp_two_factor_secret")
     private String tempSecret;
 
+    @Column(name = "request_close_at")
+    private Instant requestCloseAt;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserSession> sessions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Category> categories = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Account> accounts = new ArrayList<>();
 
     public void addSession(UserSession session) {

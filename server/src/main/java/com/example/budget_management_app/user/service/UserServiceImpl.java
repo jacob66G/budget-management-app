@@ -3,23 +3,27 @@ package com.example.budget_management_app.user.service;
 import com.example.budget_management_app.account.service.AccountService;
 import com.example.budget_management_app.auth.dto.RegistrationRequestDto;
 import com.example.budget_management_app.category.service.CategoryService;
-import com.example.budget_management_app.common.exception.ErrorCode;
-import com.example.budget_management_app.common.exception.NotFoundException;
-import com.example.budget_management_app.common.exception.TfaException;
-import com.example.budget_management_app.common.exception.ValidationException;
+import com.example.budget_management_app.common.dto.ResponseMessageDto;
+import com.example.budget_management_app.common.exception.*;
 import com.example.budget_management_app.security.service.TwoFactorAuthenticationService;
 import com.example.budget_management_app.user.dao.UserDao;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.domain.UserStatus;
+import com.example.budget_management_app.user.dto.ChangePasswordRequestDto;
 import com.example.budget_management_app.user.dto.TfaQRCode;
+import com.example.budget_management_app.user.dto.UpdateUserRequestDto;
+import com.example.budget_management_app.user.dto.UserResponseDto;
+import com.example.budget_management_app.user.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -31,25 +35,36 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder encoder;
     private final CategoryService categoryService;
     private final AccountService accountService;
+    private final UserMapper mapper;
 
     public UserServiceImpl(
             UserDao userDao,
             TwoFactorAuthenticationService tfaService,
             PasswordEncoder encoder,
             @Lazy CategoryService categoryService,
-            @Lazy AccountService accountService
+            @Lazy AccountService accountService,
+            UserMapper mapper
     ) {
         this.userDao = userDao;
         this.tfaService = tfaService;
         this.encoder = encoder;
         this.categoryService = categoryService;
         this.accountService = accountService;
+        this.mapper = mapper;
+    }
+
+    @Override
+    public UserResponseDto getUser(Long id) {
+        User user = userDao.findById(id)
+                .orElseThrow(() -> new NotFoundException("User with id: " + id + " not found", ErrorCode.NOT_FOUND));
+
+        return mapper.toUserResponseDto(user);
     }
 
     @Override
     public User getUserById(Long id) {
         return userDao.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("User with id: " + id + " not found"));
+                .orElseThrow(() -> new NotFoundException("User with id: " + id + " not found", ErrorCode.NOT_FOUND));
     }
 
     @Override
@@ -82,6 +97,24 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
+    public UserResponseDto updateUser(Long userId, UpdateUserRequestDto dto) {
+        User user = getUserById(userId);
+
+        validateUserIsActive(user);
+
+        if (StringUtils.hasText(dto.name())) {
+            user.setName(dto.name());
+        }
+        if (StringUtils.hasText(dto.surname())) {
+            user.setSurname(dto.surname());
+        }
+
+        log.info("The user: {} has modified their data", userId);
+        return mapper.toUserResponseDto(userDao.update(user));
+    }
+
+    @Transactional
+    @Override
     public void activateUser(String email) {
         User user = userDao.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(
@@ -92,13 +125,98 @@ public class UserServiceImpl implements UserService {
                 ));
 
         if (user.getStatus() == UserStatus.ACTIVE) {
-            log.info("User {} is already active", email);
             return;
         }
 
+        accountService.activateAllUserAccounts(user.getId());
+        //TODO recurringTransactionService.activateAllUserRecurringTransactions(userId);
+
         user.setStatus(UserStatus.ACTIVE);
-        userDao.save(user);
-        log.info("User {} has been activated", email);
+        userDao.update(user);
+        log.info("The user {} has been activated", email);
+    }
+
+    @Transactional
+    @Override
+    public ResponseMessageDto closeUser(Long userId) {
+        User user = getUserById(userId);
+
+        validateUserIsActive(user);
+
+        accountService.deactivateAllUserAccounts(userId);
+        //TODO recurringTransactionService.deactivateAllUserRecurringTransactions(userId);
+
+        user.setRequestCloseAt(Instant.now());
+        user.setStatus(UserStatus.PENDING_DELETION);
+        userDao.update(user);
+
+        log.info("The user: {} has closed the account", userId);
+        return new ResponseMessageDto(
+                "Your account will be closed within 30 days. " +
+                        "If you change your mind and want to stop the process of deleting your account, " +
+                        "simply log in to your account before the 30 days are up."
+        );
+    }
+
+    @Transactional
+    @Override
+    public void deleteUsersPendingDeletion() {
+        Instant cutoffDate = Instant.now().minus(30, ChronoUnit.DAYS);
+        List<User> usersToDelete = userDao.findUsersForDeletion(UserStatus.PENDING_DELETION, cutoffDate);
+
+        if (usersToDelete.isEmpty()) {
+            log.info("No users found to delete");
+            return;
+        }
+
+        log.info("Found {} users to permanent delete.", usersToDelete.size());
+
+        for (User user : usersToDelete) {
+            try {
+                deleteUser(user.getId());
+                log.info("Successfully delete user: {}", user.getId());
+
+            } catch (Exception e) {
+                log.error("Failed to delete user: {}. Error: {}", user.getId(), e.getMessage());
+            }
+        }
+    }
+
+    @Transactional
+    @Override
+    public void changePassword(Long userId, ChangePasswordRequestDto dto) {
+        User user = getUserById(userId);
+
+        validateUserIsActive(user);
+
+        if (!encoder.matches(dto.oldPassword(), user.getPassword())) {
+            log.warn("The user: {} provided incorrect old passwords", userId);
+            throw new ValidationException("Incorrect old password", ErrorCode.INVALID_OLD_PASSWORD);
+        }
+
+        if (!dto.newPassword().equals(dto.confirmedNewPassword())) {
+            log.warn("The user: {} provided different passwords", userId);
+            throw new ValidationException("The provided passwords are different", ErrorCode.PASSWORDS_NOT_MATCH);
+        }
+
+        user.setPassword(encoder.encode(dto.newPassword()));
+        userDao.update(user);
+        log.info("The user: {} has changed password", userId);
+    }
+
+    @Transactional
+    @Override
+    public void updateUserPassword(Long userId, String newPassword) {
+        User user = userDao.findById(userId)
+                .orElseThrow(() -> {
+                    log.error("Failed to find user by id {} during password reset, but token was valid.", userId);
+                    return new NotFoundException(User.class.getSimpleName(), "id", userId, ErrorCode.USER_NOT_FOUND);
+                });
+
+        user.setPassword(encoder.encode(newPassword));
+
+        userDao.update(user);
+        log.info("Password has been reset for user: {}", userId);
     }
 
     @Transactional
@@ -106,11 +224,13 @@ public class UserServiceImpl implements UserService {
     public TfaQRCode tfaSetup(Long userId) {
         User user = getUserById(userId);
 
+        validateUserIsActive(user);
+
         String secret = tfaService.generateSecret();
         user.setTempSecret(secret);
         userDao.update(user);
 
-        log.info("User: {}, setup tfa", userId);
+        log.info("The user: {}, setup tfa", userId);
         return new TfaQRCode(tfaService.generateQrCodeImageUri(secret));
     }
 
@@ -119,6 +239,7 @@ public class UserServiceImpl implements UserService {
     public void verifyTfaSetup(Long userId, String code) {
         User user = getUserById(userId);
 
+        validateUserIsActive(user);
         validateTfaCode(userId, user.getTempSecret(), code);
 
         user.setSecret(user.getTempSecret());
@@ -132,11 +253,39 @@ public class UserServiceImpl implements UserService {
     public void tfaDisable(Long userId, String code) {
         User user = getUserById(userId);
 
+        validateUserIsActive(user);
         validateTfaCode(userId, user.getSecret(), code);
 
         user.setSecret(null);
         user.setMfaEnabled(false);
         userDao.update(user);
+        log.info("The user: {}, turned off tfa", userId);
+    }
+
+    public void deleteUser(Long userId) {
+        User user = getUserById(userId);
+
+        if (!user.getStatus().equals(UserStatus.PENDING_DELETION)) {
+            log.error("Attempt to delete user {}, who is not awaiting deletion. Status: {}", userId, user.getStatus().name());
+            throw new ValidationException(
+                    "The user is not marked for deletion.",
+                    ErrorCode.USER_NOT_PENDING_DELETION
+            );
+        }
+
+        //TODO recurringTransactionService.deleteAllUserTransactions(userId);
+        //TODO transactionService.deleteAllUserTransactions(userId);
+        accountService.deleteAllUserAccounts(userId);
+        categoryService.deleteAllUserCategories(userId);
+
+        userDao.delete(user);
+        log.info("User with ID: {} has been successfully deleted.", userId);
+    }
+
+    private void validateUserIsActive(User user) {
+        if (!user.getStatus().equals(UserStatus.ACTIVE)) {
+            throw new UserStatusException("User must be active to perform this action", ErrorCode.USER_NOT_ACTIVE);
+        }
     }
 
     private void validateEmailUniqueness(String email) {
