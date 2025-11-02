@@ -12,7 +12,7 @@ import java.time.Instant;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "user_session")
+@Table(name = "user_sessions")
 public class UserSession {
 
     @Id

@@ -14,7 +14,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "account")
+@Table(name = "accounts")
 public class Account {
 
     @Id

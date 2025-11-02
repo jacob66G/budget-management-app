@@ -48,6 +48,57 @@ public class AccountDao {
         return query.getResultList();
     }
 
+    public Account save(Account account) {
+        em.persist(account);
+        em.flush();
+        return account;
+    }
+
+    public Account update(Account account) {
+        return em.merge(account);
+    }
+
+    public boolean existsByNameAndUser(String name, Long userId, Long existingAccountId) {
+        String query = "SELECT COUNT(a) FROM Account a WHERE a.user.id = :userId AND LOWER(a.name) = LOWER(:name) AND " +
+                "(:existingAccountId IS NULL OR a.id != :existingAccountId)";
+
+        Long count = em.createQuery(query, Long.class)
+                .setParameter("userId", userId)
+                .setParameter("name", name)
+                .setParameter("existingAccountId", existingAccountId)
+                .getSingleResult();
+
+        return count > 0;
+    }
+
+    public void activateAll(Long userId) {
+        em.createQuery(
+                        "UPDATE Account a SET a.accountStatus = :status, a.includeInTotalBalance = true " +
+                                "WHERE a.user.id = :userId AND a.accountStatus != :status")
+                .setParameter("status", AccountStatus.ACTIVE)
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
+
+    public void deactivateAll(Long userId) {
+        em.createQuery(
+                        "UPDATE Account a SET a.accountStatus = :status, a.includeInTotalBalance = false " +
+                                "WHERE a.user.id = :userId AND a.accountStatus != :status")
+                .setParameter("status", AccountStatus.INACTIVE)
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
+
+    public void delete(Account account) {
+        em.remove(account);
+    }
+
+    public void deleteAll(Long userId) {
+        em.createQuery("DELETE FROM Account a WHERE a.user.id = :userId")
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
+
     private List<Predicate> preparePredicates(Long userId, SearchCriteria criteria, CriteriaBuilder cb, Join<Account, User> userJoin, Root<Account> root) {
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(userJoin.get("id"), userId));
@@ -109,8 +160,8 @@ public class AccountDao {
             return root.get("createdAt");
         }
         try {
-            AccountSortableField field = AccountSortableField.valueOf(sortBy.toUpperCase());
-            return root.get(field.name());
+            AccountSortableField.valueOf(sortBy.toUpperCase());
+            return root.get(sortBy);
         } catch (IllegalArgumentException e) {
             return root.get("createdAt");
         }
@@ -119,56 +170,5 @@ public class AccountDao {
     private Order getSortOrder(String sortDirection, CriteriaBuilder cb, Path<?> sortField) {
         boolean asc = "ASC".equalsIgnoreCase(sortDirection);
         return asc ? cb.asc(sortField) : cb.desc(sortField);
-    }
-
-    public Account save(Account account) {
-        em.persist(account);
-        em.flush();
-        return account;
-    }
-
-    public Account update(Account account) {
-        return em.merge(account);
-    }
-
-    public boolean existsByNameAndUser(String name, Long userId, Long existingAccountId) {
-        String query = "SELECT COUNT(a) FROM Account a WHERE a.user.id = :userId AND LOWER(a.name) = LOWER(:name) AND " +
-                "(:existingAccountId IS NULL OR a.id != :existingAccountId)";
-
-        Long count = em.createQuery(query, Long.class)
-                .setParameter("userId", userId)
-                .setParameter("name", name)
-                .setParameter("existingAccountId", existingAccountId)
-                .getSingleResult();
-
-        return count > 0;
-    }
-
-    public void activateAll(Long userId) {
-        em.createQuery(
-                        "UPDATE Account a SET a.accountStatus = :status, a.includeInTotalBalance = true " +
-                                "WHERE a.user.id = :userId AND a.accountStatus != :status")
-                .setParameter("status", AccountStatus.ACTIVE)
-                .setParameter("userId", userId)
-                .executeUpdate();
-    }
-
-    public void deactivateAll(Long userId) {
-        em.createQuery(
-                        "UPDATE Account a SET a.accountStatus = :status, a.includeInTotalBalance = false " +
-                                "WHERE a.user.id = :userId AND a.accountStatus != :status")
-                .setParameter("status", AccountStatus.INACTIVE)
-                .setParameter("userId", userId)
-                .executeUpdate();
-    }
-
-    public void delete(Account account) {
-        em.remove(account);
-    }
-
-    public void deleteAll(Long userId) {
-        em.createQuery("DELETE FROM Account a WHERE a.user.id = :userId")
-                .setParameter("userId", userId)
-                .executeUpdate();
     }
 }
