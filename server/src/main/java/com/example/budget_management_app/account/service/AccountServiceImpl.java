@@ -263,13 +263,13 @@ public class AccountServiceImpl implements AccountService {
 
     private void validateAccount(Long userId, AccountCreateRequestDto dto) {
         validateAccountType(dto.type());
-        validateNameUniqueness(userId, dto.name(), null);
         validateCurrency(dto.currency());
         validateBudgetType(dto.budgetType());
 
         BudgetType budgetType = BudgetType.valueOf(dto.budgetType().toUpperCase());
         validateBudgetAlertRelation(budgetType, dto.budget(), dto.alertThreshold());
         validateIcon(dto.iconPath());
+        validateNameUniqueness(userId, dto.name(), null);
     }
 
     private void validateNameUniqueness(Long userId, String name, Long existingAccountId) {
@@ -332,12 +332,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private void validateAccountCanBeDeleted(Account account) {
-        if (!account.getAccountStatus().equals(AccountStatus.INACTIVE)) {
-            throw new ValidationException("Incorrect account status: " + account.getAccountStatus().name(), ErrorCode.DELETE_ACTIVE_ACCOUNT);
-        }
-
         if (account.isDefault()) {
             throw new ValidationException("Cannot delete default account", ErrorCode.DELETE_DEFAULT_ACCOUNT);
+        }
+
+        if (!account.getAccountStatus().equals(AccountStatus.INACTIVE)) {
+            throw new ValidationException("Incorrect account status: " + account.getAccountStatus().name(), ErrorCode.DELETE_ACTIVE_ACCOUNT);
         }
     }
 
