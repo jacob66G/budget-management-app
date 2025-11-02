@@ -1,5 +1,6 @@
 package com.example.budget_management_app.account.domain;
 
+import com.example.budget_management_app.common.enums.SupportedCurrency;
 import com.example.budget_management_app.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;

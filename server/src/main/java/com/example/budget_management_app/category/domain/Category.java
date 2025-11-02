@@ -23,9 +23,10 @@ public class Category {
     @Enumerated(EnumType.STRING)
     private CategoryType type;
 
+    @Column(name = "icon_path")
     private String iconPath;
 
-    @Column(nullable = false)
+    @Column(name = "is_default", nullable = false)
     private boolean isDefault;
 
     @ManyToOne(fetch = FetchType.LAZY)

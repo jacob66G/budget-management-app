@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -34,7 +35,7 @@ public class AccountController {
 
     @PostMapping
     public ResponseEntity<AccountDetailsResponseDto> addAccount(
-            @RequestBody AccountCreateRequestDto dto,
+            @Valid @RequestBody AccountCreateRequestDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         AccountDetailsResponseDto response = accountService.createAccount(userDetails.getId(), dto);
@@ -49,7 +50,7 @@ public class AccountController {
     @PatchMapping("/{id}")
     public ResponseEntity<AccountDetailsResponseDto> updateAccount(
             @PathVariable Long id,
-            @RequestBody AccountUpdateRequestDto dto,
+            @Valid @RequestBody AccountUpdateRequestDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ResponseEntity.ok(accountService.updateAccount(userDetails.getId(), id, dto));

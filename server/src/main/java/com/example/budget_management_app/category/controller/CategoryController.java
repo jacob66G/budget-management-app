@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -41,7 +42,7 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<CategoryResponseDto> addCategory(
-            @RequestBody CategoryCreateRequestDto requestDto,
+            @Valid @RequestBody CategoryCreateRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         CategoryResponseDto response = categoryService.createCategory(userDetails.getId(), requestDto);
@@ -56,7 +57,7 @@ public class CategoryController {
     @PatchMapping("/{id}")
     public ResponseEntity<CategoryResponseDto> updateCategory(
             @PathVariable Long id,
-            @RequestBody CategoryUpdateRequestDto requestDto,
+            @Valid @RequestBody CategoryUpdateRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         CategoryResponseDto response = categoryService.updateCategory(userDetails.getId(), id, requestDto);
