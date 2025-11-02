@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -19,7 +20,9 @@ public class RedisServiceImpl implements CacheService {
         USER_SESSION("user-session"),
         VERIFICATION_CODE("verify"),
         VERIFICATION_LAST_SENT("verify:last_sent"),
-        USER_DETAILS("user-details");
+        USER_DETAILS("user-details"),
+        RESET_PASSWORD_CODE("reset-password"),
+        RESET_PASSWORD_LAST_SENT("reset-password:last_sent");
 
         private final String value;
 
@@ -41,6 +44,12 @@ public class RedisServiceImpl implements CacheService {
     @Override
     public void delete(KeyPrefix prefix, String key) {
         redisTemplate.delete(buildKey(prefix, key));
+    }
+
+    @Override
+    public void delete(KeyPrefix prefix, List<String> keys) {
+        List<String> keysWithPrefix = keys.stream().map(key -> buildKey(prefix, key)).toList();
+        redisTemplate.delete(keysWithPrefix);
     }
 
     private String buildKey(KeyPrefix prefix, String key) {

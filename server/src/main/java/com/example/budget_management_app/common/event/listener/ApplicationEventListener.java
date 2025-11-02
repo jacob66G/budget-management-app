@@ -1,5 +1,6 @@
 package com.example.budget_management_app.common.event.listener;
 
+import com.example.budget_management_app.common.event.model.PasswordResetEvent;
 import com.example.budget_management_app.common.event.model.VerificationEvent;
 import com.example.budget_management_app.common.event.service.EmailService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,12 @@ public class ApplicationEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleUserRegistered(VerificationEvent event) {
         emailService.sendVerificationEmail(event.userEmail(), event.userName(), event.verificationCode(), event.resend());
+    }
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleResetPassword(PasswordResetEvent event) {
+        emailService.sendResetPasswordEmail(event.userEmail(), event.userName(), event.token());
     }
 
 }

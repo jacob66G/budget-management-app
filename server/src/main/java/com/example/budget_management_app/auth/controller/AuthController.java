@@ -77,8 +77,8 @@ public class AuthController {
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<Void> verifyUser(@RequestParam String email, @RequestParam String code) {
-        authService.verifyUser(email, code);
+    public ResponseEntity<Void> verifyUser(@RequestParam String code) {
+        authService.verifyUser(code);
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(UriComponentsBuilder.fromPath(ApiPaths.BASE_API)
                         .pathSegment(ApiPaths.AUTH)
@@ -92,8 +92,19 @@ public class AuthController {
     @PostMapping("/resend-verification")
     public ResponseEntity<ResponseMessageDto> resendVerification(@Valid @RequestBody ResendVerificationRequestDto requestDto) {
         return ResponseEntity
-                .ok()
-                .body(authService.resendVerification(requestDto.email()));
+                .ok(authService.resendVerification(requestDto.email()));
+    }
+
+    @PostMapping("/password-reset-confirm")
+    public ResponseEntity<ResponseMessageDto> passwordResetConfirm(@Valid @RequestBody PasswordResetConfirmDto resetConfirmDto) {
+        authService.resetPasswordConfirm(resetConfirmDto);
+        return ResponseEntity.ok(new ResponseMessageDto("Your password has been reset."));
+    }
+
+    @PostMapping("/password-reset-request")
+    public ResponseEntity<ResponseMessageDto> passwordResetRequest(@Valid @RequestBody PasswordResetRequestDto requestDto) {
+        return ResponseEntity
+                .ok(authService.resetPassword(requestDto));
     }
 
     private ResponseEntity<LoginResponseDto> buildLoginResponseWithSession(LoginResponseDto response, HttpServletRequest request) {

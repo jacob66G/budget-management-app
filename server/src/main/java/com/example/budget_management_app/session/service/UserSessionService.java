@@ -11,4 +11,6 @@ public interface UserSessionService {
     UserSession createUserSession(Long userId, String userAgent);
 
     ResponseCookie generateResponseCookie(String refreshToken);
+
+    void deleteAllSessionsForUser(Long id);
 }

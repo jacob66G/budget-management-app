@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -89,6 +90,33 @@ public class UserSessionServiceImpl implements UserSessionService {
                 .secure(false)
                 .path("/api/auth/refresh")
                 .build();
+    }
+
+    @Transactional
+    @Override
+    public void deleteAllSessionsForUser(Long userId) {
+        List<UserSession> sessions = userSessionDao.findAllByUserId(userId);
+
+        if (sessions.isEmpty()) {
+            return;
+        }
+
+        List<String> sessionIdsToClear = new ArrayList<>();
+        List<String> tokenHashesToClear = new ArrayList<>();
+
+        for (UserSession session : sessions) {
+            sessionIdsToClear.add(String.valueOf(session.getId()));
+
+            String tokenHash = (String) cacheService.getValue(RedisServiceImpl.KeyPrefix.USER_SESSION, String.valueOf(session.getId()));
+            if (tokenHash != null) {
+                tokenHashesToClear.add(tokenHash);
+            }
+        }
+
+        cacheService.delete(RedisServiceImpl.KeyPrefix.USER_SESSION, sessionIdsToClear);
+        cacheService.delete(RedisServiceImpl.KeyPrefix.REFRESH_TOKEN, tokenHashesToClear);
+
+        userSessionDao.deleteAllByUserId(userId);
     }
 
     private void enforceMaxSessions(User user) {

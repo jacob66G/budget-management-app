@@ -5,14 +5,18 @@ import com.example.budget_management_app.common.dto.ResponseMessageDto;
 
 public interface AuthService {
 
-    RegistrationResponseDto registerUser(RegistrationRequestDto requestDto);
+    RegistrationResponseDto registerUser(RegistrationRequestDto dto);
 
-    LoginResponseDto authenticateUser(LoginRequestDto loginRequest);
+    LoginResponseDto authenticateUser(LoginRequestDto dto);
 
-    LoginResponseDto authenticateWith2fa(TwoFactorLoginRequest loginRequest);
+    LoginResponseDto authenticateWith2fa(TwoFactorLoginRequest dto);
 
-    void verifyUser(String email, String verificationCode);
+    void verifyUser(String code);
 
     ResponseMessageDto resendVerification(String email);
+
+    void resetPasswordConfirm(PasswordResetConfirmDto dto);
+
+    ResponseMessageDto resetPassword(PasswordResetRequestDto dto);
 
 }
