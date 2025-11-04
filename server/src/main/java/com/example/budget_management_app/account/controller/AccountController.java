@@ -27,7 +27,7 @@ public class AccountController {
 
     @GetMapping
     public ResponseEntity<List<AccountResponseDto>> getAccounts(
-            @RequestBody SearchCriteria criteria,
+            SearchCriteria criteria,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ResponseEntity.ok(accountService.getAccounts(userDetails.getId(), criteria));

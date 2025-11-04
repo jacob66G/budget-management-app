@@ -20,7 +20,6 @@ public class RedisServiceImpl implements CacheService {
         USER_SESSION("user-session"),
         VERIFICATION_CODE("verify"),
         VERIFICATION_LAST_SENT("verify:last_sent"),
-        USER_DETAILS("user-details"),
         RESET_PASSWORD_CODE("reset-password"),
         RESET_PASSWORD_LAST_SENT("reset-password:last_sent");
 

@@ -80,6 +80,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User createUser(RegistrationRequestDto dto) {
+        passwordsComparison(null, dto.password(), dto.passwordConfirmation());
         validateEmailUniqueness(dto.email());
 
         User user = new User();
@@ -194,10 +195,7 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("Incorrect old password", ErrorCode.INVALID_OLD_PASSWORD);
         }
 
-        if (!dto.newPassword().equals(dto.confirmedNewPassword())) {
-            log.warn("The user: {} provided different passwords", userId);
-            throw new ValidationException("The provided passwords are different", ErrorCode.PASSWORDS_NOT_MATCH);
-        }
+        passwordsComparison(userId, dto.newPassword(), dto.passwordConfirmation());
 
         user.setPassword(encoder.encode(dto.newPassword()));
         userDao.update(user);
@@ -280,6 +278,13 @@ public class UserServiceImpl implements UserService {
 
         userDao.delete(user);
         log.info("User with ID: {} has been successfully deleted.", userId);
+    }
+
+    private void passwordsComparison(Long userId, String password, String passwordConfirmation) {
+        if (!password.equals(passwordConfirmation)) {
+            log.warn("The user: {} provided different passwords", userId);
+            throw new ValidationException("The provided passwords are different", ErrorCode.PASSWORDS_NOT_MATCH);
+        }
     }
 
     private void validateUserIsActive(User user) {

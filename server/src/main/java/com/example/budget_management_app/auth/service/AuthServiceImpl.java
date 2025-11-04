@@ -176,7 +176,6 @@ public class AuthServiceImpl implements AuthService {
 
         cacheService.delete(RedisServiceImpl.KeyPrefix.RESET_PASSWORD_CODE, dto.token());
         cacheService.delete(RedisServiceImpl.KeyPrefix.RESET_PASSWORD_LAST_SENT, email);
-        cacheService.delete(RedisServiceImpl.KeyPrefix.USER_DETAILS, email);
     }
 
     @Transactional

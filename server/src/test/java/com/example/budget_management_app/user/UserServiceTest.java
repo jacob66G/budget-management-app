@@ -71,6 +71,7 @@ public class UserServiceTest {
                     "Jan",
                     "Kowalski",
                     "jan.kowalski@example.com",
+                    rawPassword,
                     rawPassword
             );
 

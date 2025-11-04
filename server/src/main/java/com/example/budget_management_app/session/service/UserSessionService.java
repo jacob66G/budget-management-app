@@ -8,9 +8,13 @@ public interface UserSessionService {
 
     RefreshTokenResult refreshToken(String token, String userAgent);
 
-    UserSession createUserSession(Long userId, String userAgent);
+    UserSession createUserSession(Long userId, String userAgent, String oldRefreshToken);
 
     ResponseCookie generateResponseCookie(String refreshToken);
 
     void deleteAllSessionsForUser(Long id);
+
+    void logout(String refreshToken);
+
+    ResponseCookie generateClearCookie();
 }

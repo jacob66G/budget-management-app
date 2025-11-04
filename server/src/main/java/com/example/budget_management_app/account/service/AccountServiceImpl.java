@@ -81,7 +81,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     @Override
     public AccountDetailsResponseDto updateAccount(Long userId, Long accountId, AccountUpdateRequestDto dto) {
-        Account account = accountDao.findByIdAndUser(userId, accountId)
+        Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
 
         validateAccountIsActive(account);
@@ -135,7 +135,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     @Override
     public void activateAccount(Long userId, Long accountId) {
-        Account account = accountDao.findByIdAndUser(userId, accountId)
+        Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
 
         if (AccountStatus.ACTIVE.equals(account.getAccountStatus())) {
@@ -153,7 +153,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     @Override
     public void deactivateAccount(Long userId, Long accountId) {
-        Account account = accountDao.findByIdAndUser(userId, accountId)
+        Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
 
         if (AccountStatus.INACTIVE.equals(account.getAccountStatus())) {
@@ -185,7 +185,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     @Override
     public void deleteAccount(Long userId, Long accountId) {
-        Account account = accountDao.findByIdAndUser(userId, accountId)
+        Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
 
         validateAccountCanBeDeleted(account);

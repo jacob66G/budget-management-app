@@ -14,6 +14,8 @@ public record RegistrationRequestDto(
         String email,
         @NotBlank(message = "Password cannot be empty")
         @Size(min = 5, message = "Password must contain at least 5 characters")
-        String password
+        String password,
+        @NotBlank(message = "The new password confirmation cannot be empty")
+        String passwordConfirmation
 ) {
 }

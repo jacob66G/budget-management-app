@@ -35,4 +35,8 @@ public class UserSessionDao {
                 .setParameter("userId", userId)
                 .executeUpdate();
     }
+
+    public void delete(UserSession session) {
+        em.remove(session);
+    }
 }

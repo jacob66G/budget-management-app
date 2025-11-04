@@ -10,16 +10,16 @@ import com.example.budget_management_app.constants.ApiPaths;
 import com.example.budget_management_app.session.domain.UserSession;
 import com.example.budget_management_app.session.dto.RefreshTokenResult;
 import com.example.budget_management_app.session.service.UserSessionService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.WebUtils;
 
 import javax.validation.Valid;
 
@@ -45,35 +45,60 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> authenticate(@Valid @RequestBody LoginRequestDto loginRequestDto, HttpServletRequest request) {
+    public ResponseEntity<LoginResponseDto> authenticate(
+            @Valid @RequestBody LoginRequestDto loginRequestDto,
+            HttpServletRequest request,
+            @CookieValue(name = ApiConstants.REFRESH_TOKEN_COOKIE, required = false) String oldRefreshToken
+    ) {
         LoginResponseDto response = authService.authenticateUser(loginRequestDto);
         if (response.getIsTfaRequired()) {
             return ResponseEntity.ok(response);
         }
 
-        return buildLoginResponseWithSession(response, request);
+        return buildLoginResponseWithSession(response, request, oldRefreshToken);
     }
 
     @PostMapping("/login/2fa")
-    public ResponseEntity<LoginResponseDto> verifyTfa(@Valid @RequestBody TwoFactorLoginRequest loginRequestDto, HttpServletRequest request) {
+    public ResponseEntity<LoginResponseDto> verifyTfa(
+            @Valid @RequestBody TwoFactorLoginRequest loginRequestDto,
+            HttpServletRequest request,
+            @CookieValue(name = ApiConstants.REFRESH_TOKEN_COOKIE, required = false) String oldRefreshToken
+    ) {
         LoginResponseDto response = authService.authenticateWith2fa(loginRequestDto);
 
-        return buildLoginResponseWithSession(response, request);
+        return buildLoginResponseWithSession(response, request, oldRefreshToken);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AccessTokenResponse> refreshToken(HttpServletRequest request) {
-        Cookie cookie = WebUtils.getCookie(request, ApiConstants.REFRESH_TOKEN_COOKIE);
-        if (cookie == null) {
+    public ResponseEntity<AccessTokenResponse> refreshToken(
+            HttpServletRequest request,
+            @CookieValue(name = ApiConstants.REFRESH_TOKEN_COOKIE, required = false) String refreshToken
+    ) {
+        if (refreshToken == null) {
             log.warn("Refresh token missing in request from IP {}", request.getRemoteAddr());
             throw new UserSessionException("No refresh token found in request", ErrorCode.TOKEN_NOT_FOUND);
         }
         String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
-        RefreshTokenResult result = userSessionService.refreshToken(cookie.getValue(), userAgent);
+        RefreshTokenResult result = userSessionService.refreshToken(refreshToken, userAgent);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, result.cookie())
                 .body(new AccessTokenResponse(result.accessToken()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseMessageDto> logout(
+            @CookieValue(name = ApiConstants.REFRESH_TOKEN_COOKIE, required = false) String refreshToken
+    ) {
+        if (StringUtils.hasText(refreshToken)) {
+            userSessionService.logout(refreshToken);
+        }
+
+        ResponseCookie clearCookie = userSessionService.generateClearCookie();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, clearCookie.toString())
+                .body(new ResponseMessageDto("You have been logged out successfully."));
     }
 
     @GetMapping("/verify")
@@ -107,9 +132,9 @@ public class AuthController {
                 .ok(authService.resetPassword(requestDto));
     }
 
-    private ResponseEntity<LoginResponseDto> buildLoginResponseWithSession(LoginResponseDto response, HttpServletRequest request) {
+    private ResponseEntity<LoginResponseDto> buildLoginResponseWithSession(LoginResponseDto response, HttpServletRequest request, String oldRefreshToken) {
         String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
-        UserSession session = userSessionService.createUserSession(response.getUserId(), userAgent);
+        UserSession session = userSessionService.createUserSession(response.getUserId(), userAgent, oldRefreshToken);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, userSessionService.generateResponseCookie(session.getRawRefreshToken()).toString())

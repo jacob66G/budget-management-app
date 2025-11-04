@@ -10,6 +10,6 @@ public record ChangePasswordRequestDto(
         @Size(min = 5, message = "Password must contain at least 5 characters")
         String newPassword,
         @NotBlank(message = "The new password confirmation cannot be empty")
-        String confirmedNewPassword
+        String passwordConfirmation
 ) {
 }

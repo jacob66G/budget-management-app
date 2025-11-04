@@ -22,10 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -59,9 +56,23 @@ public class UserSessionServiceImpl implements UserSessionService {
 
     @Transactional
     @Override
-    public UserSession createUserSession(Long userId, String userAgent) {
+    public UserSession createUserSession(Long userId, String userAgent, String oldRefreshToken) {
         User user = userService.findUserById(userId)
                 .orElseThrow(() -> new NotFoundException(User.class.getSimpleName(), userId, ErrorCode.USER_NOT_FOUND));
+
+        if (StringUtils.hasText(oldRefreshToken)) {
+            Optional<UserSession> oldSessionOpt = findSessionByToken(oldRefreshToken);
+
+            if (oldSessionOpt.isPresent()) {
+                UserSession oldSession = oldSessionOpt.get();
+                if (oldSession.getUser().getId().equals(userId)) {
+                    log.info("Login: Invalidating old session {} for user {}", oldSession.getId(), userId);
+                    user.removeSession(oldSession);
+                    userSessionDao.delete(oldSession);
+                    evictUserSessionFromCache(oldSession);
+                }
+            }
+        }
 
         enforceMaxSessions(user);
 
@@ -79,17 +90,6 @@ public class UserSessionServiceImpl implements UserSessionService {
         cacheUserSession(refreshTokenHash, persistedSession);
 
         return persistedSession;
-    }
-
-    @Override
-    public ResponseCookie generateResponseCookie(String refreshToken) {
-        return ResponseCookie.from(ApiConstants.REFRESH_TOKEN_COOKIE, refreshToken)
-                .httpOnly(true)
-                .maxAge(refreshTokenExpiration)
-                .sameSite("None")
-                .secure(false)
-                .path("/api/auth/refresh")
-                .build();
     }
 
     @Transactional
@@ -117,6 +117,46 @@ public class UserSessionServiceImpl implements UserSessionService {
         cacheService.delete(RedisServiceImpl.KeyPrefix.REFRESH_TOKEN, tokenHashesToClear);
 
         userSessionDao.deleteAllByUserId(userId);
+    }
+
+    @Override
+    public void logout(String refreshToken) {
+        Optional<UserSession> sessionOpt = findSessionByToken(refreshToken);
+
+        if (sessionOpt.isEmpty()) {
+            log.warn("Attempt to log out with a non-existent or already invalidated token.");
+            return;
+        }
+
+        UserSession session = sessionOpt.get();
+
+        evictUserSessionFromCache(session);
+
+        userSessionDao.delete(session);
+
+        log.info("User {} has successfully logged out (session {}).", session.getUser().getId(), session.getId());
+    }
+
+    @Override
+    public ResponseCookie generateResponseCookie(String refreshToken) {
+        return ResponseCookie.from(ApiConstants.REFRESH_TOKEN_COOKIE, refreshToken)
+                .httpOnly(true)
+                .maxAge(refreshTokenExpiration)
+                .sameSite("None")
+                .secure(false)
+                .path("/api/auth")
+                .build();
+    }
+
+    @Override
+    public ResponseCookie generateClearCookie() {
+        return ResponseCookie.from(ApiConstants.REFRESH_TOKEN_COOKIE, "")
+                .httpOnly(true)
+                .maxAge(0)
+                .sameSite("None")
+                .secure(false)
+                .path("/api/auth")
+                .build();
     }
 
     private void enforceMaxSessions(User user) {
@@ -175,6 +215,18 @@ public class UserSessionServiceImpl implements UserSessionService {
             cacheService.delete(RedisServiceImpl.KeyPrefix.REFRESH_TOKEN, refreshToken);
         }
         cacheService.delete(RedisServiceImpl.KeyPrefix.USER_SESSION, String.valueOf(userSession.getId()));
+    }
+
+    private Optional<UserSession> findSessionByToken(String token) {
+        if (!StringUtils.hasText(token)) {
+            return Optional.empty();
+        }
+        String tokenHash = TokenHasher.hash(token);
+        String userSessionId = (String) cacheService.getValue(RedisServiceImpl.KeyPrefix.REFRESH_TOKEN, tokenHash);
+        if (userSessionId == null) {
+            return Optional.empty();
+        }
+        return userSessionDao.findById(Long.valueOf(userSessionId));
     }
 
 }
