@@ -20,6 +20,6 @@ public record AccountUpdateRequestDto(
         @DecimalMax(value = "100.0", message = "Alert threshold cannot exceed 100%")
         Double alertThreshold,
         Boolean includeInTotalBalance,
-        String iconPath
+        String iconKey
 ) {
 }

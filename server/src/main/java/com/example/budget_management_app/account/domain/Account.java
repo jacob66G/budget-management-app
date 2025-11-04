@@ -62,7 +62,8 @@ public class Account {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
-    private String iconPath;
+    @Column(name = "icon_key")
+    private String iconKey;
 
     @Column(name = "include_in_total_balance", nullable = false)
     private boolean includeInTotalBalance = true;

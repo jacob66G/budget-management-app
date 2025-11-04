@@ -3,10 +3,15 @@ package com.example.budget_management_app.account.mapper;
 import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.account.dto.AccountDetailsResponseDto;
 import com.example.budget_management_app.account.dto.AccountResponseDto;
+import com.example.budget_management_app.common.service.StorageService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class AccountMapper {
+
+    private final StorageService storageService;
 
     public AccountResponseDto toResponseDto(Account account) {
         return new AccountResponseDto(
@@ -18,7 +23,7 @@ public class AccountMapper {
                 account.getTotalExpense(),
                 account.getCurrency().name(),
                 account.isDefault(),
-                account.getIconPath(),
+                storageService.getPublicUrl(account.getIconKey()),
                 account.isIncludeInTotalBalance(),
                 account.getCreatedAt(),
                 account.getAccountStatus().name()
@@ -39,7 +44,7 @@ public class AccountMapper {
                 account.getBudgetType().name(),
                 account.getBudget(),
                 account.getAlertThreshold(),
-                account.getIconPath(),
+                storageService.getPublicUrl(account.getIconKey()),
                 account.isIncludeInTotalBalance(),
                 account.getCreatedAt(),
                 account.getAccountStatus().name()

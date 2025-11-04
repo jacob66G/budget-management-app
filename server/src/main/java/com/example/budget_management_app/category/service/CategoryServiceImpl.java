@@ -11,7 +11,7 @@ import com.example.budget_management_app.category.mapper.CategoryMapper;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.ValidationException;
-import com.example.budget_management_app.common.service.S3PathValidator;
+import com.example.budget_management_app.common.service.IconKeyValidator;
 import com.example.budget_management_app.common.service.StorageService;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.service.UserService;
@@ -32,7 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final UserService userService;
     private final StorageService storageService;
     private final CategoryMapper mapper;
-    private final S3PathValidator s3PathValidator;
+    private final IconKeyValidator iconKeyValidator;
 
     @Override
     public List<CategoryResponseDto> getCategories(Long userId, String type) {
@@ -56,7 +56,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setName(dto.name());
         category.setType(CategoryType.valueOf(dto.type().toUpperCase()));
         category.setDefault(false);
-        category.setIconPath(dto.iconPath());
+        category.setIconKey(dto.iconKey());
 
         user.addCategory(category);
 
@@ -80,9 +80,9 @@ public class CategoryServiceImpl implements CategoryService {
             validateType(dto.type());
             category.setType(CategoryType.valueOf(dto.type().toUpperCase()));
         }
-        if (StringUtils.hasText(dto.iconPath())) {
-            validateIcon(dto.iconPath());
-            category.setIconPath(dto.iconPath());
+        if (StringUtils.hasText(dto.iconKey())) {
+            validateIcon(dto.iconKey());
+            category.setIconKey(dto.iconKey());
         }
 
         return mapper.toCategoryResponseDto(categoryDao.update(category));
@@ -107,7 +107,7 @@ public class CategoryServiceImpl implements CategoryService {
             category.setName(def.getName());
             category.setType(def.getType());
             category.setDefault(def.isDefault());
-            category.setIconPath(def.getIconPath());
+            category.setIconKey(def.getIconPath());
 
             user.addCategory(category);
         }
@@ -122,7 +122,7 @@ public class CategoryServiceImpl implements CategoryService {
     private void validateCategory(CategoryCreateRequestDto categoryRequest, Long userId) {
         validateNameUniqueness(userId, categoryRequest.name(), null);
         validateType(categoryRequest.type());
-        validateIcon(categoryRequest.iconPath());
+        validateIcon(categoryRequest.iconKey());
     }
 
     private void validateNameUniqueness(Long userId, String name, Long existingCategoryId) {
@@ -140,18 +140,18 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    private void validateIcon(String path) {
-        if (path == null) {
+    private void validateIcon(String key) {
+        if (key == null) {
             return;
         }
 
-        if (!s3PathValidator.isValidPathForCategory(path)) {
-            log.warn("Provided icon path: {} does not match required structure for categories.", path);
-            throw new ValidationException("Icon points to a wrong resource.", ErrorCode.INVALID_RESOURCE_PATH);
+        if (!iconKeyValidator.isValidCategoryIconKey(key)) {
+            log.warn("Invalid icon key: {}", key);
+            throw new ValidationException("Selected icon is not valid.", ErrorCode.INVALID_RESOURCE_PATH);
         }
 
-        if (!storageService.exists(path)) {
-            log.warn("Resource with path: {} does not exists in storage", path);
+        if (!storageService.exists(key)) {
+            log.warn("Resource with path: {} does not exists in storage", key);
             throw new NotFoundException("This image does not exist", ErrorCode.NOT_FOUND);
         }
     }

@@ -11,7 +11,7 @@ import com.example.budget_management_app.common.enums.SupportedCurrency;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.ValidationException;
-import com.example.budget_management_app.common.service.S3PathValidator;
+import com.example.budget_management_app.common.service.IconKeyValidator;
 import com.example.budget_management_app.common.service.StorageService;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.service.UserService;
@@ -34,7 +34,7 @@ public class AccountServiceImpl implements AccountService {
     private final AccountMapper mapper;
     private final UserService userService;
     private final StorageService storageService;
-    private final S3PathValidator s3PathValidator;
+    private final IconKeyValidator iconKeyValidator;
 
     @Override
     public AccountDetailsResponseDto getAccount(Long userId, Long accountId) {
@@ -68,7 +68,7 @@ public class AccountServiceImpl implements AccountService {
         account.setAlertThreshold(dto.alertThreshold());
         account.setCreatedAt(Instant.now());
         account.setIncludeInTotalBalance(dto.includeInTotalBalance());
-        account.setIconPath(dto.iconPath());
+        account.setIconKey(dto.iconKey());
         account.setAccountStatus(AccountStatus.ACTIVE);
 
         user.addAccount(account);
@@ -106,9 +106,9 @@ public class AccountServiceImpl implements AccountService {
         if (dto.includeInTotalBalance() != null) {
             account.setIncludeInTotalBalance(dto.includeInTotalBalance());
         }
-        if (dto.iconPath() != null) {
-            validateIcon(dto.iconPath());
-            account.setIconPath(dto.iconPath());
+        if (dto.iconKey() != null) {
+            validateIcon(dto.iconKey());
+            account.setIconKey(dto.iconKey());
         }
 
         changeBudget(account, dto);
@@ -125,7 +125,7 @@ public class AccountServiceImpl implements AccountService {
         account.setCurrency(SupportedCurrency.PLN);
         account.setDefault(true);
         account.setBudgetType(BudgetType.NONE);
-        account.setIconPath("");
+        account.setIconKey("");
         account.setCreatedAt(Instant.now());
         account.setAccountStatus(AccountStatus.ACTIVE);
 
@@ -268,7 +268,7 @@ public class AccountServiceImpl implements AccountService {
 
         BudgetType budgetType = BudgetType.valueOf(dto.budgetType().toUpperCase());
         validateBudgetAlertRelation(budgetType, dto.budget(), dto.alertThreshold());
-        validateIcon(dto.iconPath());
+        validateIcon(dto.iconKey());
         validateNameUniqueness(userId, dto.name(), null);
     }
 
@@ -315,9 +315,9 @@ public class AccountServiceImpl implements AccountService {
             return;
         }
 
-        if (!s3PathValidator.isValidPathForAccount(path)) {
-            log.warn("Provided icon path: {} does not match required structure for accounts.", path);
-            throw new ValidationException("Icon path points to wrong resource.", ErrorCode.INVALID_RESOURCE_PATH);
+        if (!iconKeyValidator.isValidAccountIconKey(path)) {
+            log.warn("Invalid icon key: {}.", path);
+            throw new ValidationException("Selected icon is not valid.", ErrorCode.INVALID_RESOURCE_PATH);
         }
         if (!storageService.exists(path)) {
             log.warn("Resource with path: {} does not exists in storage", path);

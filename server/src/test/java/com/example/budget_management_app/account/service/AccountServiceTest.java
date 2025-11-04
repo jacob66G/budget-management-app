@@ -13,7 +13,7 @@ import com.example.budget_management_app.common.enums.SupportedCurrency;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.ValidationException;
-import com.example.budget_management_app.common.service.S3PathValidator;
+import com.example.budget_management_app.common.service.IconKeyValidator;
 import com.example.budget_management_app.common.service.StorageService;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.service.UserService;
@@ -49,7 +49,7 @@ public class AccountServiceTest {
     @Mock
     private StorageService storageService;
     @Mock
-    private S3PathValidator s3PathValidator;
+    private IconKeyValidator iconKeyValidator;
     //    @Mock
 //    private RecurringTransactionService recurringTransactionService;
 //    @Mock
@@ -69,7 +69,7 @@ public class AccountServiceTest {
         private AccountDetailsResponseDto expectedResult;
         private Long userId = 1L;
         private String accountName = "main";
-        private String iconPath = "https://budget-management-app-bucket-2025.s3.eu-north-1.amazonaws.com/accounts/test.png";
+        private String iconKey = "/accounts/test.png";
         private BigDecimal balance = BigDecimal.valueOf(1000);
         private String description = "my main account";
         private BigDecimal budget = BigDecimal.valueOf(500);
@@ -90,7 +90,7 @@ public class AccountServiceTest {
                     budget,
                     alertThreshold,
                     true,
-                    iconPath
+                    iconKey
             );
 
             savedAccount = new Account();
@@ -108,7 +108,7 @@ public class AccountServiceTest {
             savedAccount.setBudget(budget);
             savedAccount.setAlertThreshold(alertThreshold);
             savedAccount.setCreatedAt(Instant.now());
-            savedAccount.setIconPath(iconPath);
+            savedAccount.setIconKey(iconKey);
             savedAccount.setIncludeInTotalBalance(true);
             savedAccount.setUser(user);
 
@@ -125,7 +125,7 @@ public class AccountServiceTest {
                     "MONTHLY",
                     budget,
                     alertThreshold,
-                    iconPath,
+                    iconKey,
                     true,
                     savedAccount.getCreatedAt(),
                     "ACTIVE"
@@ -137,8 +137,8 @@ public class AccountServiceTest {
             //given
             when(userService.getUserById(userId)).thenReturn(user);
             when(accountDao.existsByNameAndUser(accountName, userId, null)).thenReturn(false);
-            when(s3PathValidator.isValidPathForAccount(iconPath)).thenReturn(true);
-            when(storageService.exists(iconPath)).thenReturn(true);
+            when(iconKeyValidator.isValidAccountIconKey(iconKey)).thenReturn(true);
+            when(storageService.exists(iconKey)).thenReturn(true);
             when(accountDao.save(any(Account.class))).thenReturn(savedAccount);
             when(mapper.toDetailsResponseDto(savedAccount)).thenReturn(expectedResult);
 
@@ -152,8 +152,8 @@ public class AccountServiceTest {
 
             verify(userService, times(1)).getUserById(userId);
             verify(accountDao, times(1)).existsByNameAndUser(accountName, userId, null);
-            verify(s3PathValidator, times(1)).isValidPathForAccount(iconPath);
-            verify(storageService, times(1)).exists(iconPath);
+            verify(iconKeyValidator, times(1)).isValidAccountIconKey(iconKey);
+            verify(storageService, times(1)).exists(iconKey);
             verify(mapper, times(1)).toDetailsResponseDto(savedAccount);
 
             verify(accountDao, times(1)).save(accountCaptor.capture());
@@ -164,7 +164,7 @@ public class AccountServiceTest {
             assertThat(accountSentToDao.getBalance()).isEqualTo(requestDto.initialBalance());
             assertThat(accountSentToDao.getCurrency().name()).isEqualTo(requestDto.currency());
             assertThat(accountSentToDao.getBudgetType().name()).isEqualTo(requestDto.budgetType());
-            assertThat(accountSentToDao.getIconPath()).isEqualTo(requestDto.iconPath());
+            assertThat(accountSentToDao.getIconKey()).isEqualTo(requestDto.iconKey());
             assertThat(accountSentToDao.getUser()).isEqualTo(user);
 
             assertThat(accountSentToDao.getAccountStatus()).isEqualTo(AccountStatus.ACTIVE);
@@ -186,7 +186,7 @@ public class AccountServiceTest {
                     budget,
                     alertThreshold,
                     true,
-                    iconPath
+                    iconKey
             );
 
             //when + then
@@ -212,7 +212,7 @@ public class AccountServiceTest {
                     budget,
                     alertThreshold,
                     true,
-                    iconPath
+                    iconKey
             );
 
             //when + then
@@ -238,7 +238,7 @@ public class AccountServiceTest {
                     budget,
                     alertThreshold,
                     true,
-                    iconPath
+                    iconKey
             );
 
             //when + then
@@ -255,8 +255,8 @@ public class AccountServiceTest {
             //given
             when(userService.getUserById(userId)).thenReturn(user);
             when(accountDao.existsByNameAndUser(accountName, userId, null)).thenReturn(true);
-            when(s3PathValidator.isValidPathForAccount(iconPath)).thenReturn(true);
-            when(storageService.exists(iconPath)).thenReturn(true);
+            when(iconKeyValidator.isValidAccountIconKey(iconKey)).thenReturn(true);
+            when(storageService.exists(iconKey)).thenReturn(true);
 
             //when + then
             ValidationException exception = assertThrows(ValidationException.class,
@@ -267,8 +267,8 @@ public class AccountServiceTest {
 
             verify(userService, times(1)).getUserById(userId);
             verify(accountDao, times(1)).existsByNameAndUser(accountName, userId, null);
-            verify(s3PathValidator, times(1)).isValidPathForAccount(iconPath);
-            verify(storageService, times(1)).exists(iconPath);
+            verify(iconKeyValidator, times(1)).isValidAccountIconKey(iconKey);
+            verify(storageService, times(1)).exists(iconKey);
         }
 
         @Test
@@ -284,7 +284,7 @@ public class AccountServiceTest {
                     budget,
                     null,
                     true,
-                    iconPath
+                    iconKey
             );
             when(userService.getUserById(userId)).thenReturn(user);
 
@@ -310,7 +310,7 @@ public class AccountServiceTest {
                     null,
                     alertThreshold,
                     true,
-                    iconPath
+                    iconKey
             );
             when(userService.getUserById(userId)).thenReturn(user);
 
@@ -336,7 +336,7 @@ public class AccountServiceTest {
                     null,
                     alertThreshold,
                     true,
-                    iconPath
+                    iconKey
             );
             when(userService.getUserById(userId)).thenReturn(user);
 
@@ -362,7 +362,7 @@ public class AccountServiceTest {
                     budget,
                     null,
                     true,
-                    iconPath
+                    iconKey
             );
             when(userService.getUserById(userId)).thenReturn(user);
 
@@ -379,7 +379,7 @@ public class AccountServiceTest {
         void should_throw_validationException_when_icon_path_is_invalid() {
             //given
             when(userService.getUserById(userId)).thenReturn(user);
-            when(s3PathValidator.isValidPathForAccount(iconPath)).thenReturn(false);
+            when(iconKeyValidator.isValidAccountIconKey(iconKey)).thenReturn(false);
 
             //when + then
             ValidationException exception = assertThrows(ValidationException.class,
@@ -388,15 +388,15 @@ public class AccountServiceTest {
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_RESOURCE_PATH);
 
             verify(userService, times(1)).getUserById(userId);
-            verify(s3PathValidator, times(1)).isValidPathForAccount(iconPath);
+            verify(iconKeyValidator, times(1)).isValidAccountIconKey(iconKey);
         }
 
         @Test
         void should_throw_notFoundException_when_icon_path_no_exists() {
             //given
             when(userService.getUserById(userId)).thenReturn(user);
-            when(s3PathValidator.isValidPathForAccount(iconPath)).thenReturn(true);
-            when(storageService.exists(iconPath)).thenReturn(false);
+            when(iconKeyValidator.isValidAccountIconKey(iconKey)).thenReturn(true);
+            when(storageService.exists(iconKey)).thenReturn(false);
 
             //when + then
             NotFoundException exception = assertThrows(NotFoundException.class,
@@ -405,8 +405,8 @@ public class AccountServiceTest {
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
 
             verify(userService, times(1)).getUserById(userId);
-            verify(s3PathValidator, times(1)).isValidPathForAccount(iconPath);
-            verify(storageService, times(1)).exists(iconPath);
+            verify(iconKeyValidator, times(1)).isValidAccountIconKey(iconKey);
+            verify(storageService, times(1)).exists(iconKey);
         }
     }
 
@@ -457,7 +457,7 @@ public class AccountServiceTest {
             );
 
             when(accountDao.existsByNameAndUser(newName, userId, accountId)).thenReturn(false);
-            when(s3PathValidator.isValidPathForAccount(newIcon)).thenReturn(true);
+            when(iconKeyValidator.isValidAccountIconKey(newIcon)).thenReturn(true);
             when(storageService.exists(newIcon)).thenReturn(true);
 
             when(accountDao.update(any(Account.class))).thenReturn(existingAccount);
@@ -473,7 +473,7 @@ public class AccountServiceTest {
             Account updatedAccount = accountCaptor.getValue();
             assertThat(updatedAccount.getName()).isEqualTo(newName);
             assertThat(updatedAccount.getDescription()).isEqualTo(newDesc);
-            assertThat(updatedAccount.getIconPath()).isEqualTo(newIcon);
+            assertThat(updatedAccount.getIconKey()).isEqualTo(newIcon);
             assertThat(updatedAccount.isIncludeInTotalBalance()).isFalse();
         }
 

@@ -26,6 +26,6 @@ public record AccountCreateRequestDto(
         Double alertThreshold,
         @NotNull(message = "Inclusion in the total balance is not defined")
         Boolean includeInTotalBalance,
-        String iconPath
+        String iconKey
 ) {
 }
