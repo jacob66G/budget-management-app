@@ -25,7 +25,7 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @GetMapping
-    public ResponseEntity<PagedResponse<TransactionView>> getPage(
+    public ResponseEntity<PagedResponse<TransactionSummary>> getPage(
             @RequestParam(name = "page") int page,
             @RequestParam(name = "limit") int limit,
             @RequestParam(name = "type", defaultValue = "ALL") TransactionTypeFilter type,
@@ -54,11 +54,11 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<TransactionResponse> create(
+    public ResponseEntity<TransactionCreateResponse> create(
             @RequestBody TransactionCreateRequest transactionCreate,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        TransactionResponse response = transactionService.create(transactionCreate, userDetails.getId());
+        TransactionCreateResponse response = transactionService.create(transactionCreate, userDetails.getId());
 
         URI location = URI.create("/api/v1/transactions/" + response.id());
 

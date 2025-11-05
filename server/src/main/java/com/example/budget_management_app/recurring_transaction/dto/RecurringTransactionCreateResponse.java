@@ -1,6 +1,6 @@
 package com.example.budget_management_app.recurring_transaction.dto;
 
-import com.example.budget_management_app.transaction.dto.TransactionView;
+import com.example.budget_management_app.transaction.dto.TransactionSummary;
 
 import java.time.LocalDate;
 
@@ -9,6 +9,6 @@ public record RecurringTransactionCreateResponse(
         LocalDate nextOccurrence,
         boolean isActive,
         boolean newTransaction,
-        TransactionView newTransactionView
+        TransactionSummary newTransactionView
 ) {
 }

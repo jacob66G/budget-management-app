@@ -6,7 +6,7 @@ import com.example.budget_management_app.transaction.domain.TransactionType;
 import com.example.budget_management_app.transaction.dto.AccountSummary;
 import com.example.budget_management_app.transaction.dto.CategorySummary;
 import com.example.budget_management_app.transaction.dto.TransactionCreateRequest;
-import com.example.budget_management_app.transaction.dto.TransactionView;
+import com.example.budget_management_app.transaction.dto.TransactionSummary;
 import jakarta.persistence.Tuple;
 
 import java.math.BigDecimal;
@@ -17,10 +17,10 @@ public class Mapper {
 
     private Mapper(){}
 
-    public static List<TransactionView> toDto(List<Tuple> tuples) {
+    public static List<TransactionSummary> toDto(List<Tuple> tuples) {
 
         return tuples.stream()
-                .map( tuple -> new TransactionView(
+                .map( tuple -> new TransactionSummary(
                         tuple.get("transactionId", Long.class),
                         tuple.get("amount", BigDecimal.class),
                         tuple.get("type", TransactionType.class),

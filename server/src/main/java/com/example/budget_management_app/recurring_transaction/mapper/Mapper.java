@@ -11,7 +11,7 @@ import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction.domain.TransactionType;
 import com.example.budget_management_app.transaction.dto.AccountSummary;
 import com.example.budget_management_app.transaction.dto.CategorySummary;
-import com.example.budget_management_app.transaction.dto.TransactionView;
+import com.example.budget_management_app.transaction.dto.TransactionSummary;
 import jakarta.persistence.Tuple;
 
 import java.math.BigDecimal;
@@ -54,10 +54,10 @@ public class Mapper {
                 recurringTransaction.getCreatedAt());
     }
 
-    public static TransactionView toTransactionView(Transaction transaction) {
+    public static TransactionSummary toTransactionView(Transaction transaction) {
         Account account = transaction.getAccount();
         Category category = transaction.getCategory();
-        return new TransactionView(transaction.getId(), transaction.getAmount(), transaction.getType(), transaction.getDescription(), transaction.getTransactionDate(),
+        return new TransactionSummary(transaction.getId(), transaction.getAmount(), transaction.getType(), transaction.getDescription(), transaction.getTransactionDate(),
                 new AccountSummary(account.getId(), account.getName(), account.getCurrency()),
                 new CategorySummary(category.getId(), category.getName(), category.getIconPath()));
     }

@@ -2,6 +2,7 @@ package com.example.budget_management_app.transaction.integration;
 
 import com.example.budget_management_app.common.exception.CategoryChangeNotAllowedException;
 import com.example.budget_management_app.common.exception.NotFoundException;
+import com.example.budget_management_app.common.exception.TransactionTypeMismatchException;
 import com.example.budget_management_app.transaction.domain.*;
 import com.example.budget_management_app.transaction.dto.*;
 import com.example.budget_management_app.transaction.service.TransactionService;
@@ -38,7 +39,7 @@ public class ServiceTests {
         int limit = 4;
         List<Long> userAccountsIds = List.of(1L, 2L, 3L);
         List<Long> userCategoriesIds = List.of(1L, 2L, 3L, 4L);
-        PagedResponse<TransactionView> transactionsPage = transactionService.getViews(
+        PagedResponse<TransactionSummary> transactionsPage = transactionService.getViews(
                 page,
                 limit,
                 TransactionTypeFilter.ALL,
@@ -70,7 +71,7 @@ public class ServiceTests {
         int limit = 4;
         List<Long> userAccountsIds = List.of(1L, 2L, 3L);
         List<Long> userCategoriesIds = List.of(1L, 2L, 3L, 4L);
-        PagedResponse<TransactionView> transactionsPage = transactionService.getViews(
+        PagedResponse<TransactionSummary> transactionsPage = transactionService.getViews(
                 page,
                 limit,
                 TransactionTypeFilter.ALL,
@@ -199,7 +200,7 @@ public class ServiceTests {
                         null, accountId, categoryId
                 );
 
-        TransactionResponse response = transactionService.create(createReq, userId);
+        TransactionCreateResponse response = transactionService.create(createReq, userId);
 
         System.out.println(response);
 
@@ -216,6 +217,25 @@ public class ServiceTests {
 
     @Test
     @Order(8)
+    public void createTransactionWithCategoryWithIncompatibleTypeAssignedTest() {
+
+        long userId = 2L;
+        long categoryId = 6L;
+        long accountId = 4L;
+
+        TransactionCreateRequest createReq =
+                new TransactionCreateRequest(
+                        new BigDecimal("200"), "Urodziny", TransactionType.INCOME,
+                        null, accountId, categoryId
+                );
+
+        assertThrows(TransactionTypeMismatchException.class, () -> {
+            transactionService.create(createReq, userId);
+        });
+    }
+
+    @Test
+    @Order(9)
     public void changeRecurringTransactionCategoryTest() {
 
         long userId = 3L;
@@ -237,7 +257,7 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(9)
+    @Order(10)
     public void changeCategoryForTransactionThatBelongToOtherUserTest() {
 
         long userId = 1L;
@@ -259,7 +279,7 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(10)
+    @Order(11)
     public void changeTransactionCategoryButTransactionDoesNotBelongToProvidedCategoryTest() {
 
         long userId = 1L;
@@ -281,7 +301,7 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(11)
+    @Order(12)
     public void changeTransactionCategoryWhereNewCategoryDoesNotBelongToTheUserTest() {
 
         long userId = 1L;
@@ -303,7 +323,7 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     @Transactional
     public void changeTransactionCategoryTest() {
 
@@ -343,7 +363,33 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(13)
+    @Order(14)
+    public void changeTransactionCategoryWhereNewCategoryIsIncompatibleType() {
+
+        long userId = 1L;
+        long transactionId = 22L;
+        long currentTransactionCategoryId = 2L;
+        long newTransactionCategoryId = 3L;
+        long accountId = 0L;
+
+        TransactionCategoryUpdateRequest updReq =
+                new TransactionCategoryUpdateRequest(
+                        currentTransactionCategoryId,
+                        newTransactionCategoryId,
+                        accountId
+                );
+
+
+        assertThrows(TransactionTypeMismatchException.class, () -> {
+            transactionService.changeCategory(
+                    transactionId, userId, updReq
+            );
+        });
+
+    }
+
+    @Test
+    @Order(15)
     public void updateTransactionThatBelongToOtherUserTest() {
 
         long userId = 2L;
@@ -361,7 +407,7 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(14)
+    @Order(16)
     @Transactional
     public void updateTransactionTest() {
 
@@ -387,7 +433,7 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(15)
+    @Order(17)
     public void deleteTransactionForOtherUserTest() {
 
         long userId = 2L;
@@ -399,7 +445,7 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(16)
+    @Order(18)
     public void deleteTransactionTest() {
 
         long userId = 1L;

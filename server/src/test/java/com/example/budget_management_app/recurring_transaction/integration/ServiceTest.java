@@ -2,6 +2,7 @@ package com.example.budget_management_app.recurring_transaction.integration;
 
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.StatusAlreadySetException;
+import com.example.budget_management_app.common.exception.TransactionTypeMismatchException;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
 import com.example.budget_management_app.recurring_transaction.domain.RemovalRange;
@@ -254,6 +255,26 @@ public class ServiceTest {
 
     @Test
     @Order(10)
+    public void createRecurringTransactionWithCategoryWithIncompatibleTypeTest() {
+
+        long userId = 2;
+        long accountId = 4L;
+        long categoryId = 6L;
+
+        RecurringTransactionCreateRequest createReq =
+                new RecurringTransactionCreateRequest(
+                        BigDecimal.valueOf(400), "Premia", TransactionType.INCOME,
+                        null, LocalDate.now(), null,
+                        RecurringInterval.MONTH, 1, accountId, categoryId
+                );
+
+        assertThrows(TransactionTypeMismatchException.class, () -> {
+            recTransactionService.create(userId, createReq);
+        });
+    }
+
+    @Test
+    @Order(11)
     @Transactional
     public void deleteRecurringTransactionTemplateWithoutTransactionsTest() {
 
@@ -290,7 +311,7 @@ public class ServiceTest {
     }
 
     @Test
-    @Order(11)
+    @Order(12)
     public void deleteRecurringTransactionTemplateWithRelatedTransactionsTest() {
 
         long userId = 3L;
@@ -314,7 +335,7 @@ public class ServiceTest {
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     public void deleteRecurringTransactionThatDoesNotBelongToUserTest() {
 
         long userId = 1L;
@@ -327,7 +348,7 @@ public class ServiceTest {
     }
 
     @Test
-    @Order(13)
+    @Order(14)
     public void updateRecurringTransactionTemplateOnlyTest() {
 
         long userId = 1L;
@@ -351,7 +372,7 @@ public class ServiceTest {
     }
 
     @Test
-    @Order(14)
+    @Order(15)
     public void updateRecurringTransactionTemplateWithAllRelatedTransactionsTest() {
 
         long userId = 1L;
@@ -391,7 +412,7 @@ public class ServiceTest {
     }
 
     @Test
-    @Order(15)
+    @Order(16)
     public void updateRecurringTransactionTemplateThatBelongToOtherUserTest() {
 
         long userId = 1L;
@@ -410,7 +431,7 @@ public class ServiceTest {
     }
 
     @Test
-    @Order(16)
+    @Order(17)
     public void generateRecurringTransactionsTest() {
 
         recTransactionService.generateRecurringTransactions();
@@ -449,7 +470,7 @@ public class ServiceTest {
     }
 
     @Test
-    @Order(17)
+    @Order(18)
     public void changeRecurringTransactionTemplateStatusToInactiveTest() {
 
         long userId = 3L;
@@ -465,7 +486,7 @@ public class ServiceTest {
     }
 
     @Test
-    @Order(18)
+    @Order(19)
     public void changeRecurringTransactionTemplateStatusToTheSameStatusItAlreadyIsTest() {
 
         long userId = 3L;
@@ -478,7 +499,7 @@ public class ServiceTest {
     }
 
     @Test
-    @Order(19)
+    @Order(20)
     public void changeRecurringTransactionTemplateThatBelongToTheOtherUserTest() {
 
         long userId = 3L;
@@ -491,7 +512,7 @@ public class ServiceTest {
     }
 
     @Test
-    @Order(20)
+    @Order(21)
     public void changeRecurringTransactionTemplateStatusToActiveWhereNextOccurrenceIsTodayAfterNoonTest() {
 
         long userId = 5L;
@@ -508,7 +529,7 @@ public class ServiceTest {
     }
 
     @Test
-    @Order(20)
+    @Order(22)
     public void changeRecurringTransactionTemplateStatusToActiveWhereNextOccurrenceIsTodayBeforeNoonTest() {
 
         long userId = 5L;
@@ -524,7 +545,7 @@ public class ServiceTest {
     }
 
     @Test
-    @Order(21)
+    @Order(23)
     public void changeRecurringTransactionTemplateStatusToActiveWhereNextOccurrenceFromBeforeToAfterCurrentDayTest() {
 
         long userId = 5L;
@@ -540,7 +561,7 @@ public class ServiceTest {
     }
 
     @Test
-    @Order(22)
+    @Order(24)
     public void changeRecurringTransactionTemplateToActiveWhereNextOccurrenceFromBeforeToCurrentDayBeforeNoonTest() {
 
         long userId = 5L;
@@ -557,7 +578,7 @@ public class ServiceTest {
     }
 
     @Test
-    @Order(23)
+    @Order(25)
     public void changeRecurringTransactionTemplateToActiveWhereNextOccurrenceFromBeforeToCurrentDayAfterNoonTest() {
 
         long userId = 5L;

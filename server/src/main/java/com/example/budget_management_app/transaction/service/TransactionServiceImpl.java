@@ -4,9 +4,11 @@ import com.example.budget_management_app.account.dao.AccountDao;
 import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.dao.CategoryDao;
 import com.example.budget_management_app.category.domain.Category;
+import com.example.budget_management_app.category.domain.CategoryType;
 import com.example.budget_management_app.common.exception.CategoryChangeNotAllowedException;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
+import com.example.budget_management_app.common.exception.TransactionTypeMismatchException;
 import com.example.budget_management_app.transaction.dao.TransactionDao;
 import com.example.budget_management_app.transaction.domain.*;
 import com.example.budget_management_app.transaction.dto.*;
@@ -31,17 +33,17 @@ public class TransactionServiceImpl implements TransactionService{
      * @return TransactionPage object
      */
     @Override
-    public PagedResponse<TransactionView> getViews(int page,
-                                                              int limit,
-                                                              TransactionTypeFilter type,
-                                                              TransactionModeFilter mode,
-                                                              List<Long> accounts,
-                                                              List<Long> categories,
-                                                              LocalDate since,
-                                                              LocalDate to,
-                                                              SortedBy sortedBy,
-                                                              SortDirection sortedType,
-                                                              long userId) {
+    public PagedResponse<TransactionSummary> getViews(int page,
+                                                      int limit,
+                                                      TransactionTypeFilter type,
+                                                      TransactionModeFilter mode,
+                                                      List<Long> accounts,
+                                                      List<Long> categories,
+                                                      LocalDate since,
+                                                      LocalDate to,
+                                                      SortedBy sortedBy,
+                                                      SortDirection sortedType,
+                                                      long userId) {
 
         if(!accountDao.areAccountsBelongToUser(userId, accounts)) {
             throw new NotFoundException(Account.class.getSimpleName(), accounts, ErrorCode.NOT_FOUND);
@@ -76,12 +78,14 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional
     @Override
-    public TransactionResponse create(TransactionCreateRequest createReq, long userId) {
+    public TransactionCreateResponse create(TransactionCreateRequest createReq, long userId) {
 
         // checking if category exists and belongs to the logged user
         long categoryId = createReq.categoryId();
         Category category = categoryDao.findByIdAndUser(categoryId, userId)
                 .orElseThrow( () -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
+
+        this.validateCategoryType(category.getType(), createReq.type());
 
         // checking if account exists and belongs to the logged user
         long accountId = createReq.accountId();
@@ -94,7 +98,7 @@ public class TransactionServiceImpl implements TransactionService{
 
         Transaction savedTransaction = transactionDao.save(transaction);
 
-        return new TransactionResponse(savedTransaction.getId(), savedTransaction.getTransactionDate());
+        return new TransactionCreateResponse(savedTransaction.getId(), savedTransaction.getTransactionDate());
     }
 
     @Transactional
@@ -111,6 +115,8 @@ public class TransactionServiceImpl implements TransactionService{
         long newCategoryId = updateReq.newTransactionCategoryId();
         Category category = categoryDao.findByIdAndUser(newCategoryId, userId)
                 .orElseThrow( () -> new NotFoundException(Category.class.getSimpleName(), newCategoryId, ErrorCode.NOT_FOUND));
+
+        this.validateCategoryType(category.getType(), transaction.getType());
 
         transaction.removeCategory();
         transaction.setCategory(category);
@@ -140,5 +146,11 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.removeCategory();
         transaction.removeAccount();
         transactionDao.delete(transaction);
+    }
+
+    private void validateCategoryType(CategoryType categoryType, TransactionType transactionType) {
+        if (!categoryType.supports(transactionType)) {
+            throw new TransactionTypeMismatchException(transactionType, categoryType, ErrorCode.TRANSACTION_TYPE_MISMATCH);
+        }
     }
 }

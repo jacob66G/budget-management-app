@@ -4,10 +4,8 @@ import com.example.budget_management_app.account.dao.AccountDao;
 import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.dao.CategoryDao;
 import com.example.budget_management_app.category.domain.Category;
-import com.example.budget_management_app.common.exception.ErrorCode;
-import com.example.budget_management_app.common.exception.InternalException;
-import com.example.budget_management_app.common.exception.NotFoundException;
-import com.example.budget_management_app.common.exception.StatusAlreadySetException;
+import com.example.budget_management_app.category.domain.CategoryType;
+import com.example.budget_management_app.common.exception.*;
 import com.example.budget_management_app.recurring_transaction.dao.RecurringTransactionDao;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
@@ -17,6 +15,7 @@ import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.recurring_transaction.mapper.Mapper;
 import com.example.budget_management_app.transaction.dao.TransactionDao;
 import com.example.budget_management_app.transaction.domain.Transaction;
+import com.example.budget_management_app.transaction.domain.TransactionType;
 import com.example.budget_management_app.transaction.dto.PagedResponse;
 import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
@@ -81,6 +80,8 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
         long categoryId = createReq.categoryId();
         Category category = categoryDao.findByIdAndUser(categoryId, userId)
                 .orElseThrow( () -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
+
+        this.validateCategoryType(category.getType(), createReq.type());
 
         RecurringInterval interval = createReq.recurringInterval();
         int recurringValue = createReq.recurringValue();
@@ -260,5 +261,11 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
             nextOccurrence = relativeDate.plusYears(recurringValue);
         }
         return nextOccurrence;
+    }
+
+    private void validateCategoryType(CategoryType categoryType, TransactionType transactionType) {
+        if (!categoryType.supports(transactionType)) {
+            throw new TransactionTypeMismatchException(transactionType, categoryType, ErrorCode.TRANSACTION_TYPE_MISMATCH);
+        }
     }
 }
