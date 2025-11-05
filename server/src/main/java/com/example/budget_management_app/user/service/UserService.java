@@ -3,11 +3,9 @@ package com.example.budget_management_app.user.service;
 import com.example.budget_management_app.auth.dto.RegistrationRequestDto;
 import com.example.budget_management_app.common.dto.ResponseMessageDto;
 import com.example.budget_management_app.user.domain.User;
-import com.example.budget_management_app.user.dto.ChangePasswordRequestDto;
-import com.example.budget_management_app.user.dto.TfaQRCode;
-import com.example.budget_management_app.user.dto.UpdateUserRequestDto;
-import com.example.budget_management_app.user.dto.UserResponseDto;
+import com.example.budget_management_app.user.dto.*;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
@@ -39,4 +37,8 @@ public interface UserService {
     void verifyTfaSetup(Long userId, String code);
 
     void tfaDisable(Long userId, String code);
+
+    List<UserSessionResponseDto> getUserSessions(Long userId);
+
+    void logoutSession(Long userId, Long sessionId);
 }

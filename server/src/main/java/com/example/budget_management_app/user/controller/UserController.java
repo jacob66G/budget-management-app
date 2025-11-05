@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -21,6 +22,20 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> getUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.getUser(userDetails.getId()));
+    }
+
+    @GetMapping("/me/sessions")
+    public ResponseEntity<List<UserSessionResponseDto>> getUserSessions(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(userService.getUserSessions(userDetails.getId()));
+    }
+
+    @DeleteMapping("/me/session/{sessionId}")
+    public ResponseEntity<Void> logoutSession(
+            @PathVariable Long sessionId,
+            @AuthenticationPrincipal CustomUserDetails userDetails)
+    {
+        userService.logoutSession(userDetails.getId(), sessionId);
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/me")

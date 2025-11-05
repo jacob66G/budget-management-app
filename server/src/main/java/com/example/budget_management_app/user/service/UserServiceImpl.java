@@ -6,13 +6,12 @@ import com.example.budget_management_app.category.service.CategoryService;
 import com.example.budget_management_app.common.dto.ResponseMessageDto;
 import com.example.budget_management_app.common.exception.*;
 import com.example.budget_management_app.security.service.TwoFactorAuthenticationService;
+import com.example.budget_management_app.session.domain.UserSession;
+import com.example.budget_management_app.session.service.UserSessionService;
 import com.example.budget_management_app.user.dao.UserDao;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.domain.UserStatus;
-import com.example.budget_management_app.user.dto.ChangePasswordRequestDto;
-import com.example.budget_management_app.user.dto.TfaQRCode;
-import com.example.budget_management_app.user.dto.UpdateUserRequestDto;
-import com.example.budget_management_app.user.dto.UserResponseDto;
+import com.example.budget_management_app.user.dto.*;
 import com.example.budget_management_app.user.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -36,6 +35,7 @@ public class UserServiceImpl implements UserService {
     private final CategoryService categoryService;
     private final AccountService accountService;
     private final UserMapper mapper;
+    private final UserSessionService userSessionService;
 
     public UserServiceImpl(
             UserDao userDao,
@@ -43,6 +43,7 @@ public class UserServiceImpl implements UserService {
             PasswordEncoder encoder,
             @Lazy CategoryService categoryService,
             @Lazy AccountService accountService,
+            @Lazy UserSessionService userSessionService,
             UserMapper mapper
     ) {
         this.userDao = userDao;
@@ -51,6 +52,7 @@ public class UserServiceImpl implements UserService {
         this.categoryService = categoryService;
         this.accountService = accountService;
         this.mapper = mapper;
+        this.userSessionService = userSessionService;
     }
 
     @Override
@@ -258,6 +260,17 @@ public class UserServiceImpl implements UserService {
         user.setMfaEnabled(false);
         userDao.update(user);
         log.info("The user: {}, turned off tfa", userId);
+    }
+
+    @Override
+    public List<UserSessionResponseDto> getUserSessions(Long userId) {
+        List<UserSession> sessions = userSessionService.findSessionsByUser(userId);
+        return sessions.stream().map(mapper::toUserSessionResponseDto).toList();
+    }
+
+    @Override
+    public void logoutSession(Long userId, Long sessionId) {
+        userSessionService.logout(sessionId, userId);
     }
 
     public void deleteUser(Long userId) {

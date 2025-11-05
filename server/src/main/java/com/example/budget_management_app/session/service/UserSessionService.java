@@ -4,6 +4,8 @@ import com.example.budget_management_app.session.domain.UserSession;
 import com.example.budget_management_app.session.dto.RefreshTokenResult;
 import org.springframework.http.ResponseCookie;
 
+import java.util.List;
+
 public interface UserSessionService {
 
     RefreshTokenResult refreshToken(String token, String userAgent);
@@ -14,7 +16,11 @@ public interface UserSessionService {
 
     void deleteAllSessionsForUser(Long id);
 
+    void logout(Long sessionId, Long userId);
+
     void logout(String refreshToken);
 
     ResponseCookie generateClearCookie();
+
+    List<UserSession> findSessionsByUser(Long userId);
 }

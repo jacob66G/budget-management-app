@@ -18,6 +18,18 @@ public class UserSessionDao {
         return Optional.ofNullable(em.find(UserSession.class, id));
     }
 
+    public Optional<UserSession> findByIdAndUser(Long sessionId, Long userId) {
+        List<UserSession> result = em.createQuery(
+                        "SELECT s FROM UserSession s WHERE s.id = :sessionId AND s.user.id = :userId",
+                        UserSession.class
+                )
+                .setParameter("sessionId", sessionId)
+                .setParameter("userId", userId)
+                .getResultList();
+
+        return result.stream().findFirst();
+    }
+
     public List<UserSession> findAllByUserId(Long userId) {
         return em.createQuery("SELECT s FROM UserSession s WHERE s.user.id = :userId", UserSession.class)
                 .setParameter("userId", userId)

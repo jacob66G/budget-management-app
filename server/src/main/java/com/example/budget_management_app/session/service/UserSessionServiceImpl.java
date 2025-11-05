@@ -119,6 +119,16 @@ public class UserSessionServiceImpl implements UserSessionService {
         userSessionDao.deleteAllByUserId(userId);
     }
 
+    @Transactional
+    @Override
+    public void logout(Long sessionId, Long userId) {
+        UserSession userSession = userSessionDao.findByIdAndUser(sessionId, userId)
+                .orElseThrow(() -> new NotFoundException(UserSession.class.getSimpleName(), sessionId, ErrorCode.NOT_FOUND));
+
+        performLogoutCleanup(userSession);
+    }
+
+    @Transactional
     @Override
     public void logout(String refreshToken) {
         Optional<UserSession> sessionOpt = findSessionByToken(refreshToken);
@@ -130,11 +140,7 @@ public class UserSessionServiceImpl implements UserSessionService {
 
         UserSession session = sessionOpt.get();
 
-        evictUserSessionFromCache(session);
-
-        userSessionDao.delete(session);
-
-        log.info("User {} has successfully logged out (session {}).", session.getUser().getId(), session.getId());
+        performLogoutCleanup(session);
     }
 
     @Override
@@ -157,6 +163,19 @@ public class UserSessionServiceImpl implements UserSessionService {
                 .secure(false)
                 .path("/api/auth")
                 .build();
+    }
+
+    @Override
+    public List<UserSession> findSessionsByUser(Long userId) {
+        return userSessionDao.findAllByUserId(userId);
+    }
+
+    private void performLogoutCleanup(UserSession session) {
+        evictUserSessionFromCache(session);
+
+        userSessionDao.delete(session);
+
+        log.info("User {} has successfully logged out (session {}).", session.getUser().getId(), session.getId());
     }
 
     private void enforceMaxSessions(User user) {
