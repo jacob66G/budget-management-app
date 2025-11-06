@@ -154,6 +154,7 @@ public class AuthServiceImpl implements AuthService {
         return defaultResponse;
     }
 
+    @Transactional
     @Override
     public void resetPasswordConfirm(PasswordResetConfirmDto dto) {
         if (!dto.newPassword().equals(dto.confirmedNewPassword())) {

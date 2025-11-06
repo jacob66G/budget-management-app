@@ -34,11 +34,13 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryMapper mapper;
     private final IconKeyValidator iconKeyValidator;
 
+    @Transactional(readOnly = true)
     @Override
     public List<CategoryResponseDto> getCategories(Long userId, String type) {
         return categoryDao.findByUser(userId, type).stream().map(mapper::toCategoryResponseDto).toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CategoryResponseDto getCategory(Long userId, Long categoryId) {
         Category category = categoryDao.findByIdAndUser(categoryId, userId)

@@ -165,6 +165,7 @@ public class UserSessionServiceImpl implements UserSessionService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<UserSession> findSessionsByUser(Long userId) {
         return userSessionDao.findAllByUserId(userId);
@@ -205,7 +206,7 @@ public class UserSessionServiceImpl implements UserSessionService {
                 .orElseThrow(() -> new UserSessionException("Invalid token", ErrorCode.INVALID_TOKEN));
     }
 
-    public String rotateRefreshToken(UserSession session, String userAgent, String oldToken) {
+    private String rotateRefreshToken(UserSession session, String userAgent, String oldToken) {
         String newToken = generateTokenValue();
         session.setUserAgent(userAgent);
         userSessionDao.save(session);

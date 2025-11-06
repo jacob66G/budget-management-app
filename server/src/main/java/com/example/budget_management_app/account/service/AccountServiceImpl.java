@@ -36,6 +36,7 @@ public class AccountServiceImpl implements AccountService {
     private final StorageService storageService;
     private final IconKeyValidator iconKeyValidator;
 
+    @Transactional(readOnly = true)
     @Override
     public AccountDetailsResponseDto getAccount(Long userId, Long accountId) {
         Account account = accountDao.findByIdAndUser(accountId, userId)
@@ -43,6 +44,7 @@ public class AccountServiceImpl implements AccountService {
         return mapper.toDetailsResponseDto(account);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<AccountResponseDto> getAccounts(Long userId, SearchCriteria criteria) {
         List<Account> accounts = accountDao.findByUserAndCriteria(userId, criteria);

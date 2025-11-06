@@ -36,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final AccountService accountService;
     private final UserMapper mapper;
     private final UserSessionService userSessionService;
+    private final UserService self;
 
     public UserServiceImpl(
             UserDao userDao,
@@ -44,6 +45,7 @@ public class UserServiceImpl implements UserService {
             @Lazy CategoryService categoryService,
             @Lazy AccountService accountService,
             @Lazy UserSessionService userSessionService,
+            @Lazy UserService self,
             UserMapper mapper
     ) {
         this.userDao = userDao;
@@ -53,8 +55,10 @@ public class UserServiceImpl implements UserService {
         this.accountService = accountService;
         this.mapper = mapper;
         this.userSessionService = userSessionService;
+        this.self = self;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public UserResponseDto getUser(Long id) {
         User user = userDao.findById(id)
@@ -63,17 +67,20 @@ public class UserServiceImpl implements UserService {
         return mapper.toUserResponseDto(user);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public User getUserById(Long id) {
         return userDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("User with id: " + id + " not found", ErrorCode.NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Optional<User> findUserById(Long id) {
         return userDao.findById(id);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Optional<User> findUserByEmail(String email) {
         return userDao.findByEmail(email);
@@ -101,7 +108,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserResponseDto updateUser(Long userId, UpdateUserRequestDto dto) {
-        User user = getUserById(userId);
+        User user = self.getUserById(userId);
 
         validateUserIsActive(user);
 
@@ -142,7 +149,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public ResponseMessageDto closeUser(Long userId) {
-        User user = getUserById(userId);
+        User user = self.getUserById(userId);
 
         validateUserIsActive(user);
 
@@ -188,7 +195,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void changePassword(Long userId, ChangePasswordRequestDto dto) {
-        User user = getUserById(userId);
+        User user = self.getUserById(userId);
 
         validateUserIsActive(user);
 
@@ -204,7 +211,6 @@ public class UserServiceImpl implements UserService {
         log.info("The user: {} has changed password", userId);
     }
 
-    @Transactional
     @Override
     public void updateUserPassword(Long userId, String newPassword) {
         User user = userDao.findById(userId)
@@ -222,7 +228,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public TfaQRCode tfaSetup(Long userId) {
-        User user = getUserById(userId);
+        User user = self.getUserById(userId);
 
         validateUserIsActive(user);
 
@@ -237,7 +243,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void verifyTfaSetup(Long userId, String code) {
-        User user = getUserById(userId);
+        User user = self.getUserById(userId);
 
         validateUserIsActive(user);
         validateTfaCode(userId, user.getTempSecret(), code);
@@ -251,7 +257,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void tfaDisable(Long userId, String code) {
-        User user = getUserById(userId);
+        User user = self.getUserById(userId);
 
         validateUserIsActive(user);
         validateTfaCode(userId, user.getSecret(), code);
@@ -273,8 +279,8 @@ public class UserServiceImpl implements UserService {
         userSessionService.logout(sessionId, userId);
     }
 
-    public void deleteUser(Long userId) {
-        User user = getUserById(userId);
+    private void deleteUser(Long userId) {
+        User user = self.getUserById(userId);
 
         if (!user.getStatus().equals(UserStatus.PENDING_DELETION)) {
             log.error("Attempt to delete user {}, who is not awaiting deletion. Status: {}", userId, user.getStatus().name());
