@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -85,7 +84,7 @@ public class S3StorageService implements StorageService {
         try {
             List<ObjectIdentifier> objectsToDelete = keys.stream()
                     .map(key -> ObjectIdentifier.builder().key(key).build())
-                    .collect(Collectors.toList());
+                    .toList();
 
             Delete deletePayload = Delete.builder()
                     .objects(objectsToDelete)

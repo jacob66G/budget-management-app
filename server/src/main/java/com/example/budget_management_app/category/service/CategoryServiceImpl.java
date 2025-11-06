@@ -107,7 +107,7 @@ public class CategoryServiceImpl implements CategoryService {
             category.setName(def.getName());
             category.setType(def.getType());
             category.setDefault(def.isDefault());
-            category.setIconKey(def.getIconPath());
+            category.setIconKey(def.getIconKey());
 
             user.addCategory(category);
         }

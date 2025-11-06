@@ -125,7 +125,7 @@ public class AccountServiceImpl implements AccountService {
         account.setCurrency(SupportedCurrency.PLN);
         account.setDefault(true);
         account.setBudgetType(BudgetType.NONE);
-        account.setIconKey("");
+        account.setIconKey("accounts/bank-finance-loan-icon.png");
         account.setCreatedAt(Instant.now());
         account.setAccountStatus(AccountStatus.ACTIVE);
 
