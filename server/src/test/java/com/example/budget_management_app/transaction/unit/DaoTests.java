@@ -4,6 +4,7 @@ import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.transaction.dao.TransactionDao;
 import com.example.budget_management_app.transaction.domain.*;
+import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import org.junit.jupiter.api.*;

@@ -3,6 +3,7 @@ package com.example.budget_management_app.transaction.domain;
 import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
+import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,7 +46,7 @@ public class Transaction {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 

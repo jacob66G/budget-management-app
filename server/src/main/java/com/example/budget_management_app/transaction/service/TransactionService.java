@@ -5,6 +5,7 @@ import com.example.budget_management_app.transaction.domain.SortedBy;
 import com.example.budget_management_app.transaction.domain.TransactionModeFilter;
 import com.example.budget_management_app.transaction.domain.TransactionTypeFilter;
 import com.example.budget_management_app.transaction.dto.*;
+import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 
 import java.time.LocalDate;
 import java.util.List;

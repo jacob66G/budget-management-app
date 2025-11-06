@@ -6,7 +6,7 @@ import com.example.budget_management_app.recurring_transaction.dao.RecurringTran
 import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
 import com.example.budget_management_app.transaction.domain.Transaction;
-import com.example.budget_management_app.transaction.domain.TransactionType;
+import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import org.junit.jupiter.api.*;

@@ -4,20 +4,22 @@ import com.example.budget_management_app.account.dao.AccountDao;
 import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.dao.CategoryDao;
 import com.example.budget_management_app.category.domain.Category;
-import com.example.budget_management_app.category.domain.CategoryType;
 import com.example.budget_management_app.common.exception.CategoryChangeNotAllowedException;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
-import com.example.budget_management_app.common.exception.TransactionTypeMismatchException;
 import com.example.budget_management_app.transaction.dao.TransactionDao;
 import com.example.budget_management_app.transaction.domain.*;
 import com.example.budget_management_app.transaction.dto.*;
 import com.example.budget_management_app.transaction.mapper.Mapper;
+import com.example.budget_management_app.transaction_common.dto.PagedResponse;
+import com.example.budget_management_app.transaction_common.service.AccountUpdateService;
+import com.example.budget_management_app.transaction_common.service.CategoryValidatorService;
 import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -28,6 +30,8 @@ public class TransactionServiceImpl implements TransactionService{
     private final TransactionDao transactionDao;
     private final CategoryDao categoryDao;
     private final AccountDao accountDao;
+    private final CategoryValidatorService transactionValidator;
+    private final AccountUpdateService accountUpdateService;
 
     /**
      * @return TransactionPage object
@@ -85,13 +89,14 @@ public class TransactionServiceImpl implements TransactionService{
         Category category = categoryDao.findByIdAndUser(categoryId, userId)
                 .orElseThrow( () -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
 
-        this.validateCategoryType(category.getType(), createReq.type());
+        transactionValidator.validateCategoryType(category.getType(), createReq.type());
 
         // checking if account exists and belongs to the logged user
         long accountId = createReq.accountId();
         Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow( () -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
 
+        accountUpdateService.calculateBalanceAfterTransactionCreation(account, createReq.amount(), createReq.type());
         Transaction transaction = Mapper.fromDto(createReq);
         transaction.setCategory(category);
         transaction.setAccount(account);
@@ -116,7 +121,7 @@ public class TransactionServiceImpl implements TransactionService{
         Category category = categoryDao.findByIdAndUser(newCategoryId, userId)
                 .orElseThrow( () -> new NotFoundException(Category.class.getSimpleName(), newCategoryId, ErrorCode.NOT_FOUND));
 
-        this.validateCategoryType(category.getType(), transaction.getType());
+        transactionValidator.validateCategoryType(category.getType(), transaction.getType());
 
         transaction.removeCategory();
         transaction.setCategory(category);
@@ -131,7 +136,12 @@ public class TransactionServiceImpl implements TransactionService{
         Transaction transaction = transactionDao.findByIdAndUserId(id, userId)
                 .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
-        transaction.setAmount(req.amount());
+        if (!req.amount().equals(transaction.getAmount())) {
+            BigDecimal newAmount = req.amount();
+            accountUpdateService.calculateBalanceAfterTransactionUpdate(transaction.getAccount(), newAmount, transaction.getAmount(), transaction.getType());
+            transaction.setAmount(newAmount);
+        }
+
         transaction.setTitle(req.title());
         transaction.setDescription(req.description());
     }
@@ -143,14 +153,11 @@ public class TransactionServiceImpl implements TransactionService{
         Transaction transaction = transactionDao.findByIdAndUserId(id, userId)
                 .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
+        accountUpdateService.calculateBalanceAfterTransactionDeletion(transaction.getAccount(), transaction.getAmount(), transaction.getType());
         transaction.removeCategory();
         transaction.removeAccount();
         transactionDao.delete(transaction);
     }
 
-    private void validateCategoryType(CategoryType categoryType, TransactionType transactionType) {
-        if (!categoryType.supports(transactionType)) {
-            throw new TransactionTypeMismatchException(transactionType, categoryType, ErrorCode.TRANSACTION_TYPE_MISMATCH);
-        }
-    }
+
 }

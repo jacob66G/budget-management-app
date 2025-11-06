@@ -3,7 +3,7 @@ package com.example.budget_management_app.recurring_transaction.service;
 import com.example.budget_management_app.recurring_transaction.domain.RemovalRange;
 import com.example.budget_management_app.recurring_transaction.domain.UpdateRange;
 import com.example.budget_management_app.recurring_transaction.dto.*;
-import com.example.budget_management_app.transaction.dto.PagedResponse;
+import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 
 public interface RecurringTransactionService {
 

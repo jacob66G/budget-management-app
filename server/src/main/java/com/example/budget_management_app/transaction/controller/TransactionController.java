@@ -7,6 +7,7 @@ import com.example.budget_management_app.transaction.domain.TransactionModeFilte
 import com.example.budget_management_app.transaction.domain.TransactionTypeFilter;
 import com.example.budget_management_app.transaction.dto.*;
 import com.example.budget_management_app.transaction.service.TransactionService;
+import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

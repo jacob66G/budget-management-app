@@ -4,8 +4,10 @@ import com.example.budget_management_app.account.dao.AccountDao;
 import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.dao.CategoryDao;
 import com.example.budget_management_app.category.domain.Category;
-import com.example.budget_management_app.category.domain.CategoryType;
-import com.example.budget_management_app.common.exception.*;
+import com.example.budget_management_app.common.exception.ErrorCode;
+import com.example.budget_management_app.common.exception.InternalException;
+import com.example.budget_management_app.common.exception.NotFoundException;
+import com.example.budget_management_app.common.exception.StatusAlreadySetException;
 import com.example.budget_management_app.recurring_transaction.dao.RecurringTransactionDao;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
@@ -15,17 +17,20 @@ import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.recurring_transaction.mapper.Mapper;
 import com.example.budget_management_app.transaction.dao.TransactionDao;
 import com.example.budget_management_app.transaction.domain.Transaction;
-import com.example.budget_management_app.transaction.domain.TransactionType;
-import com.example.budget_management_app.transaction.dto.PagedResponse;
+import com.example.budget_management_app.transaction_common.dto.PagedResponse;
+import com.example.budget_management_app.transaction_common.service.AccountUpdateService;
+import com.example.budget_management_app.transaction_common.service.CategoryValidatorService;
 import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Service
@@ -33,6 +38,8 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
 
     private final RecurringTransactionDao recurringTransactionDao;
     private final TransactionDao transactionDao;
+    private final CategoryValidatorService transactionValidator;
+    private final AccountUpdateService accountUpdateService;
     private final AccountDao accountDao;
     private final CategoryDao categoryDao;
     /**
@@ -81,7 +88,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
         Category category = categoryDao.findByIdAndUser(categoryId, userId)
                 .orElseThrow( () -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
 
-        this.validateCategoryType(category.getType(), createReq.type());
+        transactionValidator.validateCategoryType(category.getType(), createReq.type());
 
         RecurringInterval interval = createReq.recurringInterval();
         int recurringValue = createReq.recurringValue();
@@ -102,6 +109,9 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
             recurringTransaction.addTransaction(transaction);
             recurringTransaction.setAccount(account);
             recurringTransaction.setCategory(category);
+
+            this.accountUpdateService.calculateBalanceAfterTransactionCreation(account, createReq.amount(), createReq.type());
+
             RecurringTransaction createdRecurringTransaction = recurringTransactionDao.create(recurringTransaction);
 
             Transaction createdTransaction = createdRecurringTransaction.getTransactions()
@@ -191,12 +201,22 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
         RecurringTransaction recurringTransaction = recurringTransactionDao.findByIdAndUserId(id, userId)
                 .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
+        if (range.equals(RemovalRange.TEMPLATE)) {
+            recurringTransaction.detachTransactions();
+        } else {
+            if (recurringTransaction.getTransactions() != null && !recurringTransaction.getTransactions().isEmpty()) {
+                BigDecimal totalAmount = recurringTransaction.getTransactions()
+                        .stream()
+                        .map(Transaction::getAmount)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                this.accountUpdateService.calculateBalanceAfterTransactionDeletion(recurringTransaction.getAccount(), totalAmount, recurringTransaction.getType());
+            }
+        }
+
         recurringTransaction.setAccount(null);
         recurringTransaction.setCategory(null);
 
-        if (range.equals(RemovalRange.TEMPLATE)) {
-            recurringTransaction.detachTransactions();
-        }
         recurringTransactionDao.delete(recurringTransaction);
     }
 
@@ -212,17 +232,31 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
         RecurringTransaction recurringTransaction = recurringTransactionDao.findByIdAndUserId(id, userId)
                 .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
-        recurringTransaction.setAmount(updateReq.amount());
         recurringTransaction.setTitle(updateReq.title());
         recurringTransaction.setDescription(updateReq.description());
 
-        if (range.equals(UpdateRange.ALL)) {
-            List<Transaction> transactions = transactionDao.findByRecurringTransactionId(id);
-            transactions.stream().forEach( transaction -> {
-                transaction.setAmount(updateReq.amount());
-                transaction.setTitle(updateReq.title());
-                transaction.setDescription(updateReq.description());
-            });
+        if (recurringTransaction.getAmount().compareTo(updateReq.amount()) != 0) {
+            recurringTransaction.setAmount(updateReq.amount());
+            if (range.equals(UpdateRange.ALL)) {
+                Set<Transaction> transactions = recurringTransaction.getTransactions();
+                if (transactions != null && !transactions.isEmpty()) {
+                    BigDecimal currentTotalAmount = transactions.stream()
+                            .map(Transaction::getAmount)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    BigDecimal newTotalAmount = updateReq.amount().multiply(BigDecimal.valueOf(transactions.size()));
+                    this.accountUpdateService.calculateBalanceAfterTransactionUpdate(
+                            recurringTransaction.getAccount(),
+                            newTotalAmount,
+                            currentTotalAmount,
+                            recurringTransaction.getType()
+                    );
+                    transactions.forEach( transaction -> {
+                        transaction.setAmount(updateReq.amount());
+                        transaction.setTitle(updateReq.title());
+                        transaction.setDescription(updateReq.description());
+                    });
+                }
+            }
         }
     }
 
@@ -241,6 +275,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
                                 recTransaction.getAmount(), recTransaction.getTitle(), recTransaction.getType(),
                                 recTransaction.getDescription(), LocalDateTime.now()
                         );
+                        this.accountUpdateService.calculateBalanceAfterTransactionCreation(recTransaction.getAccount(), recTransaction.getAmount(), recTransaction.getType());
                         transaction.setAccount(recTransaction.getAccount());
                         transaction.setCategory(recTransaction.getCategory());
                         recTransaction.addTransaction(transaction);
@@ -261,11 +296,5 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
             nextOccurrence = relativeDate.plusYears(recurringValue);
         }
         return nextOccurrence;
-    }
-
-    private void validateCategoryType(CategoryType categoryType, TransactionType transactionType) {
-        if (!categoryType.supports(transactionType)) {
-            throw new TransactionTypeMismatchException(transactionType, categoryType, ErrorCode.TRANSACTION_TYPE_MISMATCH);
-        }
     }
 }

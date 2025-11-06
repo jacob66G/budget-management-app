@@ -5,7 +5,7 @@ import com.example.budget_management_app.recurring_transaction.domain.UpdateRang
 import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.security.service.CustomUserDetails;
-import com.example.budget_management_app.transaction.dto.PagedResponse;
+import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

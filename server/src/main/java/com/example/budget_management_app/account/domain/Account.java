@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
-@ToString(exclude = "transactions")
+@ToString(exclude = {"transactions", "user"})
 @Entity
 @Getter
 @Setter

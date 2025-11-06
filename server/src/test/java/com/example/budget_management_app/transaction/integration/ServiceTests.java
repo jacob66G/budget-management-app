@@ -1,11 +1,14 @@
 package com.example.budget_management_app.transaction.integration;
 
+import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.common.exception.CategoryChangeNotAllowedException;
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.TransactionTypeMismatchException;
 import com.example.budget_management_app.transaction.domain.*;
 import com.example.budget_management_app.transaction.dto.*;
 import com.example.budget_management_app.transaction.service.TransactionService;
+import com.example.budget_management_app.transaction_common.domain.TransactionType;
+import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -188,7 +191,7 @@ public class ServiceTests {
     @Test
     @Order(7)
     @Transactional
-    public void createTransactionTest() {
+    public void createExpenseTypeTransactionTest() {
 
         long userId = 2L;
         long categoryId = 6L;
@@ -196,7 +199,7 @@ public class ServiceTests {
 
         TransactionCreateRequest createReq =
                 new TransactionCreateRequest(
-                        new BigDecimal("800"), "Nowy materac", TransactionType.EXPENSE,
+                        new BigDecimal("800.00"), "Nowy materac", TransactionType.EXPENSE,
                         null, accountId, categoryId
                 );
 
@@ -209,14 +212,58 @@ public class ServiceTests {
         Transaction createdTransaction = em.find(Transaction.class, response.id());
         assertThat(createdTransaction).isNotNull();
         assertThat(createdTransaction.getId()).isEqualTo(response.id());
-        assertThat(createdTransaction.getAccount().getId()).isEqualTo(accountId);
+
+        Account assignedAccount = createdTransaction.getAccount();
+        assertThat(assignedAccount).isNotNull();
+        assertThat(assignedAccount.getId()).isEqualTo(accountId);
+        assertThat(assignedAccount.getBalance()).isEqualTo(new BigDecimal("2200.00"));
+        assertThat(assignedAccount.getTotalExpense()).isEqualTo(new BigDecimal("2499.50"));
+
         assertThat(createdTransaction.getCategory().getId()).isEqualTo(categoryId);
 
         System.out.println(createdTransaction);
+        System.out.println(assignedAccount);
     }
 
     @Test
     @Order(8)
+    @Transactional
+    public void createIncomeTypeTransactionTest() {
+
+        long userId = 1L;
+        long categoryId = 3L;
+        long accountId = 1L;
+
+        TransactionCreateRequest createReq =
+                new TransactionCreateRequest(
+                        new BigDecimal("800.00"), "Premia", TransactionType.INCOME,
+                        null, accountId, categoryId
+                );
+
+        TransactionCreateResponse response = transactionService.create(createReq, userId);
+
+        System.out.println(response);
+
+        em.clear();
+
+        Transaction createdTransaction = em.find(Transaction.class, response.id());
+        assertThat(createdTransaction).isNotNull();
+        assertThat(createdTransaction.getId()).isEqualTo(response.id());
+
+        Account assignedAccount = createdTransaction.getAccount();
+        assertThat(assignedAccount).isNotNull();
+        assertThat(assignedAccount.getId()).isEqualTo(accountId);
+        assertThat(assignedAccount.getBalance()).isEqualTo(new BigDecimal("2300.00"));
+        assertThat(assignedAccount.getTotalIncome()).isEqualTo(new BigDecimal("5800.00"));
+
+        assertThat(createdTransaction.getCategory().getId()).isEqualTo(categoryId);
+
+        System.out.println(createdTransaction);
+        System.out.println(assignedAccount);
+    }
+
+    @Test
+    @Order(9)
     public void createTransactionWithCategoryWithIncompatibleTypeAssignedTest() {
 
         long userId = 2L;
@@ -235,7 +282,7 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(9)
+    @Order(10)
     public void changeRecurringTransactionCategoryTest() {
 
         long userId = 3L;
@@ -257,7 +304,7 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(10)
+    @Order(11)
     public void changeCategoryForTransactionThatBelongToOtherUserTest() {
 
         long userId = 1L;
@@ -279,7 +326,7 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(11)
+    @Order(12)
     public void changeTransactionCategoryButTransactionDoesNotBelongToProvidedCategoryTest() {
 
         long userId = 1L;
@@ -301,7 +348,7 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     public void changeTransactionCategoryWhereNewCategoryDoesNotBelongToTheUserTest() {
 
         long userId = 1L;
@@ -323,7 +370,7 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(13)
+    @Order(14)
     @Transactional
     public void changeTransactionCategoryTest() {
 
@@ -363,7 +410,7 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(14)
+    @Order(15)
     public void changeTransactionCategoryWhereNewCategoryIsIncompatibleType() {
 
         long userId = 1L;
@@ -389,7 +436,7 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(15)
+    @Order(16)
     public void updateTransactionThatBelongToOtherUserTest() {
 
         long userId = 2L;
@@ -407,9 +454,9 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(16)
+    @Order(17)
     @Transactional
-    public void updateTransactionTest() {
+    public void updateTransactionIncreasingTransactionExpenseValueTest() {
 
         long userId = 1L;
         long transactionId = 22L;
@@ -430,10 +477,116 @@ public class ServiceTests {
         assertThat(updatedTransaction.getId()).isEqualTo(transactionId);
 
         System.out.println(updatedTransaction);
+
+        Account account = updatedTransaction.getAccount();
+        assertThat(account).isNotNull();
+        assertThat(account.getBalance()).isEqualTo(new BigDecimal("1480.00"));
+        assertThat(account.getTotalExpense()).isEqualTo(new BigDecimal("3520.00"));
+
+        System.out.println(account);
     }
 
     @Test
-    @Order(17)
+    @Order(18)
+    @Transactional
+    public void updateTransactionDecreasingTransactionExpenseValueTest() {
+
+        long userId = 1L;
+        long transactionId = 22L;
+
+        TransactionUpdateRequest updateReq =
+                new TransactionUpdateRequest(
+                        "Bilet miesięczny", new BigDecimal("40"),
+                        "Bilet miesięczny potaniał"
+                );
+
+        transactionService.update(transactionId, userId, updateReq);
+
+        em.flush();
+        em.clear();
+
+        Transaction updatedTransaction = em.find(Transaction.class, transactionId);
+        assertThat(updatedTransaction).isNotNull();
+        assertThat(updatedTransaction.getId()).isEqualTo(transactionId);
+
+        System.out.println(updatedTransaction);
+
+        Account account = updatedTransaction.getAccount();
+        assertThat(account).isNotNull();
+        assertThat(account.getBalance()).isEqualTo(new BigDecimal("1510.00"));
+        assertThat(account.getTotalExpense()).isEqualTo(new BigDecimal("3490.00"));
+
+        System.out.println(account);
+    }
+
+    @Test
+    @Order(19)
+    @Transactional
+    public void updateTransactionIncreasingTransactionIncomeValueTest() {
+
+        long userId = 1L;
+        long transactionId = 23L;
+
+        TransactionUpdateRequest updateReq =
+                new TransactionUpdateRequest(
+                        "Wypłata", new BigDecimal("5100"),
+                        "Wypłata z premią - 100zł"
+                );
+
+        transactionService.update(transactionId, userId, updateReq);
+
+        em.flush();
+        em.clear();
+
+        Transaction updatedTransaction = em.find(Transaction.class, transactionId);
+        assertThat(updatedTransaction).isNotNull();
+        assertThat(updatedTransaction.getId()).isEqualTo(transactionId);
+
+        System.out.println(updatedTransaction);
+
+        Account account = updatedTransaction.getAccount();
+        assertThat(account).isNotNull();
+        assertThat(account.getBalance()).isEqualTo(new BigDecimal("1600.00"));
+        assertThat(account.getTotalIncome()).isEqualTo(new BigDecimal("5100.00"));
+
+        System.out.println(account);
+    }
+
+    @Test
+    @Order(20)
+    @Transactional
+    public void updateTransactionDecreasingTransactionIncomeValueTest() {
+
+        long userId = 1L;
+        long transactionId = 23L;
+
+        TransactionUpdateRequest updateReq =
+                new TransactionUpdateRequest(
+                        "Wypłata", new BigDecimal("4900"),
+                        "Wypłata obcięta o 100zł"
+                );
+
+        transactionService.update(transactionId, userId, updateReq);
+
+        em.flush();
+        em.clear();
+
+        Transaction updatedTransaction = em.find(Transaction.class, transactionId);
+        assertThat(updatedTransaction).isNotNull();
+        assertThat(updatedTransaction.getId()).isEqualTo(transactionId);
+
+        System.out.println(updatedTransaction);
+
+        Account account = updatedTransaction.getAccount();
+        assertThat(account).isNotNull();
+        assertThat(account.getBalance()).isEqualTo(new BigDecimal("1400.00"));
+        assertThat(account.getTotalIncome()).isEqualTo(new BigDecimal("4900.00"));
+
+        System.out.println(account);
+    }
+
+    @Test
+    @Order(21)
     public void deleteTransactionForOtherUserTest() {
 
         long userId = 2L;
@@ -445,15 +598,44 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(18)
-    public void deleteTransactionTest() {
+    @Order(22)
+    public void deleteExpenseTypeTransactionTest() {
 
         long userId = 1L;
         long transactionId = 22L;
+        long accountId = 1L;
 
         transactionService.delete(transactionId, userId);
 
         Transaction deletedTransaction = em.find(Transaction.class, transactionId);
         assertThat(deletedTransaction).isNull();
+
+        Account account = em.find(Account.class, accountId);
+        assertThat(account).isNotNull();
+        assertThat(account.getBalance()).isEqualTo(new BigDecimal("1550.00"));
+        assertThat(account.getTotalExpense()).isEqualTo(new BigDecimal("3450.00"));
+
+        System.out.println(account);
+    }
+
+    @Test
+    @Order(23)
+    public void deleteIncomeTypeTransactionTest() {
+
+        long userId = 1L;
+        long transactionId = 28L;
+        long accountId = 2L;
+
+        transactionService.delete(transactionId, userId);
+
+        Transaction deletedTransaction = em.find(Transaction.class, transactionId);
+        assertThat(deletedTransaction).isNull();
+
+        Account account = em.find(Account.class, accountId);
+        assertThat(account).isNotNull();
+        assertThat(account.getBalance()).isEqualTo(new BigDecimal("9000.00"));
+        assertThat(account.getTotalIncome()).isEqualTo(new BigDecimal("0.00"));
+
+        System.out.println(account);
     }
 }

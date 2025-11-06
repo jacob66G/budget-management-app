@@ -1,4 +1,4 @@
-package com.example.budget_management_app.transaction.dto;
+package com.example.budget_management_app.transaction_common.dto;
 
 import java.util.Map;
 

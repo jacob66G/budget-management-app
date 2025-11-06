@@ -28,7 +28,7 @@ INSERT INTO accounts (name, balance, total_income, total_expense, currency, is_d
 
 -- Konta dla Usera 2 (2 konta)
 INSERT INTO accounts (name, balance, total_income, total_expense, currency, is_default, description, created_at, user_id) VALUES
-('Portfel (PLN)', 300.50, 2000.00, 1699.50, 'PLN', true, 'Gotówka', CURRENT_TIMESTAMP, 2),
+('Portfel (PLN)', 3000, 2000.00, 1699.50, 'PLN', true, 'Gotówka', CURRENT_TIMESTAMP, 2),
 ('Konto USD', 2000.00, 2000.00, 0.00, 'USD', false, NULL, CURRENT_TIMESTAMP, 2);
 
 -- Konta dla Usera 3 (4 konta)
@@ -121,7 +121,8 @@ INSERT INTO recurring_transactions (amount, title, type, description, start_date
 (50.00, 'Karnecik', 'EXPENSE', NULL, '2025-10-31', NULL, 'MONTH', 1, CURRENT_DATE, false, CURRENT_TIMESTAMP, 19, 12),
 (50.00, 'Karnet na siłownie', 'EXPENSE', NULL, '2025-06-06', NULL, 'MONTH', 1, '2025-08-06', false, CURRENT_TIMESTAMP, 19, 12),
 (50.00, 'Karnet na siłownie', 'EXPENSE', NULL, '2024-06-01', NULL, 'MONTH', 1, CURRENT_DATE - INTERVAL '4' MONTH, false, CURRENT_TIMESTAMP, 19, 12),
-(50.00, 'Karnet na siłownie', 'EXPENSE', NULL, '2025-06-06', NULL, 'MONTH', 1, CURRENT_DATE - INTERVAL '3' MONTH, false, CURRENT_TIMESTAMP, 19, 12);
+(50.00, 'Karnet na siłownie', 'EXPENSE', NULL, '2025-06-06', NULL, 'MONTH', 1, CURRENT_DATE - INTERVAL '3' MONTH, false, CURRENT_TIMESTAMP, 19, 12),
+(150.00, 'Siłownia', 'EXPENSE', NULL, '2024-01-10', '2025-12-31', 'MONTH', 1, CURRENT_DATE, true, CURRENT_TIMESTAMP, 4, 1);
 
 
 -- ===================================================================================

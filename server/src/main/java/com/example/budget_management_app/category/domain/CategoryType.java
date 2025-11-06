@@ -1,6 +1,6 @@
 package com.example.budget_management_app.category.domain;
 
-import com.example.budget_management_app.transaction.domain.TransactionType;
+import com.example.budget_management_app.transaction_common.domain.TransactionType;
 
 public enum CategoryType {
     INCOME {

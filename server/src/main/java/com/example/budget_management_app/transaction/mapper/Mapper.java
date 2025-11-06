@@ -2,9 +2,9 @@ package com.example.budget_management_app.transaction.mapper;
 
 import com.example.budget_management_app.account.domain.SupportedCurrency;
 import com.example.budget_management_app.transaction.domain.Transaction;
-import com.example.budget_management_app.transaction.domain.TransactionType;
-import com.example.budget_management_app.transaction.dto.AccountSummary;
-import com.example.budget_management_app.transaction.dto.CategorySummary;
+import com.example.budget_management_app.transaction_common.domain.TransactionType;
+import com.example.budget_management_app.transaction_common.dto.AccountSummary;
+import com.example.budget_management_app.transaction_common.dto.CategorySummary;
 import com.example.budget_management_app.transaction.dto.TransactionCreateRequest;
 import com.example.budget_management_app.transaction.dto.TransactionSummary;
 import jakarta.persistence.Tuple;

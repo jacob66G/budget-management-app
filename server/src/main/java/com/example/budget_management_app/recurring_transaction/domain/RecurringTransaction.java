@@ -3,7 +3,7 @@ package com.example.budget_management_app.recurring_transaction.domain;
 import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.transaction.domain.Transaction;
-import com.example.budget_management_app.transaction.domain.TransactionType;
+import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
