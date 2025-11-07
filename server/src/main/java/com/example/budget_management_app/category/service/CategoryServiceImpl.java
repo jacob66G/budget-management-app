@@ -121,6 +121,50 @@ public class CategoryServiceImpl implements CategoryService {
         categoryDao.deleteAll(userId);
     }
 
+    @Transactional
+    @Override
+    public void reassignTransactions(Long userId, Long oldCategoryId, Long newCategoryId) {
+        if (oldCategoryId.equals(newCategoryId)) {
+            throw new ValidationException("Cannot reassign to the same category.", ErrorCode.WRONG_CATEGORY_TYPE);
+        }
+
+        Category oldCategory = categoryDao.findByIdAndUser(oldCategoryId, userId)
+                .orElseThrow(() -> new NotFoundException("Old category not found", ErrorCode.NOT_FOUND));
+
+        Category newCategory = categoryDao.findByIdAndUser(newCategoryId, userId)
+                .orElseThrow(() -> new NotFoundException("New category not found", ErrorCode.NOT_FOUND));
+
+        validateCategoryReassignment(oldCategory.getType(), newCategory.getType());
+
+        //TODO transactionService.reassignCategoryForUser(userId, oldCategoryId, newCategoryId);
+
+    }
+
+    private void validateCategoryReassignment(CategoryType oldType, CategoryType newType) {
+        if (oldType == newType) {
+            return;
+        }
+
+        if (newType.equals(CategoryType.GENERAL)) {
+            return;
+        }
+
+        if (oldType.equals(CategoryType.GENERAL) && (newType.equals(CategoryType.EXPENSE) || newType.equals(CategoryType.INCOME))) {
+            throw new ValidationException(
+                    "Cannot reassign from a 'GENERAL' category (which contains mixed transactions) to a specific type (INCOME/EXPENSE).",
+                    ErrorCode.WRONG_CATEGORY_TYPE
+            );
+        }
+
+        if (oldType.equals(CategoryType.EXPENSE) && newType.equals(CategoryType.INCOME) ||
+            oldType.equals(CategoryType.INCOME) && newType.equals(CategoryType.EXPENSE)) {
+            throw new ValidationException(
+                    "Cannot reassign transactions between INCOME and EXPENSE categories.",
+                    ErrorCode.WRONG_CATEGORY_TYPE
+            );
+        }
+    }
+
     private void validateCategory(CategoryCreateRequestDto categoryRequest, Long userId) {
         validateNameUniqueness(userId, categoryRequest.name(), null);
         validateType(categoryRequest.type());

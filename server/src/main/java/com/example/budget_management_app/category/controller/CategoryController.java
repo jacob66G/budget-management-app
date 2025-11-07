@@ -3,6 +3,7 @@ package com.example.budget_management_app.category.controller;
 import com.example.budget_management_app.category.dto.CategoryCreateRequestDto;
 import com.example.budget_management_app.category.dto.CategoryResponseDto;
 import com.example.budget_management_app.category.dto.CategoryUpdateRequestDto;
+import com.example.budget_management_app.category.dto.ReassignTransactionsRequestDto;
 import com.example.budget_management_app.category.service.CategoryService;
 import com.example.budget_management_app.constants.ApiPaths;
 import com.example.budget_management_app.security.service.CustomUserDetails;
@@ -62,6 +63,20 @@ public class CategoryController {
 
         CategoryResponseDto response = categoryService.updateCategory(userDetails.getId(), id, requestDto);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{oldCategoryId}/reassign")
+    public ResponseEntity<Void> reassignTransactions(
+            @PathVariable Long oldCategoryId,
+            @Valid @RequestBody ReassignTransactionsRequestDto dto,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        categoryService.reassignTransactions(
+                userDetails.getId(),
+                oldCategoryId,
+                dto.newCategoryId()
+        );
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")

@@ -94,8 +94,6 @@ public class AccountServiceImpl implements AccountService {
         }
         if (StringUtils.hasText(dto.currency()) && !account.getCurrency().name().equals(dto.currency().toUpperCase())) {
             validateCurrency(dto.currency());
-            validateCurrencyConsistency(accountId, dto.currency());
-
             account.setCurrency(SupportedCurrency.valueOf(dto.currency().toUpperCase()));
         }
         if (StringUtils.hasText(dto.description()) && !account.getDescription().equals(dto.description())) {
@@ -305,11 +303,6 @@ public class AccountServiceImpl implements AccountService {
             log.warn("Incorrect budget type provided: {}", budgetType);
             throw new ValidationException("Incorrect budget type: " + budgetType, ErrorCode.WRONG_BUDGET_TYPE);
         }
-    }
-
-    private void validateCurrencyConsistency(Long accountId, String currency) {
-        //TODO check if exists transactions with other currency
-
     }
 
     private void validateIcon(String path) {

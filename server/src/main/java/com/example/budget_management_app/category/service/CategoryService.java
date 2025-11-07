@@ -22,4 +22,6 @@ public interface CategoryService {
     void assignInitialCategories(User user);
 
     void deleteAllUserCategories(Long userId);
+
+    void reassignTransactions(Long userId, Long oldCategoryId, Long newCategoryId);
 }
