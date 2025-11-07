@@ -5,7 +5,7 @@ import com.example.budget_management_app.common.dto.ResponseMessageDto;
 
 public interface AuthService {
 
-    RegistrationResponseDto registerUser(RegistrationRequestDto dto);
+    ResponseMessageDto registerUser(RegistrationRequestDto dto);
 
     LoginResponseDto authenticateUser(LoginRequestDto dto);
 

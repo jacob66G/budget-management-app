@@ -54,13 +54,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
-    public RegistrationResponseDto registerUser(RegistrationRequestDto dto) {
+    public ResponseMessageDto registerUser(RegistrationRequestDto dto) {
         User savedUser = userService.createUser(dto);
 
         sendVerification(savedUser, false);
 
         log.info("New user registration: email={}", savedUser.getEmail());
-        return mapper.toRegistrationResponseDto(savedUser);
+        return new ResponseMessageDto("Registration successful. Please check your email to activate your account.");
     }
 
     @Override

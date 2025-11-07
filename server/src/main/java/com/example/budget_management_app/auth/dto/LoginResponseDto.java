@@ -15,10 +15,10 @@ public class LoginResponseDto {
         private String name;
         private String surname;
         private String email;
-        private Boolean isTfaRequired;
+        private boolean mfaEnabled;
 
-    public LoginResponseDto(Long userId, Boolean isTfaRequired) {
+    public LoginResponseDto(Long userId, Boolean mfaEnabled) {
         this.userId = userId;
-        this.isTfaRequired = isTfaRequired;
+        this.mfaEnabled = mfaEnabled;
     }
 }

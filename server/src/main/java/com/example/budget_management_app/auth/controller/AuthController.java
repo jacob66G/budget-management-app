@@ -33,15 +33,9 @@ public class AuthController {
     private final UserSessionService userSessionService;
 
     @PostMapping("/register")
-    public ResponseEntity<RegistrationResponseDto> registerUser(@Valid @RequestBody RegistrationRequestDto registrationRequestDto) {
-        RegistrationResponseDto response = this.authService.registerUser(registrationRequestDto);
-        return ResponseEntity
-                .created(UriComponentsBuilder.fromPath(ApiPaths.BASE_API)
-                        .pathSegment(ApiPaths.USERS)
-                        .pathSegment(String.valueOf(response.userId()))
-                        .build().toUri()
-                )
-                .body(response);
+    public ResponseEntity<ResponseMessageDto> registerUser(@Valid @RequestBody RegistrationRequestDto registrationRequestDto) {
+        ResponseMessageDto response = this.authService.registerUser(registrationRequestDto);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
@@ -51,7 +45,7 @@ public class AuthController {
             @CookieValue(name = ApiConstants.REFRESH_TOKEN_COOKIE, required = false) String oldRefreshToken
     ) {
         LoginResponseDto response = authService.authenticateUser(loginRequestDto);
-        if (response.getIsTfaRequired()) {
+        if (response.isMfaEnabled()) {
             return ResponseEntity.ok(response);
         }
 
