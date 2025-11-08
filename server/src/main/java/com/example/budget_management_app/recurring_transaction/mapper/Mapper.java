@@ -7,6 +7,7 @@ import com.example.budget_management_app.recurring_transaction.domain.RecurringI
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
 import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionDetailsResponse;
 import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionSummary;
+import com.example.budget_management_app.recurring_transaction.dto.UpcomingTransactionSummary;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import com.example.budget_management_app.transaction_common.dto.AccountSummary;
@@ -15,6 +16,7 @@ import com.example.budget_management_app.transaction.dto.TransactionSummary;
 import jakarta.persistence.Tuple;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 public class Mapper {
@@ -33,6 +35,27 @@ public class Mapper {
                         tuple.get("desc", String.class),
                         tuple.get("recInterval", RecurringInterval.class),
                         tuple.get("recValue", Integer.class),
+                        new AccountSummary(
+                                tuple.get("accountId", Long.class),
+                                tuple.get("accountName", String.class),
+                                tuple.get("currency", SupportedCurrency.class)
+                        ),
+                        new CategorySummary(
+                                tuple.get("categoryId", Long.class),
+                                tuple.get("categoryName", String.class),
+                                tuple.get("iconPath", String.class)
+                        )
+                )).toList();
+    }
+
+    public static List<UpcomingTransactionSummary> fromUpcomingTuples(List<Tuple> tuples) {
+        return tuples.stream()
+                .map( tuple -> new UpcomingTransactionSummary(
+                        tuple.get("recurringTemplateId", Long.class),
+                        tuple.get("amount", BigDecimal.class),
+                        tuple.get("title", String.class),
+                        tuple.get("type", TransactionType.class),
+                        tuple.get("nextOccurrence", LocalDate.class),
                         new AccountSummary(
                                 tuple.get("accountId", Long.class),
                                 tuple.get("accountName", String.class),

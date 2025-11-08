@@ -17,6 +17,7 @@ import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.recurring_transaction.mapper.Mapper;
 import com.example.budget_management_app.transaction.dao.TransactionDao;
 import com.example.budget_management_app.transaction.domain.Transaction;
+import com.example.budget_management_app.transaction_common.dto.PageRequest;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 import com.example.budget_management_app.transaction_common.service.AccountUpdateService;
 import com.example.budget_management_app.transaction_common.service.CategoryValidatorService;
@@ -42,6 +43,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
     private final AccountUpdateService accountUpdateService;
     private final AccountDao accountDao;
     private final CategoryDao categoryDao;
+
     /**
      * @param userId
      * @return
@@ -70,6 +72,29 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
                 .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
         return Mapper.toDetails(recurringTransaction);
+    }
+
+    /**
+     * @param pageRequest
+     * @param searchCriteria
+     * @param userId
+     * @return
+     */
+    @Override
+    public PagedResponse<UpcomingTransactionSummary> getUpcommingTransactionsPage(PageRequest pageRequest, UpcomingTransactionSearchCriteria searchCriteria, Long userId) {
+
+        if (!accountDao.areAccountsBelongToUser(userId, searchCriteria.accountIds())) {
+            throw new NotFoundException(Account.class.getSimpleName(), searchCriteria.accountIds(), ErrorCode.NOT_FOUND);
+        }
+
+        List<Tuple> results = this.recurringTransactionDao.getUpcomingTransactionsTuples(
+                pageRequest,
+                searchCriteria
+        );
+
+        Long count = this.recurringTransactionDao.getUpcomingTransactionsCount(searchCriteria);
+
+        return PagedResponse.of(Mapper.fromUpcomingTuples(results), pageRequest.page(), pageRequest.limit(), count);
     }
 
     /**

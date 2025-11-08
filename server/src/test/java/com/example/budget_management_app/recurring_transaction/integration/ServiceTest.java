@@ -4,14 +4,12 @@ import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.StatusAlreadySetException;
 import com.example.budget_management_app.common.exception.TransactionTypeMismatchException;
-import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
-import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
-import com.example.budget_management_app.recurring_transaction.domain.RemovalRange;
-import com.example.budget_management_app.recurring_transaction.domain.UpdateRange;
+import com.example.budget_management_app.recurring_transaction.domain.*;
 import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
+import com.example.budget_management_app.transaction_common.dto.PageRequest;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
@@ -29,6 +27,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
+@Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("RecurringTransactionService Integration Tests")
 public class ServiceTest {
@@ -121,7 +120,6 @@ public class ServiceTest {
 
     @Test
     @Order(6)
-    @Transactional
     public void createRecurringTransactionTemplateWhichStartsAfterCurrentDayTest() {
 
         long userId = 1L;
@@ -156,7 +154,6 @@ public class ServiceTest {
 
     @Test
     @Order(7)
-    @Transactional
     public void createRecurringTransactionTemplateWhichStartsAtTheCurrentDayAfterNoonTest() {
 
         long userId = 2;
@@ -210,7 +207,6 @@ public class ServiceTest {
 
     @Test
     @Order(8)
-    @Transactional
     public void createRecurringTransactionTemplateWhichStartsAtTheCurrentDayBeforeNoonTest() {
 
         long userId = 3L;
@@ -285,7 +281,6 @@ public class ServiceTest {
 
     @Test
     @Order(11)
-    @Transactional
     public void deleteRecurringTransactionTemplateWithoutTransactionsTest() {
 
         long userId = 2L;
@@ -322,7 +317,6 @@ public class ServiceTest {
 
     @Test
     @Order(12)
-    @Transactional
     public void deleteExpenseRecurringTransactionTemplateWithRelatedTransactionsTest() {
 
         long userId = 3L;
@@ -357,7 +351,6 @@ public class ServiceTest {
 
     @Test
     @Order(13)
-    @Transactional
     public void deleteIncomeRecurringTransactionTemplateWithRelatedTransactionsTest() {
 
         long userId = 5L;
@@ -405,7 +398,6 @@ public class ServiceTest {
 
     @Test
     @Order(15)
-    @Transactional
     public void updateRecurringTransactionTemplateOnlyTest() {
 
         long userId = 1L;
@@ -433,7 +425,6 @@ public class ServiceTest {
 
     @Test
     @Order(16)
-    @Transactional
     public void updateRecurringTransactionTemplateWithAllRelatedTransactionsTest() {
 
         long userId = 1L;
@@ -502,7 +493,6 @@ public class ServiceTest {
 
     @Test
     @Order(18)
-    @Transactional
     public void generateRecurringTransactionsTest() {
 
         recTransactionService.generateRecurringTransactions();
@@ -542,7 +532,6 @@ public class ServiceTest {
 
     @Test
     @Order(19)
-    @Transactional
     public void changeRecurringTransactionTemplateStatusToInactiveTest() {
 
         long userId = 3L;
@@ -588,7 +577,6 @@ public class ServiceTest {
 
     @Test
     @Order(22)
-    @Transactional
     public void changeRecurringTransactionTemplateStatusToActiveWhereNextOccurrenceIsTodayAfterNoonTest() {
 
         long userId = 5L;
@@ -670,5 +658,63 @@ public class ServiceTest {
         assertThat(recTransaction).isNotNull();
         assertThat(recTransaction.isActive()).isEqualTo(isActive);
         System.out.println(recTransaction);
+    }
+
+    @Test
+    @Order(27)
+    public void getUpcomingTransactionsPagedResponseForAccountThatDoNotBelongToUserTest() {
+
+        Long userId = 1L;
+        List<Long> accountIds = List.of(1L, 2L, 3L, 4L);
+
+        int page = 1;
+        int limit = 4;
+        PageRequest pageReq =
+                new PageRequest(page, limit);
+        UpcomingTransactionSearchCriteria searchCriteria =
+                new UpcomingTransactionSearchCriteria(
+                        UpcomingTransactionsTimeRange.NEXT_7_DAYS,
+                        accountIds
+                );
+
+        assertThrows(NotFoundException.class, () -> {
+                this.recTransactionService.getUpcommingTransactionsPage(
+                        pageReq,
+                        searchCriteria,
+                        userId
+                );
+        });
+    }
+
+    @Test
+    @Order(27)
+    public void getUpcomingTransactionsPagedResponseTest() {
+
+        Long userId = 1L;
+        List<Long> accountIds = List.of(1L, 2L, 3L);
+
+        int page = 1;
+        int limit = 4;
+        PageRequest pageReq =
+                new PageRequest(page, limit);
+        UpcomingTransactionSearchCriteria searchCriteria =
+                new UpcomingTransactionSearchCriteria(
+                        UpcomingTransactionsTimeRange.NEXT_MONTH,
+                        accountIds
+                );
+
+        PagedResponse<UpcomingTransactionSummary> response =
+                this.recTransactionService.getUpcommingTransactionsPage(
+                    pageReq,
+                    searchCriteria,
+                    userId
+                );
+
+        assertThat(response).isNotNull();
+        assertThat(response.data()).isNotNull();
+        assertThat(response.data().size()).isNotZero();
+        assertThat(response.pagination()).isNotNull();
+        assertThat(response.links()).isNull();
+        System.out.println(response);
     }
 }

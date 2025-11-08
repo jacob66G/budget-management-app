@@ -122,7 +122,14 @@ INSERT INTO recurring_transactions (amount, title, type, description, start_date
 (50.00, 'Karnet na siłownie', 'EXPENSE', NULL, '2025-06-06', NULL, 'MONTH', 1, '2025-08-06', false, CURRENT_TIMESTAMP, 19, 12),
 (50.00, 'Karnet na siłownie', 'EXPENSE', NULL, '2024-06-01', NULL, 'MONTH', 1, CURRENT_DATE - INTERVAL '4' MONTH, false, CURRENT_TIMESTAMP, 19, 12),
 (50.00, 'Karnet na siłownie', 'EXPENSE', NULL, '2025-06-06', NULL, 'MONTH', 1, CURRENT_DATE - INTERVAL '3' MONTH, false, CURRENT_TIMESTAMP, 19, 12),
-(150.00, 'Siłownia', 'EXPENSE', NULL, '2024-01-10', '2025-12-31', 'MONTH', 1, CURRENT_DATE, true, CURRENT_TIMESTAMP, 4, 1);
+-- user 1, konta 1-3
+(150.00, 'Siłownia', 'EXPENSE', NULL, '2024-01-10', '2025-12-31', 'MONTH', 1, CURRENT_DATE, true, CURRENT_TIMESTAMP, 4, 1),
+(50.00, 'HBO', 'EXPENSE', NULL, '2024-01-10', '2025-12-31', 'MONTH', 1, CURRENT_DATE + INTERVAL '2' DAY, true, CURRENT_TIMESTAMP, 4, 1),
+(5000.00, 'Wypłata', 'INCOME', NULL, '2024-01-10', '2025-12-31', 'MONTH', 1, CURRENT_DATE + INTERVAL '7' DAY, true, CURRENT_TIMESTAMP, 3, 2),
+(150.00, 'Fitness', 'EXPENSE', NULL, '2024-01-10', '2025-12-31', 'MONTH', 1, CURRENT_DATE + INTERVAL '13' DAY, true, CURRENT_TIMESTAMP, 4, 1),
+(75.00, 'Bilet miesięczny', 'EXPENSE', NULL, '2024-01-10', '2025-12-31', 'MONTH', 1, CURRENT_DATE + INTERVAL '10' DAY, true, CURRENT_TIMESTAMP, 4, 1),
+(75.00, 'Internet', 'EXPENSE', NULL, '2024-01-10', '2025-12-31', 'MONTH', 1, CURRENT_DATE + INTERVAL '20' DAY, true, CURRENT_TIMESTAMP, 4, 1),
+(200.00, 'Premia', 'INCOME', NULL, '2024-01-10', '2025-12-31', 'MONTH', 1, CURRENT_DATE + INTERVAL '21' DAY, true, CURRENT_TIMESTAMP, 3, 2);
 
 
 -- ===================================================================================

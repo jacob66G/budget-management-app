@@ -1,10 +1,12 @@
 package com.example.budget_management_app.recurring_transaction.controller;
 
+import com.example.budget_management_app.common.utils.PaginationUtils;
 import com.example.budget_management_app.recurring_transaction.domain.RemovalRange;
 import com.example.budget_management_app.recurring_transaction.domain.UpdateRange;
 import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.security.service.CustomUserDetails;
+import com.example.budget_management_app.transaction_common.dto.PageRequest;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -43,6 +45,22 @@ public class RecurringTransactionController {
                 id,
                 userDetails.getId()
         ));
+    }
+
+    @GetMapping("/upcoming")
+    public ResponseEntity<PagedResponse<UpcomingTransactionSummary>> getUpcomingSummaries(
+            PageRequest pageReq,
+            UpcomingTransactionSearchCriteria searchCriteria,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+
+        PagedResponse<UpcomingTransactionSummary> page = this.recurringTransactionService.getUpcommingTransactionsPage(
+                pageReq,
+                searchCriteria,
+                userDetails.getId()
+        );
+
+        return ResponseEntity.ok(page.withLinks(PaginationUtils.createLinks(page.pagination())));
     }
 
     @PostMapping

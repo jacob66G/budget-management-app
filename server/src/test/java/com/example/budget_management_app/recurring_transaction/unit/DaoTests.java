@@ -3,16 +3,20 @@ package com.example.budget_management_app.recurring_transaction.unit;
 import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.recurring_transaction.dao.RecurringTransactionDao;
+import com.example.budget_management_app.recurring_transaction.dao.RecurringTransactionDaoImpl;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
+import com.example.budget_management_app.recurring_transaction.domain.UpcomingTransactionsTimeRange;
+import com.example.budget_management_app.recurring_transaction.dto.UpcomingTransactionSearchCriteria;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
+import com.example.budget_management_app.transaction_common.dto.PageRequest;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,7 +26,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@SpringBootTest
+@DataJpaTest
+@Import(RecurringTransactionDaoImpl.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("RecurringTransactionDao Unit Tests")
 public class DaoTests {
@@ -40,7 +45,7 @@ public class DaoTests {
         long userId = 1L;
         int page = 1;
         int limit = 3;
-        long expectedValue = 2L;
+        long expectedValue = 3L;
 
         List<Tuple> results = recurringTransactionDao.getSummaryTuplesByUserId(userId, page, limit);
 
@@ -56,7 +61,7 @@ public class DaoTests {
     public void getRecurringTransactionsSummaryCountByUserIdTest() {
 
         long userId = 1L;
-        long expectedValue = 2L;
+        long expectedValue = 9L;
 
         Long count = recurringTransactionDao.getSummaryTuplesCountByUserId(userId);
 
@@ -66,7 +71,6 @@ public class DaoTests {
 
     @Test
     @Order(3)
-    @Transactional(readOnly = true)
     public void findRecurringTransactionTemplateByIdAndUserIdTest() {
 
         long userId = 1L;
@@ -83,7 +87,6 @@ public class DaoTests {
 
     @Test
     @Order(4)
-    @Transactional
     public void createRecurringTransactionWithoutRegularTransactionTest() {
 
         long accountId = 1L;
@@ -123,7 +126,6 @@ public class DaoTests {
 
     @Test
     @Order(5)
-    @Transactional
     public void createRecurringTransactionWithRegularTransaction() {
 
         long accountId = 1L;
@@ -192,7 +194,7 @@ public class DaoTests {
     @Order(6)
     public void searchForRecurringTransactionsToCreateTest() {
 
-        long expectedCount = 1L;
+        long expectedCount = 2L;
 
         List<RecurringTransaction> results = recurringTransactionDao.searchForRecurringTransactionsToCreate();
 
@@ -202,4 +204,89 @@ public class DaoTests {
         results.forEach(System.out::println);
     }
 
+    @Test
+    @Order(7)
+    public void getUpcomingRecurringTransactionsForNextSevenDaysTest() {
+
+        List<Long> userAccountIds = List.of(1L, 2L, 3L);
+        int page = 1;
+        int limit = 4;
+
+        PageRequest pageReq = new PageRequest(page, limit);
+        UpcomingTransactionSearchCriteria searchCriteria =
+                new UpcomingTransactionSearchCriteria(
+                        UpcomingTransactionsTimeRange.NEXT_7_DAYS,
+                        userAccountIds
+                );
+
+        List<Tuple> results = this.recurringTransactionDao.getUpcomingTransactionsTuples(pageReq, searchCriteria);
+
+        assertThat(results).isNotNull();
+        assertThat(results.size()).isNotZero();
+
+        results.forEach(System.out::println);
+    }
+
+    @Test
+    @Order(8)
+    public void getUpcomingRecurringTransactionsForNextFourteenDaysTest() {
+
+        List<Long> userAccountIds = List.of(1L, 2L, 3L);
+        int page = 1;
+        int limit = 4;
+
+        PageRequest pageReq = new PageRequest(page, limit);
+        UpcomingTransactionSearchCriteria searchCriteria =
+                new UpcomingTransactionSearchCriteria(
+                        UpcomingTransactionsTimeRange.NEXT_14_DAYS,
+                        userAccountIds
+                );
+
+        List<Tuple> results = this.recurringTransactionDao.getUpcomingTransactionsTuples(pageReq, searchCriteria);
+
+        assertThat(results).isNotNull();
+        assertThat(results.size()).isNotZero();
+
+        results.forEach(System.out::println);
+    }
+
+    @Test
+    @Order(8)
+    public void getUpcomingRecurringTransactionsForNextMonthTest() {
+
+        List<Long> userAccountIds = List.of(1L, 2L, 3L);
+        int page = 2;
+        int limit = 4;
+
+        PageRequest pageReq = new PageRequest(page, limit);
+        UpcomingTransactionSearchCriteria searchCriteria =
+                new UpcomingTransactionSearchCriteria(
+                        UpcomingTransactionsTimeRange.NEXT_MONTH,
+                        userAccountIds
+                );
+
+        List<Tuple> results = this.recurringTransactionDao.getUpcomingTransactionsTuples(pageReq, searchCriteria);
+
+        assertThat(results).isNotNull();
+        assertThat(results.size()).isNotZero();
+        results.forEach(System.out::println);
+    }
+
+    @Test
+    @Order(9)
+    public void getUpcomingRecurringTransactionsCount() {
+
+        List<Long> userAccountIds = List.of(1L, 2L, 3L);
+
+        UpcomingTransactionSearchCriteria searchCriteria =
+                new UpcomingTransactionSearchCriteria(
+                        UpcomingTransactionsTimeRange.NEXT_MONTH,
+                        userAccountIds
+                );
+
+        Long count = this.recurringTransactionDao.getUpcomingTransactionsCount(searchCriteria);
+
+        assertThat(count).isNotNull();
+        assertThat(count).isGreaterThan(0L);
+    }
 }

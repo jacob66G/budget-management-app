@@ -3,6 +3,7 @@ package com.example.budget_management_app.recurring_transaction.service;
 import com.example.budget_management_app.recurring_transaction.domain.RemovalRange;
 import com.example.budget_management_app.recurring_transaction.domain.UpdateRange;
 import com.example.budget_management_app.recurring_transaction.dto.*;
+import com.example.budget_management_app.transaction_common.dto.PageRequest;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 
 public interface RecurringTransactionService {
@@ -10,6 +11,10 @@ public interface RecurringTransactionService {
     PagedResponse<RecurringTransactionSummary> getSummaries(long userId, int page, int limit);
 
     RecurringTransactionDetailsResponse getDetails(long id, long userId);
+
+    PagedResponse<UpcomingTransactionSummary> getUpcommingTransactionsPage(PageRequest pageRequest,
+                                                                               UpcomingTransactionSearchCriteria searchCriteria,
+                                                                               Long userId);
 
     RecurringTransactionCreateResponse create(long userId, RecurringTransactionCreateRequest createReq);
 

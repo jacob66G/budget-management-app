@@ -3,14 +3,15 @@ package com.example.budget_management_app.transaction.unit;
 import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.transaction.dao.TransactionDao;
+import com.example.budget_management_app.transaction.dao.TransactionDaoImpl;
 import com.example.budget_management_app.transaction.domain.*;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -20,7 +21,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@SpringBootTest
+@DataJpaTest
+@Import(TransactionDaoImpl.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("TransactionDao Unit Tests")
 public class DaoTests {
@@ -250,7 +252,6 @@ public class DaoTests {
 
     @Test
     @Order(10)
-    @Transactional
     public void saveRegularTransactionTest() {
 
         long expectedIdValue = 61L;
@@ -290,7 +291,6 @@ public class DaoTests {
 
     @Test
     @Order(11)
-    @Transactional
     public void deleteRegularTransactionTest() {
 
         long transactionId = 28L;
@@ -309,7 +309,6 @@ public class DaoTests {
 
     @Test
     @Order(12)
-    @Transactional(readOnly = true)
     public void findTransactionsByIdAndUserId() {
 
         long userId = 1;
@@ -330,7 +329,6 @@ public class DaoTests {
 
     @Test
     @Order(13)
-    @Transactional(readOnly = true)
     public void findRecurringTransactionByRecurringTemplateId() {
 
         long recurringTemplateId = 1L;
