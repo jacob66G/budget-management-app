@@ -1,0 +1,41 @@
+<div class ="auth-container">
+<mat-card class="verification-sent-card">
+
+  <mat-card-header>
+    <mat-icon color="primary" class="card-icon">check_circle</mat-icon>
+  </mat-card-header>
+
+  <mat-card-title>A verification email has been sent</mat-card-title>
+
+  <mat-card-content class="card-content">
+    <p>
+      An activation link has been sent to your email address.
+      @if (email()) {
+        <strong class="email-display">{{ email() }}</strong>
+      }
+    </p>
+    <p>
+      Check your inbox (and spam folder) and follow the instructions to activate your account.
+    </p>
+  </mat-card-content>
+
+  <mat-card-actions class="card-actions">
+    <button
+      mat-flat-button
+      color="primary"
+      class="resend-button"
+      (click)="onResendVerificationEmail()"
+      [disabled]="isLoading()"> @if (!isLoading()) {
+        <span>Resend</span>
+      } @else {
+        <mat-spinner [diameter]="24" />
+      }
+    </button>
+  </mat-card-actions>
+
+  <mat-card-footer class="card-footer">
+    <a routerLink="/login">Back to login</a>
+  </mat-card-footer>
+
+</mat-card>
+</div>
