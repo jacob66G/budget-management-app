@@ -5,6 +5,8 @@ import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
 import com.example.budget_management_app.transaction.domain.*;
+import com.example.budget_management_app.transaction.dto.TransactionPageRequest;
+import com.example.budget_management_app.transaction.dto.TransactionSearchCriteria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Tuple;
@@ -28,16 +30,9 @@ public class TransactionDaoImpl implements TransactionDao{
      */
     @Transactional(readOnly = true)
     @Override
-    public List<Tuple> getTuples(int page,
-                                       int limit,
-                                       TransactionTypeFilter type,
-                                       TransactionModeFilter mode,
-                                       List<Long> accounts,
-                                       List<Long> categories,
-                                       LocalDate since,
-                                       LocalDate to,
-                                       SortedBy sortedBy,
-                                       SortDirection sortedType
+    public List<Tuple> getTuples(
+            TransactionPageRequest pageReq,
+            TransactionSearchCriteria searchCriteria
                                        ) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -68,29 +63,26 @@ public class TransactionDaoImpl implements TransactionDao{
                 recTransaction,
                 root,
                 cb,
-                type,
-                mode,
-                accounts,
-                categories,
-                since,
-                to
-                );
+                searchCriteria
+        );
 
+        SortedBy sortedBy = pageReq.sortedBy();
+        SortDirection sortDirection = pageReq.sortDirection();
         Order order;
         if (sortedBy.equals(SortedBy.AMOUNT)) {
-            if (sortedType.equals(SortDirection.ASC)) {
+            if (sortDirection.equals(SortDirection.ASC)) {
                 order = cb.asc(root.get("amount"));
             } else {
                 order = cb.desc(root.get("amount"));
             }
         } else if (sortedBy.equals(SortedBy.CATEGORY)) {
-            if (sortedType.equals(SortDirection.ASC)) {
+            if (sortDirection.equals(SortDirection.ASC)) {
                 order = cb.asc(category.get("name"));
             } else {
                 order = cb.desc(category.get("name"));
             }
         } else {
-            if (sortedType.equals(SortDirection.ASC)) {
+            if (sortDirection.equals(SortDirection.ASC)) {
                 order = cb.asc(root.get("transactionDate"));
             } else {
                 order = cb.desc(root.get("transactionDate"));
@@ -100,7 +92,8 @@ public class TransactionDaoImpl implements TransactionDao{
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
         cq.orderBy(order);
 
-        int offset = (page - 1) * limit;
+        int limit = pageReq.limit();
+        int offset = (pageReq.page() - 1) * limit;
 
         return em.createQuery(cq)
                 .setFirstResult(offset)
@@ -113,12 +106,7 @@ public class TransactionDaoImpl implements TransactionDao{
      */
     @Transactional(readOnly = true)
     @Override
-    public Long getCount(TransactionTypeFilter type,
-                                     TransactionModeFilter mode,
-                                     List<Long> accounts,
-                                     List<Long> categories,
-                                     LocalDate since,
-                                     LocalDate to) {
+    public Long getCount(TransactionSearchCriteria searchCriteria) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
@@ -133,12 +121,8 @@ public class TransactionDaoImpl implements TransactionDao{
                 recTransaction,
                 root,
                 cb,
-                type,
-                mode,
-                accounts,
-                categories,
-                since,
-                to);
+                searchCriteria
+        );
 
         countQuery.select(cb.count(root)).where(cb.and(predicates.toArray(new Predicate[0])));
 
@@ -162,7 +146,7 @@ public class TransactionDaoImpl implements TransactionDao{
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<Transaction> findByIdAndUserId(long id, long userId) {
+    public Optional<Transaction> findByIdAndUserId(Long id, Long userId) {
 
          List<Transaction> results = em.createQuery("""
                 SELECT t FROM Transaction t
@@ -178,7 +162,7 @@ public class TransactionDaoImpl implements TransactionDao{
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<Transaction> findByIdAndUserIdAndCategoryId(long id, long userId, long categoryId) {
+    public Optional<Transaction> findByIdAndUserIdAndCategoryId(Long id, Long categoryId, Long userId) {
 
         List<Transaction> results = em.createQuery("""
                 SELECT t FROM Transaction t
@@ -194,18 +178,18 @@ public class TransactionDaoImpl implements TransactionDao{
     }
 
     /**
-     * @param recurringTransactionId
+     * @param id
      * @return
      */
     @Transactional(readOnly = true)
     @Override
-    public List<Transaction> findByRecurringTransactionId(long recurringTransactionId) {
+    public List<Transaction> findByRecurringTransactionId(Long id) {
 
         return em.createQuery("""
                 SELECT t FROM Transaction t
                 WHERE t.recurringTransaction.id = :recurringTransactionId
                 """, Transaction.class)
-                .setParameter("recurringTransactionId", recurringTransactionId)
+                .setParameter("recurringTransactionId", id)
                 .getResultList();
     }
 
@@ -215,14 +199,16 @@ public class TransactionDaoImpl implements TransactionDao{
                                 Join<Transaction, RecurringTransaction> recTransaction,
                                 Root<Transaction> root,
                                 CriteriaBuilder cb,
-                                TransactionTypeFilter type,
-                                TransactionModeFilter mode,
-                                List<Long> accounts,
-                                List<Long> categories,
-                                LocalDate since,
-                                LocalDate to) {
+                                TransactionSearchCriteria searchCriteria) {
 
         List<Predicate> predicates = new ArrayList<>();
+
+        TransactionTypeFilter type = searchCriteria.type();
+        TransactionModeFilter mode = searchCriteria.mode();
+        List<Long> accountIds = searchCriteria.accountIds();
+        List<Long> categoryIds = searchCriteria.categoryIds();
+        LocalDate since = searchCriteria.since();
+        LocalDate to = searchCriteria.to();
 
         if (!type.equals(TransactionTypeFilter.ALL)) {
             predicates.add(cb.equal(cb.lower(root.get("type")),  type.toString().toLowerCase()));
@@ -234,11 +220,11 @@ public class TransactionDaoImpl implements TransactionDao{
                 predicates.add(cb.isNotNull(recTransaction.get("id")));
             }
         }
-        if (!accounts.isEmpty()) {
-            predicates.add(account.get("id").in(accounts));
+        if (!accountIds.isEmpty()) {
+            predicates.add(account.get("id").in(accountIds));
         }
-        if(!categories.isEmpty()) {
-            predicates.add(category.get("id").in(categories));
+        if(!categoryIds.isEmpty()) {
+            predicates.add(category.get("id").in(categoryIds));
         }
         if (since != null) {
             LocalDateTime startDate = since.atStartOfDay();

@@ -31,7 +31,7 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao{
      */
     @Transactional(readOnly = true)
     @Override
-    public List<Tuple> getSummaryTuplesByUserId(long userId, int page, int limit) {
+    public List<Tuple> getSummaryTuplesByUserId(PageRequest pageReq, Long userId) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Tuple> cq = cb.createTupleQuery();
@@ -61,7 +61,8 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao{
         cq.where(p);
         cq.orderBy(cb.desc(root.get("createdAt")));
 
-        int offest = (page - 1) * limit;
+        int limit = pageReq.limit();
+        int offest = (pageReq.page() - 1) * limit;
 
         return em.createQuery(cq)
                 .setFirstResult(offest)
@@ -75,7 +76,7 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao{
      */
     @Transactional(readOnly = true)
     @Override
-    public Long getSummaryTuplesCountByUserId(long userId) {
+    public Long getSummaryTuplesCountByUserId(Long userId) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
@@ -98,7 +99,7 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao{
      */
     @Transactional(readOnly = true)
     @Override
-    public Optional<RecurringTransaction> findByIdAndUserId(long id, long userId) {
+    public Optional<RecurringTransaction> findByIdAndUserId(Long id, Long userId) {
 
         List<RecurringTransaction> result = em.createQuery("""
                 SELECT r FROM RecurringTransaction r

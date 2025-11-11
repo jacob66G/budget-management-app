@@ -10,11 +10,11 @@ import java.util.Optional;
 
 public interface RecurringTransactionDao {
 
-    List<Tuple> getSummaryTuplesByUserId(long userId, int page, int limit);
+    List<Tuple> getSummaryTuplesByUserId(PageRequest pageReq, Long userId);
 
-    Long getSummaryTuplesCountByUserId(long userId);
+    Long getSummaryTuplesCountByUserId(Long userId);
 
-    Optional<RecurringTransaction> findByIdAndUserId(long id, long userId);
+    Optional<RecurringTransaction> findByIdAndUserId(Long id, Long userId);
 
     RecurringTransaction create(RecurringTransaction recurringTransaction);
 

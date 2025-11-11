@@ -24,7 +24,7 @@ public class RecurringTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
     @Column(name = "amount", precision = 19, scale = 2, nullable = false)
     private BigDecimal amount;

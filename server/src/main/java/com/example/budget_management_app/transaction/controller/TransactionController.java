@@ -1,10 +1,7 @@
 package com.example.budget_management_app.transaction.controller;
 
+import com.example.budget_management_app.common.utils.PaginationUtils;
 import com.example.budget_management_app.security.service.CustomUserDetails;
-import com.example.budget_management_app.transaction.domain.SortDirection;
-import com.example.budget_management_app.transaction.domain.SortedBy;
-import com.example.budget_management_app.transaction.domain.TransactionModeFilter;
-import com.example.budget_management_app.transaction.domain.TransactionTypeFilter;
 import com.example.budget_management_app.transaction.dto.*;
 import com.example.budget_management_app.transaction.service.TransactionService;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
@@ -15,8 +12,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,32 +21,18 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @GetMapping
-    public ResponseEntity<PagedResponse<TransactionSummary>> getPage(
-            @RequestParam(name = "page") int page,
-            @RequestParam(name = "limit") int limit,
-            @RequestParam(name = "type", defaultValue = "ALL") TransactionTypeFilter type,
-            @RequestParam(name = "mode", defaultValue = "ALL")TransactionModeFilter mode,
-            @RequestParam(name = "accounts") List<Long> accounts,
-            @RequestParam(name = "categories") List<Long> categories,
-            @RequestParam(name = "since") LocalDate since,
-            @RequestParam(name = "to", required = false) LocalDate to,
-            @RequestParam(name = "sortedBy", defaultValue = "DATE") SortedBy sortedBy,
-            @RequestParam(name = "sortDirection", defaultValue = "DESC") SortDirection sortDirection,
+    public ResponseEntity<PagedResponse<TransactionSummary>> getSummariesPage(
+            TransactionPageRequest pageReq,
+            TransactionSearchCriteria searchCriteria,
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
 
-        return ResponseEntity.ok(transactionService.getViews(
-                page,
-                limit,
-                type,
-                mode,
-                accounts,
-                categories,
-                since,
-                to,
-                sortedBy,
-                sortDirection,
-                userDetails.getId()));
+        PagedResponse<TransactionSummary> summariesPage = transactionService.getSummariesPage(
+                pageReq,
+                searchCriteria,
+                userDetails.getId());
+
+        return ResponseEntity.ok(summariesPage.withLinks(PaginationUtils.createLinks(summariesPage.pagination())));
     }
 
     @PostMapping
@@ -70,33 +51,33 @@ public class TransactionController {
 
     @PatchMapping("/{id}/category")
     public ResponseEntity<TransactionCategoryUpdateResponse> changeCategory(
-            @PathVariable long id,
+            @PathVariable Long id,
             @RequestBody TransactionCategoryUpdateRequest updateReq,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
         return ResponseEntity.ok(transactionService.changeCategory(
                 id,
-                userDetails.getId(),
-                updateReq
+                updateReq,
+                userDetails.getId()
         ));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Void> update(
-            @PathVariable long id,
+            @PathVariable Long id,
             @RequestBody TransactionUpdateRequest updateReq,
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
 
-        transactionService.update(id, userDetails.getId(), updateReq);
+        transactionService.update(id, updateReq, userDetails.getId());
 
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
-            @PathVariable long id,
+            @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         transactionService.delete(id, userDetails.getId());

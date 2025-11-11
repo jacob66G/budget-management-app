@@ -38,22 +38,28 @@ public class ServiceTests {
     @Order(1)
     public void getTransactionPageFirstPageWithDefaultFiltersTest() {
 
-        long userId = 1L;
+        Long userId = 1L;
         int page = 1;
         int limit = 4;
         List<Long> userAccountsIds = List.of(1L, 2L, 3L);
         List<Long> userCategoriesIds = List.of(1L, 2L, 3L, 4L);
-        PagedResponse<TransactionSummary> transactionsPage = transactionService.getViews(
-                page,
-                limit,
-                TransactionTypeFilter.ALL,
-                TransactionModeFilter.ALL,
-                userAccountsIds,
-                userCategoriesIds,
-                LocalDate.of(2025,9,1),
-                null,
-                SortedBy.DATE,
-                SortDirection.DESC,
+
+        TransactionSearchCriteria searchCriteria =
+                new TransactionSearchCriteria(
+                        TransactionTypeFilter.ALL,
+                        TransactionModeFilter.ALL,
+                        userAccountsIds,
+                        userCategoriesIds,
+                        LocalDate.of(2025,9,1),
+                        null
+                );
+
+        TransactionPageRequest pageReq =
+                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+
+        PagedResponse<TransactionSummary> transactionsPage = transactionService.getSummariesPage(
+                pageReq,
+                searchCriteria,
                 userId
         );
 
@@ -75,17 +81,23 @@ public class ServiceTests {
         int limit = 4;
         List<Long> userAccountsIds = List.of(1L, 2L, 3L);
         List<Long> userCategoriesIds = List.of(1L, 2L, 3L, 4L);
-        PagedResponse<TransactionSummary> transactionsPage = transactionService.getViews(
-                page,
-                limit,
-                TransactionTypeFilter.ALL,
-                TransactionModeFilter.ALL,
-                userAccountsIds,
-                userCategoriesIds,
-                LocalDate.of(2025,10,1),
-                null,
-                SortedBy.DATE,
-                SortDirection.DESC,
+
+        TransactionSearchCriteria searchCriteria =
+                new TransactionSearchCriteria(
+                        TransactionTypeFilter.ALL,
+                        TransactionModeFilter.ALL,
+                        userAccountsIds,
+                        userCategoriesIds,
+                        LocalDate.of(2025,10,1),
+                        null
+                );
+
+        TransactionPageRequest pageReq =
+                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+
+        PagedResponse<TransactionSummary> transactionsPage = transactionService.getSummariesPage(
+                pageReq,
+                searchCriteria,
                 userId
         );
 
@@ -107,18 +119,23 @@ public class ServiceTests {
         List<Long> userAccountsIds = List.of(1L, 2L, 3L, 4L);
         List<Long> userCategoriesIds = List.of(1L, 2L, 3L, 4L);
 
+        TransactionSearchCriteria searchCriteria =
+                new TransactionSearchCriteria(
+                        TransactionTypeFilter.ALL,
+                        TransactionModeFilter.ALL,
+                        userAccountsIds,
+                        userCategoriesIds,
+                        LocalDate.of(2025,10,1),
+                        null
+                );
+
+        TransactionPageRequest pageReq =
+                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+
         assertThrows(NotFoundException.class, () -> {
-            transactionService.getViews(
-                    page,
-                    limit,
-                    TransactionTypeFilter.ALL,
-                    TransactionModeFilter.ALL,
-                    userAccountsIds,
-                    userCategoriesIds,
-                    LocalDate.of(2025,10,1),
-                    null,
-                    SortedBy.DATE,
-                    SortDirection.DESC,
+            transactionService.getSummariesPage(
+                    pageReq,
+                    searchCriteria,
                     userId
             );
         });
@@ -134,18 +151,23 @@ public class ServiceTests {
         List<Long> userAccountsIds = List.of(1L, 2L, 3L);
         List<Long> userCategoriesIds = List.of(1L, 2L, 3L, 4L, 5L);
 
+        TransactionSearchCriteria searchCriteria =
+                new TransactionSearchCriteria(
+                        TransactionTypeFilter.ALL,
+                        TransactionModeFilter.ALL,
+                        userAccountsIds,
+                        userCategoriesIds,
+                        LocalDate.of(2025,10,1),
+                        null
+                );
+
+        TransactionPageRequest pageReq =
+                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+
         assertThrows(NotFoundException.class, () -> {
-            transactionService.getViews(
-                    page,
-                    limit,
-                    TransactionTypeFilter.ALL,
-                    TransactionModeFilter.ALL,
-                    userAccountsIds,
-                    userCategoriesIds,
-                    LocalDate.of(2025,10,1),
-                    null,
-                    SortedBy.DATE,
-                    SortDirection.DESC,
+            transactionService.getSummariesPage(
+                    pageReq,
+                    searchCriteria,
                     userId
             );
         });
@@ -300,7 +322,7 @@ public class ServiceTests {
                 );
 
         assertThrows( CategoryChangeNotAllowedException.class, () -> {
-           transactionService.changeCategory(transactionId, userId, updReq);
+           transactionService.changeCategory(transactionId, updReq, userId);
         });
     }
 
@@ -322,7 +344,7 @@ public class ServiceTests {
                 );
 
         assertThrows( NotFoundException.class, () -> {
-            transactionService.changeCategory(transactionId, userId, updReq);
+            transactionService.changeCategory(transactionId, updReq, userId);
         });
     }
 
@@ -344,7 +366,7 @@ public class ServiceTests {
                 );
 
         assertThrows( NotFoundException.class, () -> {
-            transactionService.changeCategory(transactionId, userId, updReq);
+            transactionService.changeCategory(transactionId, updReq, userId);
         });
     }
 
@@ -366,7 +388,7 @@ public class ServiceTests {
                 );
 
         assertThrows( NotFoundException.class, () -> {
-            transactionService.changeCategory(transactionId, userId, updReq);
+            transactionService.changeCategory(transactionId, updReq, userId);
         });
     }
 
@@ -390,7 +412,7 @@ public class ServiceTests {
 
         TransactionCategoryUpdateResponse updateResponse =
                 transactionService.changeCategory(
-                        transactionId, userId, updReq
+                        transactionId, updReq, userId
                 );
 
         System.out.println(updateResponse);
@@ -430,7 +452,7 @@ public class ServiceTests {
 
         assertThrows(TransactionTypeMismatchException.class, () -> {
             transactionService.changeCategory(
-                    transactionId, userId, updReq
+                    transactionId, updReq, userId
             );
         });
 
@@ -450,7 +472,7 @@ public class ServiceTests {
                 );
 
         assertThrows(NotFoundException.class, () -> {
-            transactionService.update(transactionId, userId, updateReq);
+            transactionService.update(transactionId, updateReq, userId);
         });
     }
 
@@ -468,7 +490,7 @@ public class ServiceTests {
                         "Bilet miesięczny podrożał"
                 );
 
-        transactionService.update(transactionId, userId, updateReq);
+        transactionService.update(transactionId, updateReq, userId);
 
         em.flush();
         em.clear();
@@ -501,7 +523,7 @@ public class ServiceTests {
                         "Bilet miesięczny potaniał"
                 );
 
-        transactionService.update(transactionId, userId, updateReq);
+        transactionService.update(transactionId, updateReq, userId);
 
         em.flush();
         em.clear();
@@ -534,7 +556,7 @@ public class ServiceTests {
                         "Wypłata z premią - 100zł"
                 );
 
-        transactionService.update(transactionId, userId, updateReq);
+        transactionService.update(transactionId, updateReq, userId);
 
         em.flush();
         em.clear();
@@ -567,7 +589,7 @@ public class ServiceTests {
                         "Wypłata obcięta o 100zł"
                 );
 
-        transactionService.update(transactionId, userId, updateReq);
+        transactionService.update(transactionId, updateReq, userId);
 
         em.flush();
         em.clear();

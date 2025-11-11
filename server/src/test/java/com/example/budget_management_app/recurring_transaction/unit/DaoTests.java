@@ -42,12 +42,15 @@ public class DaoTests {
     @Order(1)
     public void getRecurringTransactionsSummaryTuplesByUserIdTest() {
 
-        long userId = 1L;
+        Long userId = 1L;
         int page = 1;
         int limit = 3;
         long expectedValue = 3L;
 
-        List<Tuple> results = recurringTransactionDao.getSummaryTuplesByUserId(userId, page, limit);
+        PageRequest pageReq =
+                new PageRequest(page, limit);
+
+        List<Tuple> results = recurringTransactionDao.getSummaryTuplesByUserId(pageReq, userId);
 
         assertThat(results).isNotNull();
         assertThat(results.size()).isNotZero();
@@ -60,7 +63,7 @@ public class DaoTests {
     @Order(2)
     public void getRecurringTransactionsSummaryCountByUserIdTest() {
 
-        long userId = 1L;
+        Long userId = 1L;
         long expectedValue = 9L;
 
         Long count = recurringTransactionDao.getSummaryTuplesCountByUserId(userId);
@@ -73,8 +76,8 @@ public class DaoTests {
     @Order(3)
     public void findRecurringTransactionTemplateByIdAndUserIdTest() {
 
-        long userId = 1L;
-        long recurringTemplateId = 2L;
+        Long userId = 1L;
+        Long recurringTemplateId = 2L;
 
         Optional<RecurringTransaction> optRecurringTransaction = recurringTransactionDao.findByIdAndUserId(recurringTemplateId, userId);
         assertThat(optRecurringTransaction).isPresent();
@@ -89,11 +92,11 @@ public class DaoTests {
     @Order(4)
     public void createRecurringTransactionWithoutRegularTransactionTest() {
 
-        long accountId = 1L;
+        Long accountId = 1L;
         Account account = em.find(Account.class, accountId);
         assertThat(account).isNotNull();
 
-        long categoryId = 4L;
+        Long categoryId = 4L;
         Category category = em.find(Category.class, categoryId);
         assertThat(category).isNotNull();
 
@@ -128,11 +131,11 @@ public class DaoTests {
     @Order(5)
     public void createRecurringTransactionWithRegularTransaction() {
 
-        long accountId = 1L;
+        Long accountId = 1L;
         Account account = em.find(Account.class, accountId);
         assertThat(account).isNotNull();
 
-        long categoryId = 4L;
+        Long categoryId = 4L;
         Category category = em.find(Category.class, categoryId);
         assertThat(category).isNotNull();
 
@@ -167,7 +170,7 @@ public class DaoTests {
         assertThat(optFetchedTransaction).isPresent();
         Transaction fetchedTransaction = optFetchedTransaction.get();
 
-        long expectedTransactionIdValue = fetchedTransaction.getId();
+        Long expectedTransactionIdValue = fetchedTransaction.getId();
         assertThat(fetchedRecTransaction.getId()).isEqualTo(createdRecTransaction.getId());
         assertThat(fetchedTransaction.getId()).isEqualTo(expectedTransactionIdValue);
 

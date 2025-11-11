@@ -8,21 +8,21 @@ import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 
 public interface RecurringTransactionService {
 
-    PagedResponse<RecurringTransactionSummary> getSummaries(long userId, int page, int limit);
+    PagedResponse<RecurringTransactionSummary> getSummariesPage(PageRequest pageRequest, Long userId);
 
-    RecurringTransactionDetailsResponse getDetails(long id, long userId);
+    RecurringTransactionDetailsResponse getDetails(Long id, Long userId);
 
-    PagedResponse<UpcomingTransactionSummary> getUpcommingTransactionsPage(PageRequest pageRequest,
+    PagedResponse<UpcomingTransactionSummary> getUpcomingTransactionsPage(PageRequest pageRequest,
                                                                                UpcomingTransactionSearchCriteria searchCriteria,
                                                                                Long userId);
 
-    RecurringTransactionCreateResponse create(long userId, RecurringTransactionCreateRequest createReq);
+    RecurringTransactionCreateResponse create(RecurringTransactionCreateRequest createReq, Long userId);
 
-    void changeStatus(long id, long userId, boolean isActive);
+    void changeStatus(Long id, Boolean isActive, Long userId);
 
-    void delete(long id, long userId, RemovalRange range);
+    void delete(Long id, RemovalRange range, Long userId);
 
-    void update(long id, long userId, RecurringTransactionUpdateRequest updateReq, UpdateRange range);
+    void update(Long id, RecurringTransactionUpdateRequest updateReq, UpdateRange range, Long userId);
 
     void generateRecurringTransactions();
 }

@@ -24,21 +24,21 @@ public class RecurringTransactionController {
     private final RecurringTransactionService recurringTransactionService;
 
     @GetMapping
-    public ResponseEntity<PagedResponse<RecurringTransactionSummary>> getSummaries(
-            @RequestParam(name = "page") int page,
-            @RequestParam(name = "limit") int limit,
+    public ResponseEntity<PagedResponse<RecurringTransactionSummary>> getSummariesPage(
+            PageRequest pageReq,
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
 
-        return ResponseEntity.ok(recurringTransactionService.getSummaries(
-                userDetails.getId(),
-                page,
-                limit));
+        PagedResponse<RecurringTransactionSummary> summariesPage = recurringTransactionService.getSummariesPage(
+                pageReq,
+                userDetails.getId());
+
+        return ResponseEntity.ok(summariesPage.withLinks(PaginationUtils.createLinks(summariesPage.pagination())));
     }
 
     @GetMapping("/{id}/details")
     public ResponseEntity<RecurringTransactionDetailsResponse> getDetails(
-            @PathVariable(name = "id") long id,
+            @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ResponseEntity.ok(recurringTransactionService.getDetails(
@@ -54,13 +54,13 @@ public class RecurringTransactionController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        PagedResponse<UpcomingTransactionSummary> page = this.recurringTransactionService.getUpcommingTransactionsPage(
+        PagedResponse<UpcomingTransactionSummary> upcomingTransactionsPage = this.recurringTransactionService.getUpcomingTransactionsPage(
                 pageReq,
                 searchCriteria,
                 userDetails.getId()
         );
 
-        return ResponseEntity.ok(page.withLinks(PaginationUtils.createLinks(page.pagination())));
+        return ResponseEntity.ok(upcomingTransactionsPage.withLinks(PaginationUtils.createLinks(upcomingTransactionsPage.pagination())));
     }
 
     @PostMapping
@@ -69,7 +69,7 @@ public class RecurringTransactionController {
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
 
-        RecurringTransactionCreateResponse response = recurringTransactionService.create(userDetails.getId(), createReq);
+        RecurringTransactionCreateResponse response = recurringTransactionService.create(createReq, userDetails.getId());
 
         URI location = URI.create("/api/v1/recurring-transactions/" + response.id());
 
@@ -80,35 +80,35 @@ public class RecurringTransactionController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> changeStatus(
-            @PathVariable(name = "id") long id,
+            @PathVariable Long id,
             @RequestBody RecurringTransactionStatusUpdateRequest updateReq,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        recurringTransactionService.changeStatus(id, userDetails.getId(), updateReq.isActive());
+        recurringTransactionService.changeStatus(id, updateReq.isActive(), userDetails.getId());
 
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Void> update(
-            @PathVariable(name = "id") long id,
+            @PathVariable Long id,
             @RequestParam(name = "range") UpdateRange range,
             @RequestBody RecurringTransactionUpdateRequest updateReq,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        recurringTransactionService.update(id, userDetails.getId(), updateReq, range);
+        recurringTransactionService.update(id, updateReq, range, userDetails.getId());
 
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
-            @PathVariable(name = "id") long id,
+            @PathVariable Long id,
             @RequestParam(name = "range") RemovalRange range,
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
 
-        recurringTransactionService.delete(id, userDetails.getId(), range);
+        recurringTransactionService.delete(id, range, userDetails.getId());
 
         return ResponseEntity.noContent().build();
     }

@@ -1,40 +1,29 @@
 package com.example.budget_management_app.transaction.dao;
 
-import com.example.budget_management_app.transaction.domain.*;
+import com.example.budget_management_app.transaction.domain.Transaction;
+import com.example.budget_management_app.transaction.dto.TransactionPageRequest;
+import com.example.budget_management_app.transaction.dto.TransactionSearchCriteria;
 import jakarta.persistence.Tuple;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 public interface TransactionDao {
 
-    List<Tuple> getTuples(int page,
-                                int limit,
-                                TransactionTypeFilter type,
-                                TransactionModeFilter mode,
-                                List<Long> accounts,
-                                List<Long> categories,
-                                LocalDate since,
-                                LocalDate to,
-                                SortedBy sortedBy,
-                                SortDirection sortedType
+    List<Tuple> getTuples(
+            TransactionPageRequest pageReq,
+            TransactionSearchCriteria searchCriteria
     );
 
-    Long getCount(TransactionTypeFilter type,
-                              TransactionModeFilter mode,
-                              List<Long> accounts,
-                              List<Long> categories,
-                              LocalDate since,
-                              LocalDate to);
+    Long getCount(TransactionSearchCriteria searchCriteria);
 
     Transaction save(Transaction transaction);
 
     void delete(Transaction transaction);
 
-    Optional<Transaction> findByIdAndUserId(long id, long userId);
+    Optional<Transaction> findByIdAndUserId(Long id, Long userId);
 
-    Optional<Transaction> findByIdAndUserIdAndCategoryId(long id, long userId, long categoryId);
+    Optional<Transaction> findByIdAndUserIdAndCategoryId(Long id, Long categoryId, Long userId);
 
-    List<Transaction> findByRecurringTransactionId(long recurringTransactionId);
+    List<Transaction> findByRecurringTransactionId(Long id);
 }

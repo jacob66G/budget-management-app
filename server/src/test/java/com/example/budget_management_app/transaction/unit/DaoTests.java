@@ -5,6 +5,8 @@ import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.transaction.dao.TransactionDao;
 import com.example.budget_management_app.transaction.dao.TransactionDaoImpl;
 import com.example.budget_management_app.transaction.domain.*;
+import com.example.budget_management_app.transaction.dto.TransactionPageRequest;
+import com.example.budget_management_app.transaction.dto.TransactionSearchCriteria;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
@@ -40,14 +42,16 @@ public class DaoTests {
         long expectedNumberOfRecords = 10L;
         List<Long> allUserAccountsIds = List.of(1L, 2L, 3L);
         List<Long> allUserCategoriesIds = List.of(1L, 2L, 3L, 4L);
-        Long count = transactionDao.getCount(
-                TransactionTypeFilter.ALL,
-                TransactionModeFilter.ALL,
-                allUserAccountsIds,
-                allUserCategoriesIds,
-                LocalDate.of(2025,10,1),
-                null
-                );
+
+        TransactionSearchCriteria searchCriteria =
+                new TransactionSearchCriteria(TransactionTypeFilter.ALL,
+                        TransactionModeFilter.ALL,
+                        allUserAccountsIds,
+                        allUserCategoriesIds,
+                        LocalDate.of(2025,10,1),
+                        null);
+
+        Long count = transactionDao.getCount(searchCriteria);
 
         assertThat(count).isNotNull();
         assertThat(count).isNotZero();
@@ -61,14 +65,18 @@ public class DaoTests {
         long expectedNumberOfRecords = 4L;
         List<Long> allUserAccountsIds = List.of(1L, 2L, 3L);
         List<Long> allUserCategoriesIds = List.of(1L, 2L, 3L, 4L);
-        Long count = transactionDao.getCount(
-                TransactionTypeFilter.ALL,
-                TransactionModeFilter.RECURRING,
-                allUserAccountsIds,
-                allUserCategoriesIds,
-                LocalDate.of(2025, 9, 1),
-                null
-        );
+
+        TransactionSearchCriteria searchCriteria =
+                new TransactionSearchCriteria(
+                        TransactionTypeFilter.ALL,
+                        TransactionModeFilter.RECURRING,
+                        allUserAccountsIds,
+                        allUserCategoriesIds,
+                        LocalDate.of(2025, 9, 1),
+                        null
+                );
+
+        Long count = transactionDao.getCount(searchCriteria);
 
         assertThat(count).isNotNull();
         assertThat(count).isNotZero();
@@ -82,14 +90,18 @@ public class DaoTests {
         long expectedNumberOfRecords = 8L;
         List<Long> allUserAccountsIds = List.of(1L, 2L, 3L);
         List<Long> allUserCategoriesIds = List.of(1L, 2L, 3L, 4L);
-        Long count = transactionDao.getCount(
-                TransactionTypeFilter.ALL,
-                TransactionModeFilter.REGULAR,
-                allUserAccountsIds,
-                allUserCategoriesIds,
-                LocalDate.of(2025, 9, 1),
-                null
-        );
+
+        TransactionSearchCriteria searchCriteria =
+                new TransactionSearchCriteria(
+                        TransactionTypeFilter.ALL,
+                        TransactionModeFilter.REGULAR,
+                        allUserAccountsIds,
+                        allUserCategoriesIds,
+                        LocalDate.of(2025, 9, 1),
+                        null
+                );
+
+        Long count = transactionDao.getCount(searchCriteria);
 
         assertThat(count).isNotNull();
         assertThat(count).isNotZero();
@@ -103,14 +115,18 @@ public class DaoTests {
         long expectedNumberOfRecords = 3L;
         List<Long> allUserAccountsIds = List.of(1L);
         List<Long> allUserCategoriesIds = List.of(2L, 4L);
-        Long count = transactionDao.getCount(
-                TransactionTypeFilter.ALL,
-                TransactionModeFilter.REGULAR,
-                allUserAccountsIds,
-                allUserCategoriesIds,
-                LocalDate.of(2025, 9, 1),
-                null
-        );
+
+        TransactionSearchCriteria searchCriteria =
+                new TransactionSearchCriteria(
+                        TransactionTypeFilter.ALL,
+                        TransactionModeFilter.REGULAR,
+                        allUserAccountsIds,
+                        allUserCategoriesIds,
+                        LocalDate.of(2025, 9, 1),
+                        null
+                );
+
+        Long count = transactionDao.getCount(searchCriteria);
 
         assertThat(count).isNotNull();
         assertThat(count).isNotZero();
@@ -124,14 +140,18 @@ public class DaoTests {
         long expectedNumberOfRecords = 4L;
         List<Long> allUserAccountsIds = List.of(1L);
         List<Long> allUserCategoriesIds = List.of(4L);
-        Long count = transactionDao.getCount(
-                TransactionTypeFilter.ALL,
-                TransactionModeFilter.RECURRING,
-                allUserAccountsIds,
-                allUserCategoriesIds,
-                LocalDate.of(2025, 9, 1),
-                null
-        );
+
+        TransactionSearchCriteria searchCriteria =
+                new TransactionSearchCriteria(
+                        TransactionTypeFilter.ALL,
+                        TransactionModeFilter.RECURRING,
+                        allUserAccountsIds,
+                        allUserCategoriesIds,
+                        LocalDate.of(2025, 9, 1),
+                        null
+                );
+
+        Long count = transactionDao.getCount(searchCriteria);
 
         assertThat(count).isNotNull();
         assertThat(count).isNotZero();
@@ -147,17 +167,21 @@ public class DaoTests {
         int expectedSize = 5;
         List<Long> allUserAccountsIds = List.of(1L, 2L, 3L);
         List<Long> allUserCategoriesIds = List.of(1L, 2L, 3L, 4L);
-        List<Tuple> transactions = transactionDao.getTuples(
-                page,
-                limit,
-                TransactionTypeFilter.ALL,
-                TransactionModeFilter.ALL,
-                allUserAccountsIds,
-                allUserCategoriesIds,
-                LocalDate.of(2025, 9, 1),
-                null,
-                SortedBy.DATE,
-                SortDirection.DESC);
+
+        TransactionSearchCriteria searchCriteria =
+                new TransactionSearchCriteria(
+                        TransactionTypeFilter.ALL,
+                        TransactionModeFilter.ALL,
+                        allUserAccountsIds,
+                        allUserCategoriesIds,
+                        LocalDate.of(2025, 9, 1),
+                        null
+                );
+
+        TransactionPageRequest pageReq =
+                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+
+        List<Tuple> transactions = transactionDao.getTuples(pageReq, searchCriteria);
 
         assertThat(transactions).isNotNull();
         assertThat(transactions.size()).isNotZero();
@@ -175,17 +199,21 @@ public class DaoTests {
         int expectedSize = 2;
         List<Long> allUserAccountsIds = List.of(1L, 2L, 3L);
         List<Long> allUserCategoriesIds = List.of(1L, 2L, 3L, 4L);
-        List<Tuple> transactions = transactionDao.getTuples(
-                page,
-                limit,
-                TransactionTypeFilter.ALL,
-                TransactionModeFilter.ALL,
-                allUserAccountsIds,
-                allUserCategoriesIds,
-                LocalDate.of(2025, 9, 1),
-                null,
-                SortedBy.DATE,
-                SortDirection.DESC);
+
+        TransactionSearchCriteria searchCriteria =
+                new TransactionSearchCriteria(
+                        TransactionTypeFilter.ALL,
+                        TransactionModeFilter.ALL,
+                        allUserAccountsIds,
+                        allUserCategoriesIds,
+                        LocalDate.of(2025, 9, 1),
+                        null
+                );
+
+        TransactionPageRequest pageReq =
+                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+
+        List<Tuple> transactions = transactionDao.getTuples(pageReq, searchCriteria);
 
         assertThat(transactions).isNotNull();
         assertThat(transactions.size()).isNotZero();
@@ -203,17 +231,21 @@ public class DaoTests {
         int expectedSize = 5;
         List<Long> allUserAccountsIds = List.of(1L, 2L, 3L);
         List<Long> allUserCategoriesIds = List.of(1L, 2L, 3L, 4L);
-        List<Tuple> transactions = transactionDao.getTuples(
-                page,
-                limit,
-                TransactionTypeFilter.EXPENSE,
-                TransactionModeFilter.ALL,
-                allUserAccountsIds,
-                allUserCategoriesIds,
-                LocalDate.of(2025, 10, 1),
-                LocalDate.of(2025,10, 21),
-                SortedBy.DATE,
-                SortDirection.DESC);
+
+        TransactionSearchCriteria searchCriteria =
+                new TransactionSearchCriteria(
+                        TransactionTypeFilter.EXPENSE,
+                        TransactionModeFilter.ALL,
+                        allUserAccountsIds,
+                        allUserCategoriesIds,
+                        LocalDate.of(2025, 10, 1),
+                        LocalDate.of(2025,10, 21)
+                );
+
+        TransactionPageRequest pageReq =
+                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+
+        List<Tuple> transactions = transactionDao.getTuples(pageReq, searchCriteria);
 
         assertThat(transactions).isNotNull();
         assertThat(transactions.size()).isNotZero();
@@ -231,17 +263,21 @@ public class DaoTests {
         int expectedSize = 2;
         List<Long> allUserAccountsIds = List.of(1L, 2L, 3L);
         List<Long> allUserCategoriesIds = List.of(1L, 2L, 3L, 4L);
-        List<Tuple> transactions = transactionDao.getTuples(
-                page,
-                limit,
-                TransactionTypeFilter.EXPENSE,
-                TransactionModeFilter.ALL,
-                allUserAccountsIds,
-                allUserCategoriesIds,
-                LocalDate.of(2025, 10, 1),
-                LocalDate.of(2025,10, 21),
-                SortedBy.DATE,
-                SortDirection.DESC);
+
+        TransactionSearchCriteria searchCriteria =
+                new TransactionSearchCriteria(
+                        TransactionTypeFilter.EXPENSE,
+                        TransactionModeFilter.ALL,
+                        allUserAccountsIds,
+                        allUserCategoriesIds,
+                        LocalDate.of(2025, 10, 1),
+                        LocalDate.of(2025,10, 21)
+                );
+
+        TransactionPageRequest pageReq =
+                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+
+        List<Tuple> transactions = transactionDao.getTuples(pageReq, searchCriteria);
 
         assertThat(transactions).isNotNull();
         assertThat(transactions.size()).isNotZero();

@@ -21,7 +21,7 @@ public class Transaction {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "amount", precision = 19, scale = 2, nullable = false)
     private BigDecimal amount;
@@ -38,9 +38,6 @@ public class Transaction {
 
     @Column(name = "transaction_date", nullable = false, updatable = false)
     private LocalDateTime transactionDate;
-
-    @Column(name = "photo_path")
-    private String photoPath;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
@@ -99,7 +96,6 @@ public class Transaction {
                 ", type=" + type +
                 ", description='" + description + '\'' +
                 ", transactionDate=" + transactionDate +
-                ", photoPath='" + photoPath + '\'' +
                 '}';
     }
 }

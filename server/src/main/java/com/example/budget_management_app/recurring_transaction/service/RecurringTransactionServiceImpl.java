@@ -15,7 +15,6 @@ import com.example.budget_management_app.recurring_transaction.domain.RemovalRan
 import com.example.budget_management_app.recurring_transaction.domain.UpdateRange;
 import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.recurring_transaction.mapper.Mapper;
-import com.example.budget_management_app.transaction.dao.TransactionDao;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction_common.dto.PageRequest;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
@@ -38,7 +37,6 @@ import java.util.Set;
 public class RecurringTransactionServiceImpl implements RecurringTransactionService{
 
     private final RecurringTransactionDao recurringTransactionDao;
-    private final TransactionDao transactionDao;
     private final CategoryValidatorService transactionValidator;
     private final AccountUpdateService accountUpdateService;
     private final AccountDao accountDao;
@@ -49,11 +47,11 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
      * @return
      */
     @Override
-    public PagedResponse<RecurringTransactionSummary> getSummaries(long userId, int page, int limit) {
+    public PagedResponse<RecurringTransactionSummary> getSummariesPage(PageRequest pageReq, Long userId) {
 
-        List<Tuple> results = recurringTransactionDao.getSummaryTuplesByUserId(
-                userId, page, limit
-        );
+        int page = pageReq.page();
+        int limit = pageReq.limit();
+        List<Tuple> results = recurringTransactionDao.getSummaryTuplesByUserId(pageReq, userId);
 
         long recTransactionsCount = recurringTransactionDao.getSummaryTuplesCountByUserId(userId);
 
@@ -66,7 +64,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
      * @return
      */
     @Override
-    public RecurringTransactionDetailsResponse getDetails(long id, long userId) {
+    public RecurringTransactionDetailsResponse getDetails(Long id, Long userId) {
 
         RecurringTransaction recurringTransaction = recurringTransactionDao.findByIdAndUserId(id, userId)
                 .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
@@ -81,7 +79,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
      * @return
      */
     @Override
-    public PagedResponse<UpcomingTransactionSummary> getUpcommingTransactionsPage(PageRequest pageRequest, UpcomingTransactionSearchCriteria searchCriteria, Long userId) {
+    public PagedResponse<UpcomingTransactionSummary> getUpcomingTransactionsPage(PageRequest pageRequest, UpcomingTransactionSearchCriteria searchCriteria, Long userId) {
 
         if (!accountDao.areAccountsBelongToUser(userId, searchCriteria.accountIds())) {
             throw new NotFoundException(Account.class.getSimpleName(), searchCriteria.accountIds(), ErrorCode.NOT_FOUND);
@@ -103,7 +101,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
      */
     @Transactional
     @Override
-    public RecurringTransactionCreateResponse create(long userId, RecurringTransactionCreateRequest createReq) {
+    public RecurringTransactionCreateResponse create(RecurringTransactionCreateRequest createReq, Long userId) {
 
         long accountId = createReq.accountId();
         Account account = accountDao.findByIdAndUser(accountId, userId)
@@ -182,7 +180,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
      */
     @Transactional
     @Override
-    public void changeStatus(long id, long userId, boolean isActive) {
+    public void changeStatus(Long id, Boolean isActive, Long userId) {
 
         RecurringTransaction recurringTransaction = recurringTransactionDao.findByIdAndUserId(id, userId)
                 .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
@@ -221,7 +219,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
      */
     @Transactional
     @Override
-    public void delete(long id, long userId, RemovalRange range) {
+    public void delete(Long id, RemovalRange range, Long userId) {
 
         RecurringTransaction recurringTransaction = recurringTransactionDao.findByIdAndUserId(id, userId)
                 .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
@@ -252,7 +250,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
      */
     @Transactional
     @Override
-    public void update(long id, long userId, RecurringTransactionUpdateRequest updateReq, UpdateRange range) {
+    public void update(Long id, RecurringTransactionUpdateRequest updateReq, UpdateRange range, Long userId) {
 
         RecurringTransaction recurringTransaction = recurringTransactionDao.findByIdAndUserId(id, userId)
                 .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
