@@ -89,7 +89,7 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateToken(user.getEmail());
 
         log.info("User logged in: email={}", user.getEmail());
-        return mapper.toLoginResponseDto(user, accessToken);
+        return mapper.toLoginResponseDto(user, accessToken, false);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateToken(user.getEmail());
 
         log.info("User logged in: email={}", user.getEmail());
-        return mapper.toLoginResponseDto(user, accessToken);
+        return mapper.toLoginResponseDto(user, accessToken, false);
     }
 
     @Transactional
@@ -156,7 +156,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
-    public void resetPasswordConfirm(PasswordResetConfirmDto dto) {
+    public void resetPasswordConfirm(PasswordResetConfirmationDto dto) {
         if (!dto.newPassword().equals(dto.confirmedNewPassword())) {
             throw new ValidationException("The provided passwords are different", ErrorCode.PASSWORDS_NOT_MATCH);
         }

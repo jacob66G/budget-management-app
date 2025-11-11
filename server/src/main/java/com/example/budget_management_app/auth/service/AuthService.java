@@ -15,7 +15,7 @@ public interface AuthService {
 
     ResponseMessageDto resendVerification(String email);
 
-    void resetPasswordConfirm(PasswordResetConfirmDto dto);
+    void resetPasswordConfirm(PasswordResetConfirmationDto dto);
 
     ResponseMessageDto resetPassword(PasswordResetRequestDto dto);
 

@@ -5,20 +5,25 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
+
 @Setter
 @Getter
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class LoginResponseDto {
-        private String accessToken;
         private Long userId;
         private String name;
         private String surname;
         private String email;
+        private String status;
         private boolean mfaEnabled;
+        private Instant createdAt;
+        private String accessToken;
+        private boolean isMfaRequired;
 
-    public LoginResponseDto(Long userId, Boolean mfaEnabled) {
+    public LoginResponseDto(Long userId, Boolean isMfaRequired) {
         this.userId = userId;
-        this.mfaEnabled = mfaEnabled;
+        this.isMfaRequired = isMfaRequired;
     }
 }

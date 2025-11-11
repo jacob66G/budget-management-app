@@ -6,10 +6,10 @@ import jakarta.validation.constraints.Size;
 
 public record RegistrationRequestDto(
         @NotBlank(message = "Name cannot be empty")
-        @Size(min = 2, message = "Name must contain at least 2 characters")
+        @Size(min = 2, max=30, message = "Name must be between 2 and 30 characters")
         String name,
         @NotBlank(message = "Surname cannot be empty")
-        @Size(min = 2, message = "Surname must contain at least 2 characters")
+        @Size(min = 2, max=30, message = "Surname must be between 2 and 30 characters")
         String surname,
         @NotBlank(message = "Email cannot be empty")
         @Email(message = "Email should be valid")

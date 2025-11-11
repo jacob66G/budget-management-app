@@ -25,9 +25,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Field;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+class UserServiceTest {
 
     @Mock
     private UserDao userDao;
@@ -57,6 +60,17 @@ public class UserServiceTest {
 
     @Captor
     private ArgumentCaptor<User> userCaptor;
+
+    @BeforeEach
+    void setUpSelfInjection() {
+        Field selfField = ReflectionUtils.findField(UserServiceImpl.class, "self");
+        if (selfField != null) {
+            ReflectionUtils.makeAccessible(selfField);
+            ReflectionUtils.setField(selfField, userService, userService);
+        } else {
+            throw new RuntimeException("Not found 'self' w UserServiceImpl");
+        }
+    }
 
     @Nested
     class CreateUserTests {
@@ -610,69 +624,93 @@ public class UserServiceTest {
     }
 
     @Nested
-    class DeleteUserTests {
+    class DeleteUsersPendingDeletionTests {
 
-        private Long userId = 1L;
-        private User user;
+        private User user1;
+        private User user2;
 
         @BeforeEach
         void setUp() {
-            user = new User();
-            user.setId(userId);
-            user.setStatus(UserStatus.PENDING_DELETION);
+            user1 = new User();
+            user1.setId(1L);
+            user1.setStatus(UserStatus.PENDING_DELETION);
+            user1.setEmail("user1@example.com");
 
-            lenient().when(userDao.findById(userId)).thenReturn(Optional.of(user));
+            user2 = new User();
+            user2.setId(2L);
+            user2.setStatus(UserStatus.PENDING_DELETION);
+            user2.setEmail("user2@example.com");
         }
 
         @Test
-        void should_delete_user_and_call_dependent_services() {
+        void should_delete_all_found_users_successfully() {
             //given
-            doNothing().when(accountService).deleteAllUserAccounts(userId);
-            doNothing().when(categoryService).deleteAllUserCategories(userId);
-            doNothing().when(userDao).delete(user);
-            // TODO: doNothing().when(recurringTransactionService).deleteAllUserTransactions(userId);
-            // TODO: doNothing().when(transactionService).deleteAllUserTransactions(userId);
+            when(userDao.findUsersForDeletion(eq(UserStatus.PENDING_DELETION), any(Instant.class)))
+                    .thenReturn(List.of(user1, user2));
+
+            when(userDao.findById(1L)).thenReturn(Optional.of(user1));
+            when(userDao.findById(2L)).thenReturn(Optional.of(user2));
+
+            doNothing().when(accountService).deleteAllUserAccounts(anyLong());
+            doNothing().when(categoryService).deleteAllUserCategories(anyLong());
+            doNothing().when(userDao).delete(any(User.class));
 
             //when
-            userService.deleteUser(userId);
+            userService.deleteUsersPendingDeletion();
 
             //then
-            // TODO: verify(recurringTransactionService, times(1)).deleteAllUserTransactions(userId);
-            // TODO: verify(transactionService, times(1)).deleteAllUserTransactions(userId);
-            verify(accountService, times(1)).deleteAllUserAccounts(userId);
-            verify(categoryService, times(1)).deleteAllUserCategories(userId);
+            verify(accountService, times(1)).deleteAllUserAccounts(1L);
+            verify(accountService, times(1)).deleteAllUserAccounts(2L);
 
-            verify(userDao, times(1)).delete(user);
+            verify(categoryService, times(1)).deleteAllUserCategories(1L);
+            verify(categoryService, times(1)).deleteAllUserCategories(2L);
+
+            verify(userDao, times(1)).delete(user1);
+            verify(userDao, times(1)).delete(user2);
         }
 
         @Test
-        void should_throw_ValidationException_when_user_status_is_not_pending_deletion() {
+        void should_do_nothing_when_no_users_found() {
             //given
-            user.setStatus(UserStatus.ACTIVE);
+            when(userDao.findUsersForDeletion(eq(UserStatus.PENDING_DELETION), any(Instant.class)))
+                    .thenReturn(List.of());
 
-            //when & then
-            ValidationException exception = assertThrows(ValidationException.class,
-                    () -> userService.deleteUser(userId));
+            //when
+            userService.deleteUsersPendingDeletion();
 
             //then
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_PENDING_DELETION);
-
+            verify(userDao, never()).findById(anyLong());
             verify(accountService, never()).deleteAllUserAccounts(anyLong());
             verify(categoryService, never()).deleteAllUserCategories(anyLong());
             verify(userDao, never()).delete(any());
         }
 
         @Test
-        void should_throw_NotFoundException_when_user_not_found() {
+        void should_continue_loop_if_one_user_fails_validation() {
             //given
-            when(userDao.findById(userId)).thenReturn(Optional.empty());
+            user1.setStatus(UserStatus.ACTIVE);
 
-            //when & then
-            NotFoundException exception = assertThrows(NotFoundException.class,
-                    () -> userService.deleteUser(userId));
+            when(userDao.findUsersForDeletion(eq(UserStatus.PENDING_DELETION), any(Instant.class)))
+                    .thenReturn(List.of(user1, user2));
 
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
-            verify(userDao, never()).delete(any());
+            when(userDao.findById(1L)).thenReturn(Optional.of(user1));
+            when(userDao.findById(2L)).thenReturn(Optional.of(user2));
+
+            doNothing().when(accountService).deleteAllUserAccounts(2L);
+            doNothing().when(categoryService).deleteAllUserCategories(2L);
+            doNothing().when(userDao).delete(user2);
+
+            //when
+            userService.deleteUsersPendingDeletion();
+
+            //then
+            verify(accountService, never()).deleteAllUserAccounts(1L);
+            verify(categoryService, never()).deleteAllUserCategories(1L);
+            verify(userDao, never()).delete(user1);
+
+            verify(accountService, times(1)).deleteAllUserAccounts(2L);
+            verify(categoryService, times(1)).deleteAllUserCategories(2L);
+            verify(userDao, times(1)).delete(user2);
         }
     }
 }

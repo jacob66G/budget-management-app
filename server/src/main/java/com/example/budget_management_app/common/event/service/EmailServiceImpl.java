@@ -36,9 +36,8 @@ public class EmailServiceImpl implements EmailService {
         String textTemplate = emailServiceHelper.loadTemplate(resourceText);
 
         String verificationLink = UriComponentsBuilder
-                .fromPath(ApiPaths.BASE_URL)
-                .pathSegment(ApiPaths.BASE_API, ApiPaths.AUTH, ApiPaths.VERIFY)
-                .queryParam("email", userEmail)
+                .fromPath(ApiPaths.CLIENT_BASE_URL)
+                .pathSegment(ApiPaths.VERIFY)
                 .queryParam("code", verificationCode)
                 .build().toUriString();
 
@@ -61,9 +60,8 @@ public class EmailServiceImpl implements EmailService {
         String textTemplate = emailServiceHelper.loadTemplate(resourceText);
 
         String resetPasswordLink = UriComponentsBuilder
-                .fromPath(ApiPaths.BASE_URL)
-                .pathSegment(ApiPaths.BASE_API, ApiPaths.AUTH, ApiPaths.RESET_PASSWORD)
-                .queryParam("email", userEmail)
+                .fromPath(ApiPaths.CLIENT_BASE_URL)
+                .pathSegment(ApiPaths.RESET_PASSWORD)
                 .queryParam("code", token)
                 .build().toUriString();
 

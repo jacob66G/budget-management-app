@@ -1,8 +1,9 @@
 package com.example.budget_management_app.security.config;
 
+import com.example.budget_management_app.constants.ApiPaths;
 import com.example.budget_management_app.security.exceptionsHandling.CustomAuthenticationEntryPoint;
-import com.example.budget_management_app.security.provider.CustomAuthenticationProvider;
 import com.example.budget_management_app.security.filter.JwtAuthenticationFilter;
+import com.example.budget_management_app.security.provider.CustomAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -44,7 +45,7 @@ public class SecurityConfig {
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
                         .anyRequest().authenticated()
                 )
-                .headers( headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -60,16 +61,20 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         return request -> {
             CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOrigins(List.of("*"));
+            config.setAllowedOrigins(List.of(ApiPaths.CLIENT_BASE_URL));
             config.setAllowedMethods(List.of(
                     HttpMethod.GET.name(),
                     HttpMethod.POST.name(),
                     HttpMethod.PUT.name(),
                     HttpMethod.PATCH.name(),
-                    HttpMethod.DELETE.name())
+                    HttpMethod.DELETE.name(),
+                    HttpMethod.OPTIONS.name())
             );
-            config.setAllowedHeaders(List.of("*"));
-            config.setExposedHeaders(List.of(HttpHeaders.AUTHORIZATION));
+            config.setAllowedHeaders(List.of(
+                    HttpHeaders.AUTHORIZATION,
+                    HttpHeaders.CONTENT_TYPE,
+                    HttpHeaders.COOKIE
+            ));
             config.setAllowCredentials(true);
             config.setMaxAge(3600L);
             return config;

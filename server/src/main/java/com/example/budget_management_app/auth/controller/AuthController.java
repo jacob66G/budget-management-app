@@ -6,7 +6,6 @@ import com.example.budget_management_app.common.dto.ResponseMessageDto;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.UserSessionException;
 import com.example.budget_management_app.constants.ApiConstants;
-import com.example.budget_management_app.constants.ApiPaths;
 import com.example.budget_management_app.session.domain.UserSession;
 import com.example.budget_management_app.session.dto.RefreshTokenResult;
 import com.example.budget_management_app.session.service.UserSessionService;
@@ -14,12 +13,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
 
@@ -64,7 +61,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AccessTokenResponse> refreshToken(
+    public ResponseEntity<LoginResponseDto> refreshToken(
             HttpServletRequest request,
             @CookieValue(name = ApiConstants.REFRESH_TOKEN_COOKIE, required = false) String refreshToken
     ) {
@@ -77,7 +74,7 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, result.cookie())
-                .body(new AccessTokenResponse(result.accessToken()));
+                .body((result.loginResponse()));
     }
 
     @PostMapping("/logout")
@@ -98,14 +95,7 @@ public class AuthController {
     @GetMapping("/verify")
     public ResponseEntity<Void> verifyUser(@RequestParam String code) {
         authService.verifyUser(code);
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .location(UriComponentsBuilder.fromPath(ApiPaths.BASE_API)
-                        .pathSegment(ApiPaths.AUTH)
-                        .pathSegment(ApiPaths.LOGIN)
-                        .queryParam("activated", "true")
-                        .build().toUri()
-                )
-                .build();
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/resend-verification")
@@ -115,7 +105,7 @@ public class AuthController {
     }
 
     @PostMapping("/password-reset-confirm")
-    public ResponseEntity<ResponseMessageDto> passwordResetConfirm(@Valid @RequestBody PasswordResetConfirmDto resetConfirmDto) {
+    public ResponseEntity<ResponseMessageDto> passwordResetConfirm(@Valid @RequestBody PasswordResetConfirmationDto resetConfirmDto) {
         authService.resetPasswordConfirm(resetConfirmDto);
         return ResponseEntity.ok(new ResponseMessageDto("Your password has been reset."));
     }

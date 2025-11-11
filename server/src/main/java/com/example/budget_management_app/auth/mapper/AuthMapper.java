@@ -7,14 +7,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthMapper {
 
-    public LoginResponseDto toLoginResponseDto(User user, String accessToken) {
+    public LoginResponseDto toLoginResponseDto(User user, String accessToken, boolean isMfaRequired) {
         return new LoginResponseDto(
-                accessToken,
                 user.getId(),
                 user.getName(),
                 user.getSurname(),
                 user.getEmail(),
-                user.isMfaEnabled()
+                user.getStatus().name(),
+                user.isMfaEnabled(),
+                user.getCreatedAt(),
+                accessToken,
+                isMfaRequired
         );
     }
 

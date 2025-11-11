@@ -1,7 +1,9 @@
 package com.example.budget_management_app.session.dto;
 
+import com.example.budget_management_app.auth.dto.LoginResponseDto;
+
 public record RefreshTokenResult(
-        String accessToken,
+        LoginResponseDto loginResponse,
         String cookie
 ) {
 }

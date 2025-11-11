@@ -1,5 +1,7 @@
 package com.example.budget_management_app.session.service;
 
+import com.example.budget_management_app.auth.dto.LoginResponseDto;
+import com.example.budget_management_app.auth.mapper.AuthMapper;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.InternalException;
 import com.example.budget_management_app.common.exception.NotFoundException;
@@ -38,6 +40,7 @@ public class UserSessionServiceImpl implements UserSessionService {
     private final UserService userService;
     private final JwtService jwtService;
     private final CacheService cacheService;
+    private final AuthMapper authMapper;
 
     @Transactional
     @Override
@@ -49,9 +52,10 @@ public class UserSessionServiceImpl implements UserSessionService {
         String newRefreshTokenValue = rotateRefreshToken(userSession, userAgent, token);
 
         ResponseCookie cookie = generateResponseCookie(newRefreshTokenValue);
+        LoginResponseDto loginResponse = authMapper.toLoginResponseDto(user, accessToken, false);
 
         log.info("User email={} has refreshed token", user.getEmail());
-        return new RefreshTokenResult(accessToken, cookie.toString());
+        return new RefreshTokenResult(loginResponse, cookie.toString());
     }
 
     @Transactional
