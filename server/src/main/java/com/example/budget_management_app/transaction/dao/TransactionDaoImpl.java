@@ -53,7 +53,7 @@ public class TransactionDaoImpl implements TransactionDao{
                 account.get("currency").alias("currency"),
                 category.get("id").alias("categoryId"),
                 category.get("name").alias("categoryName"),
-                category.get("iconPath").alias("iconPath"),
+                category.get("iconKey").alias("iconKey"),
                 recTransaction.get("id").alias("recId")
         );
 

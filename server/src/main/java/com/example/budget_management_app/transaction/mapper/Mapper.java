@@ -1,6 +1,6 @@
 package com.example.budget_management_app.transaction.mapper;
 
-import com.example.budget_management_app.account.domain.SupportedCurrency;
+import com.example.budget_management_app.common.enums.SupportedCurrency;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import com.example.budget_management_app.transaction_common.dto.AccountSummary;
@@ -34,7 +34,7 @@ public class Mapper {
                         new CategorySummary(
                                 tuple.get("categoryId", Long.class),
                                 tuple.get("categoryName", String.class),
-                                tuple.get("iconPath", String.class)
+                                tuple.get("iconKey", String.class)
                         )
                 ))
                 .toList();

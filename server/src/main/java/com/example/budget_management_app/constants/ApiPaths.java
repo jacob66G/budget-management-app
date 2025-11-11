@@ -11,4 +11,5 @@ public class ApiPaths {
     public static final String VERIFY ="verify";
     public static final String RESET_PASSWORD = "reset-password";
     public static final String REFRESH = "refresh";
+    public static final String CLIENT_BASE_URL = "http://localhost:4200";
 }

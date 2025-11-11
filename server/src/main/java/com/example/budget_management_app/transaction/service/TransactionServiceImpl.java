@@ -106,7 +106,7 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.removeCategory();
         transaction.setCategory(category);
 
-        return new TransactionCategoryUpdateResponse(newCategoryId, category.getName(), category.getIconPath());
+        return new TransactionCategoryUpdateResponse(newCategoryId, category.getName(), category.getIconKey());
     }
 
     @Transactional

@@ -1,8 +1,8 @@
 package com.example.budget_management_app.recurring_transaction.mapper;
 
 import com.example.budget_management_app.account.domain.Account;
-import com.example.budget_management_app.account.domain.SupportedCurrency;
 import com.example.budget_management_app.category.domain.Category;
+import com.example.budget_management_app.common.enums.SupportedCurrency;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
 import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionDetailsResponse;
@@ -82,6 +82,6 @@ public class Mapper {
         Category category = transaction.getCategory();
         return new TransactionSummary(transaction.getId(), transaction.getAmount(), transaction.getType(), transaction.getDescription(), transaction.getTransactionDate(),
                 new AccountSummary(account.getId(), account.getName(), account.getCurrency()),
-                new CategorySummary(category.getId(), category.getName(), category.getIconPath()));
+                new CategorySummary(category.getId(), category.getName(), category.getIconKey()));
     }
 }
