@@ -39,27 +39,27 @@ public class TransactionServiceImpl implements TransactionService{
      */
     @Override
     public PagedResponse<TransactionSummary> getSummariesPage(
-            TransactionPageRequest pageReq,
-            TransactionSearchCriteria searchCriteria,
+            TransactionPaginationParams paginationParams,
+            TransactionFilterParams filterParams,
             Long userId
     ) {
 
-        if(!accountDao.areAccountsBelongToUser(userId, searchCriteria.accountIds())) {
-            throw new NotFoundException(Account.class.getSimpleName(), searchCriteria.accountIds(), ErrorCode.NOT_FOUND);
+        if(!accountDao.areAccountsBelongToUser(userId, filterParams.getAccountIds())) {
+            throw new NotFoundException(Account.class.getSimpleName(), filterParams.getAccountIds(), ErrorCode.NOT_FOUND);
         }
 
-        if (!categoryDao.areCategoriesBelongToUser(userId, searchCriteria.categoryIds())) {
-            throw new NotFoundException(Category.class.getSimpleName(), searchCriteria.categoryIds(), ErrorCode.NOT_FOUND);
+        if (!categoryDao.areCategoriesBelongToUser(userId, filterParams.getCategoryIds())) {
+            throw new NotFoundException(Category.class.getSimpleName(), filterParams.getCategoryIds(), ErrorCode.NOT_FOUND);
         }
 
         List<Tuple> transactionTuples = transactionDao.getTuples(
-                pageReq,
-                searchCriteria);
+                paginationParams,
+                filterParams);
 
         long transactionCount = transactionDao.getCount(
-                searchCriteria);
+                filterParams);
 
-        return PagedResponse.of(Mapper.toDto(transactionTuples), pageReq.page(), pageReq.limit(), transactionCount);
+        return PagedResponse.of(Mapper.toDto(transactionTuples), paginationParams.getPage(), paginationParams.getLimit(), transactionCount);
     }
 
     @Transactional
@@ -90,16 +90,16 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional
     @Override
-    public TransactionCategoryUpdateResponse changeCategory(Long id, TransactionCategoryUpdateRequest updateReq, Long userId) {
+    public TransactionCategoryChangeResponse changeCategory(Long id, TransactionCategoryChangeRequest updateReq, Long userId) {
 
-        Transaction transaction = transactionDao.findByIdAndUserIdAndCategoryId(id, updateReq.currentTransactionCategoryId(), userId)
+        Transaction transaction = transactionDao.findByIdAndUserIdAndCategoryId(id, updateReq.currentCategoryId(), userId)
                 .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
         if (transaction.getRecurringTransaction() != null) {
             throw new CategoryChangeNotAllowedException(transaction.getId(), ErrorCode.TRANSACTION_IS_RECURRING);
         }
 
-        long newCategoryId = updateReq.newTransactionCategoryId();
+        long newCategoryId = updateReq.newCategoryId();
         Category category = categoryDao.findByIdAndUser(newCategoryId, userId)
                 .orElseThrow( () -> new NotFoundException(Category.class.getSimpleName(), newCategoryId, ErrorCode.NOT_FOUND));
 
@@ -108,7 +108,7 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.removeCategory();
         transaction.setCategory(category);
 
-        return new TransactionCategoryUpdateResponse(newCategoryId, category.getName(), category.getIconKey());
+        return new TransactionCategoryChangeResponse(newCategoryId, category.getName(), category.getIconKey());
     }
 
     @Transactional

@@ -3,18 +3,18 @@ package com.example.budget_management_app.recurring_transaction.service;
 import com.example.budget_management_app.recurring_transaction.domain.RemovalRange;
 import com.example.budget_management_app.recurring_transaction.domain.UpdateRange;
 import com.example.budget_management_app.recurring_transaction.dto.*;
-import com.example.budget_management_app.transaction_common.dto.PageRequest;
+import com.example.budget_management_app.transaction_common.dto.PaginationParams;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 
 public interface RecurringTransactionService {
 
-    PagedResponse<RecurringTransactionSummary> getSummariesPage(PageRequest pageRequest, Long userId);
+    PagedResponse<RecurringTransactionSummary> getSummariesPage(PaginationParams paginationParams, Long userId);
 
     RecurringTransactionDetailsResponse getDetails(Long id, Long userId);
 
-    PagedResponse<UpcomingTransactionSummary> getUpcomingTransactionsPage(PageRequest pageRequest,
-                                                                               UpcomingTransactionSearchCriteria searchCriteria,
-                                                                               Long userId);
+    PagedResponse<UpcomingTransactionSummary> getUpcomingTransactionsPage(PaginationParams paginationParams,
+                                                                          UpcomingTransactionFilterParams filterParams,
+                                                                          Long userId);
 
     RecurringTransactionCreateResponse create(RecurringTransactionCreateRequest createReq, Long userId);
 

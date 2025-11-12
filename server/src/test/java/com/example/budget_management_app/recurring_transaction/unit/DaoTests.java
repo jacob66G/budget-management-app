@@ -7,10 +7,10 @@ import com.example.budget_management_app.recurring_transaction.dao.RecurringTran
 import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
 import com.example.budget_management_app.recurring_transaction.domain.UpcomingTransactionsTimeRange;
-import com.example.budget_management_app.recurring_transaction.dto.UpcomingTransactionSearchCriteria;
+import com.example.budget_management_app.recurring_transaction.dto.UpcomingTransactionFilterParams;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
-import com.example.budget_management_app.transaction_common.dto.PageRequest;
+import com.example.budget_management_app.transaction_common.dto.PaginationParams;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import org.junit.jupiter.api.*;
@@ -47,8 +47,8 @@ public class DaoTests {
         int limit = 3;
         long expectedValue = 3L;
 
-        PageRequest pageReq =
-                new PageRequest(page, limit);
+        PaginationParams pageReq =
+                new PaginationParams(page, limit);
 
         List<Tuple> results = recurringTransactionDao.getSummaryTuplesByUserId(pageReq, userId);
 
@@ -215,9 +215,9 @@ public class DaoTests {
         int page = 1;
         int limit = 4;
 
-        PageRequest pageReq = new PageRequest(page, limit);
-        UpcomingTransactionSearchCriteria searchCriteria =
-                new UpcomingTransactionSearchCriteria(
+        PaginationParams pageReq = new PaginationParams(page, limit);
+        UpcomingTransactionFilterParams searchCriteria =
+                new UpcomingTransactionFilterParams(
                         UpcomingTransactionsTimeRange.NEXT_7_DAYS,
                         userAccountIds
                 );
@@ -238,9 +238,9 @@ public class DaoTests {
         int page = 1;
         int limit = 4;
 
-        PageRequest pageReq = new PageRequest(page, limit);
-        UpcomingTransactionSearchCriteria searchCriteria =
-                new UpcomingTransactionSearchCriteria(
+        PaginationParams pageReq = new PaginationParams(page, limit);
+        UpcomingTransactionFilterParams searchCriteria =
+                new UpcomingTransactionFilterParams(
                         UpcomingTransactionsTimeRange.NEXT_14_DAYS,
                         userAccountIds
                 );
@@ -261,9 +261,9 @@ public class DaoTests {
         int page = 2;
         int limit = 4;
 
-        PageRequest pageReq = new PageRequest(page, limit);
-        UpcomingTransactionSearchCriteria searchCriteria =
-                new UpcomingTransactionSearchCriteria(
+        PaginationParams pageReq = new PaginationParams(page, limit);
+        UpcomingTransactionFilterParams searchCriteria =
+                new UpcomingTransactionFilterParams(
                         UpcomingTransactionsTimeRange.NEXT_MONTH,
                         userAccountIds
                 );
@@ -281,8 +281,8 @@ public class DaoTests {
 
         List<Long> userAccountIds = List.of(1L, 2L, 3L);
 
-        UpcomingTransactionSearchCriteria searchCriteria =
-                new UpcomingTransactionSearchCriteria(
+        UpcomingTransactionFilterParams searchCriteria =
+                new UpcomingTransactionFilterParams(
                         UpcomingTransactionsTimeRange.NEXT_MONTH,
                         userAccountIds
                 );

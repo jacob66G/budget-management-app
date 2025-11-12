@@ -43,7 +43,7 @@ public class Mapper {
                         new CategorySummary(
                                 tuple.get("categoryId", Long.class),
                                 tuple.get("categoryName", String.class),
-                                tuple.get("iconPath", String.class)
+                                tuple.get("iconKey", String.class)
                         )
                 )).toList();
     }

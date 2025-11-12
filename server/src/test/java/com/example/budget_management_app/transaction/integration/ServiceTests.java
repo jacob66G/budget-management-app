@@ -44,8 +44,8 @@ public class ServiceTests {
         List<Long> userAccountsIds = List.of(1L, 2L, 3L);
         List<Long> userCategoriesIds = List.of(1L, 2L, 3L, 4L);
 
-        TransactionSearchCriteria searchCriteria =
-                new TransactionSearchCriteria(
+        TransactionFilterParams searchCriteria =
+                new TransactionFilterParams(
                         TransactionTypeFilter.ALL,
                         TransactionModeFilter.ALL,
                         userAccountsIds,
@@ -54,8 +54,8 @@ public class ServiceTests {
                         null
                 );
 
-        TransactionPageRequest pageReq =
-                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+        TransactionPaginationParams pageReq =
+                new TransactionPaginationParams(page, limit, SortedBy.DATE, SortDirection.DESC);
 
         PagedResponse<TransactionSummary> transactionsPage = transactionService.getSummariesPage(
                 pageReq,
@@ -82,8 +82,8 @@ public class ServiceTests {
         List<Long> userAccountsIds = List.of(1L, 2L, 3L);
         List<Long> userCategoriesIds = List.of(1L, 2L, 3L, 4L);
 
-        TransactionSearchCriteria searchCriteria =
-                new TransactionSearchCriteria(
+        TransactionFilterParams searchCriteria =
+                new TransactionFilterParams(
                         TransactionTypeFilter.ALL,
                         TransactionModeFilter.ALL,
                         userAccountsIds,
@@ -92,8 +92,8 @@ public class ServiceTests {
                         null
                 );
 
-        TransactionPageRequest pageReq =
-                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+        TransactionPaginationParams pageReq =
+                new TransactionPaginationParams(page, limit, SortedBy.DATE, SortDirection.DESC);
 
         PagedResponse<TransactionSummary> transactionsPage = transactionService.getSummariesPage(
                 pageReq,
@@ -119,8 +119,8 @@ public class ServiceTests {
         List<Long> userAccountsIds = List.of(1L, 2L, 3L, 4L);
         List<Long> userCategoriesIds = List.of(1L, 2L, 3L, 4L);
 
-        TransactionSearchCriteria searchCriteria =
-                new TransactionSearchCriteria(
+        TransactionFilterParams searchCriteria =
+                new TransactionFilterParams(
                         TransactionTypeFilter.ALL,
                         TransactionModeFilter.ALL,
                         userAccountsIds,
@@ -129,8 +129,8 @@ public class ServiceTests {
                         null
                 );
 
-        TransactionPageRequest pageReq =
-                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+        TransactionPaginationParams pageReq =
+                new TransactionPaginationParams(page, limit, SortedBy.DATE, SortDirection.DESC);
 
         assertThrows(NotFoundException.class, () -> {
             transactionService.getSummariesPage(
@@ -151,8 +151,8 @@ public class ServiceTests {
         List<Long> userAccountsIds = List.of(1L, 2L, 3L);
         List<Long> userCategoriesIds = List.of(1L, 2L, 3L, 4L, 5L);
 
-        TransactionSearchCriteria searchCriteria =
-                new TransactionSearchCriteria(
+        TransactionFilterParams searchCriteria =
+                new TransactionFilterParams(
                         TransactionTypeFilter.ALL,
                         TransactionModeFilter.ALL,
                         userAccountsIds,
@@ -161,8 +161,8 @@ public class ServiceTests {
                         null
                 );
 
-        TransactionPageRequest pageReq =
-                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+        TransactionPaginationParams pageReq =
+                new TransactionPaginationParams(page, limit, SortedBy.DATE, SortDirection.DESC);
 
         assertThrows(NotFoundException.class, () -> {
             transactionService.getSummariesPage(
@@ -314,8 +314,8 @@ public class ServiceTests {
         long newTransactionCategoryId = 10L;
         long accountId = 0L;
 
-        TransactionCategoryUpdateRequest updReq =
-                new TransactionCategoryUpdateRequest(
+        TransactionCategoryChangeRequest updReq =
+                new TransactionCategoryChangeRequest(
                         currentTransactionCategoryId,
                         newTransactionCategoryId,
                         accountId
@@ -336,8 +336,8 @@ public class ServiceTests {
         long newTransactionCategoryId = 5L;
         long accountId = 0L;
 
-        TransactionCategoryUpdateRequest updReq =
-                new TransactionCategoryUpdateRequest(
+        TransactionCategoryChangeRequest updReq =
+                new TransactionCategoryChangeRequest(
                         currentTransactionCategoryId,
                         newTransactionCategoryId,
                         accountId
@@ -358,8 +358,8 @@ public class ServiceTests {
         long newTransactionCategoryId = 1L;
         long accountId = 0L;
 
-        TransactionCategoryUpdateRequest updReq =
-                new TransactionCategoryUpdateRequest(
+        TransactionCategoryChangeRequest updReq =
+                new TransactionCategoryChangeRequest(
                         currentTransactionCategoryId,
                         newTransactionCategoryId,
                         accountId
@@ -380,8 +380,8 @@ public class ServiceTests {
         long newTransactionCategoryId = 6L;
         long accountId = 0L;
 
-        TransactionCategoryUpdateRequest updReq =
-                new TransactionCategoryUpdateRequest(
+        TransactionCategoryChangeRequest updReq =
+                new TransactionCategoryChangeRequest(
                         currentTransactionCategoryId,
                         newTransactionCategoryId,
                         accountId
@@ -403,14 +403,14 @@ public class ServiceTests {
         long newTransactionCategoryId = 4L;
         long accountId = 0L;
 
-        TransactionCategoryUpdateRequest updReq =
-                new TransactionCategoryUpdateRequest(
+        TransactionCategoryChangeRequest updReq =
+                new TransactionCategoryChangeRequest(
                         currentTransactionCategoryId,
                         newTransactionCategoryId,
                         accountId
                 );
 
-        TransactionCategoryUpdateResponse updateResponse =
+        TransactionCategoryChangeResponse updateResponse =
                 transactionService.changeCategory(
                         transactionId, updReq, userId
                 );
@@ -442,8 +442,8 @@ public class ServiceTests {
         long newTransactionCategoryId = 3L;
         long accountId = 0L;
 
-        TransactionCategoryUpdateRequest updReq =
-                new TransactionCategoryUpdateRequest(
+        TransactionCategoryChangeRequest updReq =
+                new TransactionCategoryChangeRequest(
                         currentTransactionCategoryId,
                         newTransactionCategoryId,
                         accountId

@@ -1,8 +1,8 @@
 package com.example.budget_management_app.transaction.dao;
 
 import com.example.budget_management_app.transaction.domain.Transaction;
-import com.example.budget_management_app.transaction.dto.TransactionPageRequest;
-import com.example.budget_management_app.transaction.dto.TransactionSearchCriteria;
+import com.example.budget_management_app.transaction.dto.TransactionPaginationParams;
+import com.example.budget_management_app.transaction.dto.TransactionFilterParams;
 import jakarta.persistence.Tuple;
 
 import java.util.List;
@@ -11,11 +11,11 @@ import java.util.Optional;
 public interface TransactionDao {
 
     List<Tuple> getTuples(
-            TransactionPageRequest pageReq,
-            TransactionSearchCriteria searchCriteria
+            TransactionPaginationParams paginationParams,
+            TransactionFilterParams filterParams
     );
 
-    Long getCount(TransactionSearchCriteria searchCriteria);
+    Long getCount(TransactionFilterParams filterParams);
 
     Transaction save(Transaction transaction);
 

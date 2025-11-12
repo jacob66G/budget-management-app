@@ -12,7 +12,7 @@ public class PaginationUtils {
     public static Map<String, String> createLinks(Pagination pagination) {
 
         int currentPage = pagination.page();
-        int limit = pagination.size();
+        int limit = pagination.limit();
         int totalPages = pagination.totalPages();
 
         Map<String, String> links = new LinkedHashMap<>();

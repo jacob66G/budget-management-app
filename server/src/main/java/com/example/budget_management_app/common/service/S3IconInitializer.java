@@ -1,7 +1,6 @@
 package com.example.budget_management_app.common.service;
 
 import com.example.budget_management_app.config.IconConfig;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,16 +31,16 @@ public class S3IconInitializer {
         ACCOUNTS, CATEGORIES
     }
 
-    @PostConstruct
-    public void init() {
-        log.info("Start loading icons from s3 bucket");
-        loadKeysByPrefix(ACCOUNT_PREFIX, IconType.ACCOUNTS);
-        loadKeysByPrefix(CATEGORY_PREFIX, IconType.CATEGORIES);
-        log.info("Successfully loaded icons. CATEGORIES:  {},  ACCOUNTS:  {}",
-                iconConfig.getCategories().size(),
-                iconConfig.getAccounts().size()
-        );
-    }
+//    @PostConstruct
+//    public void init() {
+//        log.info("Start loading icons from s3 bucket");
+//        loadKeysByPrefix(ACCOUNT_PREFIX, IconType.ACCOUNTS);
+//        loadKeysByPrefix(CATEGORY_PREFIX, IconType.CATEGORIES);
+//        log.info("Successfully loaded icons. CATEGORIES:  {},  ACCOUNTS:  {}",
+//                iconConfig.getCategories().size(),
+//                iconConfig.getAccounts().size()
+//        );
+//    }
 
     private void loadKeysByPrefix(String prefix, IconType type) {
         ListObjectsV2Request request = ListObjectsV2Request.builder()

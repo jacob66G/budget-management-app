@@ -5,8 +5,8 @@ import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
 import com.example.budget_management_app.transaction.domain.*;
-import com.example.budget_management_app.transaction.dto.TransactionPageRequest;
-import com.example.budget_management_app.transaction.dto.TransactionSearchCriteria;
+import com.example.budget_management_app.transaction.dto.TransactionPaginationParams;
+import com.example.budget_management_app.transaction.dto.TransactionFilterParams;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Tuple;
@@ -32,9 +32,9 @@ public class TransactionDaoImpl implements TransactionDao {
     @Transactional(readOnly = true)
     @Override
     public List<Tuple> getTuples(
-            TransactionPageRequest pageReq,
-            TransactionSearchCriteria searchCriteria
-    ) {
+            TransactionPaginationParams paginationParams,
+            TransactionFilterParams filterParams
+                                       ) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Tuple> cq = cb.createTupleQuery();
@@ -64,11 +64,11 @@ public class TransactionDaoImpl implements TransactionDao {
                 recTransaction,
                 root,
                 cb,
-                searchCriteria
+                filterParams
         );
 
-        SortedBy sortedBy = pageReq.sortedBy();
-        SortDirection sortDirection = pageReq.sortDirection();
+        SortedBy sortedBy = paginationParams.getSortedBy();
+        SortDirection sortDirection = paginationParams.getSortDirection();
         Order order;
         if (sortedBy.equals(SortedBy.AMOUNT)) {
             if (sortDirection.equals(SortDirection.ASC)) {
@@ -93,8 +93,8 @@ public class TransactionDaoImpl implements TransactionDao {
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
         cq.orderBy(order);
 
-        int limit = pageReq.limit();
-        int offset = (pageReq.page() - 1) * limit;
+        int limit = paginationParams.getLimit();
+        int offset = (paginationParams.getPage() - 1) * limit;
 
         return em.createQuery(cq)
                 .setFirstResult(offset)
@@ -107,7 +107,7 @@ public class TransactionDaoImpl implements TransactionDao {
      */
     @Transactional(readOnly = true)
     @Override
-    public Long getCount(TransactionSearchCriteria searchCriteria) {
+    public Long getCount(TransactionFilterParams filterParams) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
@@ -122,7 +122,7 @@ public class TransactionDaoImpl implements TransactionDao {
                 recTransaction,
                 root,
                 cb,
-                searchCriteria
+                filterParams
         );
 
         countQuery.select(cb.count(root)).where(cb.and(predicates.toArray(new Predicate[0])));
@@ -250,21 +250,21 @@ public class TransactionDaoImpl implements TransactionDao {
     }
 
     private List<Predicate> setPredicates(
-            Join<Transaction, Account> account,
-            Join<Transaction, Category> category,
-            Join<Transaction, RecurringTransaction> recTransaction,
-            Root<Transaction> root,
-            CriteriaBuilder cb,
-            TransactionSearchCriteria searchCriteria) {
+                                Join<Transaction, Account> account,
+                                Join<Transaction, Category> category,
+                                Join<Transaction, RecurringTransaction> recTransaction,
+                                Root<Transaction> root,
+                                CriteriaBuilder cb,
+                                TransactionFilterParams filterParams) {
 
         List<Predicate> predicates = new ArrayList<>();
 
-        TransactionTypeFilter type = searchCriteria.type();
-        TransactionModeFilter mode = searchCriteria.mode();
-        List<Long> accountIds = searchCriteria.accountIds();
-        List<Long> categoryIds = searchCriteria.categoryIds();
-        LocalDate since = searchCriteria.since();
-        LocalDate to = searchCriteria.to();
+        TransactionTypeFilter type = filterParams.getType();
+        TransactionModeFilter mode = filterParams.getMode();
+        List<Long> accountIds = filterParams.getAccountIds();
+        List<Long> categoryIds = filterParams.getCategoryIds();
+        LocalDate since = filterParams.getSince();
+        LocalDate to = filterParams.getTo();
 
         if (!type.equals(TransactionTypeFilter.ALL)) {
             predicates.add(cb.equal(cb.lower(root.get("type")), type.toString().toLowerCase()));

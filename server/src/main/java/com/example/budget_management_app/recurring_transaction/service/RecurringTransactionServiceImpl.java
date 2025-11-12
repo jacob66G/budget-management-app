@@ -16,7 +16,7 @@ import com.example.budget_management_app.recurring_transaction.domain.UpdateRang
 import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.recurring_transaction.mapper.Mapper;
 import com.example.budget_management_app.transaction.domain.Transaction;
-import com.example.budget_management_app.transaction_common.dto.PageRequest;
+import com.example.budget_management_app.transaction_common.dto.PaginationParams;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 import com.example.budget_management_app.transaction_common.service.AccountUpdateService;
 import com.example.budget_management_app.transaction_common.service.CategoryValidatorService;
@@ -49,11 +49,11 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
      * @return
      */
     @Override
-    public PagedResponse<RecurringTransactionSummary> getSummariesPage(PageRequest pageReq, Long userId) {
+    public PagedResponse<RecurringTransactionSummary> getSummariesPage(PaginationParams paginationParams, Long userId) {
 
-        int page = pageReq.page();
-        int limit = pageReq.limit();
-        List<Tuple> results = recurringTransactionDao.getSummaryTuplesByUserId(pageReq, userId);
+        int page = paginationParams.getPage();
+        int limit = paginationParams.getLimit();
+        List<Tuple> results = recurringTransactionDao.getSummaryTuplesByUserId(paginationParams, userId);
 
         long recTransactionsCount = recurringTransactionDao.getSummaryTuplesCountByUserId(userId);
 
@@ -75,26 +75,26 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
     }
 
     /**
-     * @param pageRequest
-     * @param searchCriteria
+     * @param paginationParams
+     * @param filterParams
      * @param userId
      * @return
      */
     @Override
-    public PagedResponse<UpcomingTransactionSummary> getUpcomingTransactionsPage(PageRequest pageRequest, UpcomingTransactionSearchCriteria searchCriteria, Long userId) {
+    public PagedResponse<UpcomingTransactionSummary> getUpcomingTransactionsPage(PaginationParams paginationParams, UpcomingTransactionFilterParams filterParams, Long userId) {
 
-        if (!accountDao.areAccountsBelongToUser(userId, searchCriteria.accountIds())) {
-            throw new NotFoundException(Account.class.getSimpleName(), searchCriteria.accountIds(), ErrorCode.NOT_FOUND);
+        if (!accountDao.areAccountsBelongToUser(userId, filterParams.getAccountIds())) {
+            throw new NotFoundException(Account.class.getSimpleName(), filterParams.getAccountIds(), ErrorCode.NOT_FOUND);
         }
 
         List<Tuple> results = this.recurringTransactionDao.getUpcomingTransactionsTuples(
-                pageRequest,
-                searchCriteria
+                paginationParams,
+                filterParams
         );
 
-        Long count = this.recurringTransactionDao.getUpcomingTransactionsCount(searchCriteria);
+        Long count = this.recurringTransactionDao.getUpcomingTransactionsCount(filterParams);
 
-        return PagedResponse.of(Mapper.fromUpcomingTuples(results), pageRequest.page(), pageRequest.limit(), count);
+        return PagedResponse.of(Mapper.fromUpcomingTuples(results), paginationParams.getPage(), paginationParams.getLimit(), count);
     }
 
     /**

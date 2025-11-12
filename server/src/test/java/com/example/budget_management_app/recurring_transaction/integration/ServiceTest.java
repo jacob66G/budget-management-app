@@ -9,7 +9,7 @@ import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
-import com.example.budget_management_app.transaction_common.dto.PageRequest;
+import com.example.budget_management_app.transaction_common.dto.PaginationParams;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
@@ -47,8 +47,8 @@ public class ServiceTest {
         int limit = 3;
         int expectedNumberOfElements = 3;
 
-        PageRequest pageReq =
-                new PageRequest(page, limit);
+        PaginationParams pageReq =
+                new PaginationParams(page, limit);
 
         PagedResponse<RecurringTransactionSummary> pagedResponse
                 = recTransactionService.getSummariesPage(pageReq, userId);
@@ -71,8 +71,8 @@ public class ServiceTest {
         int limit = 3;
         int expectedNumberOfElements = 3;
 
-        PageRequest pageReq =
-                new PageRequest(page, limit);
+        PaginationParams pageReq =
+                new PaginationParams(page, limit);
 
         PagedResponse<RecurringTransactionSummary> pagedResponse =
                 recTransactionService.getSummariesPage(pageReq, userId);
@@ -414,7 +414,7 @@ public class ServiceTest {
         BigDecimal changedAmount = new BigDecimal("80.00");
 
         RecurringTransactionUpdateRequest updateReq =
-                new RecurringTransactionUpdateRequest(changedAmount, "Netflix", changedDescription);
+                new RecurringTransactionUpdateRequest("Netflix", changedAmount, changedDescription);
 
         recTransactionService.update(recTransactionId, updateReq, range, userId);
 
@@ -441,7 +441,7 @@ public class ServiceTest {
         BigDecimal changedAmount = new BigDecimal("80.00");
 
         RecurringTransactionUpdateRequest updateReq =
-                new RecurringTransactionUpdateRequest(changedAmount, "Netflix", changedDescription);
+                new RecurringTransactionUpdateRequest("Netflix", changedAmount, changedDescription);
 
         recTransactionService.update(recTransactionId, updateReq, range, userId);
 
@@ -490,7 +490,7 @@ public class ServiceTest {
         BigDecimal changedAmount = new BigDecimal("80.00");
 
         RecurringTransactionUpdateRequest updateReq =
-                new RecurringTransactionUpdateRequest(changedAmount, "Netflix", changedDescription);
+                new RecurringTransactionUpdateRequest("Netflix", changedAmount, changedDescription);
 
         assertThrows(NotFoundException.class, () -> {
             recTransactionService.update(recTransactionId, updateReq, range, userId);
@@ -675,10 +675,10 @@ public class ServiceTest {
 
         int page = 1;
         int limit = 4;
-        PageRequest pageReq =
-                new PageRequest(page, limit);
-        UpcomingTransactionSearchCriteria searchCriteria =
-                new UpcomingTransactionSearchCriteria(
+        PaginationParams pageReq =
+                new PaginationParams(page, limit);
+        UpcomingTransactionFilterParams searchCriteria =
+                new UpcomingTransactionFilterParams(
                         UpcomingTransactionsTimeRange.NEXT_7_DAYS,
                         accountIds
                 );
@@ -701,10 +701,10 @@ public class ServiceTest {
 
         int page = 1;
         int limit = 4;
-        PageRequest pageReq =
-                new PageRequest(page, limit);
-        UpcomingTransactionSearchCriteria searchCriteria =
-                new UpcomingTransactionSearchCriteria(
+        PaginationParams pageReq =
+                new PaginationParams(page, limit);
+        UpcomingTransactionFilterParams searchCriteria =
+                new UpcomingTransactionFilterParams(
                         UpcomingTransactionsTimeRange.NEXT_MONTH,
                         accountIds
                 );

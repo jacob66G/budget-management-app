@@ -5,8 +5,8 @@ import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.transaction.dao.TransactionDao;
 import com.example.budget_management_app.transaction.dao.TransactionDaoImpl;
 import com.example.budget_management_app.transaction.domain.*;
-import com.example.budget_management_app.transaction.dto.TransactionPageRequest;
-import com.example.budget_management_app.transaction.dto.TransactionSearchCriteria;
+import com.example.budget_management_app.transaction.dto.TransactionPaginationParams;
+import com.example.budget_management_app.transaction.dto.TransactionFilterParams;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
@@ -43,8 +43,8 @@ public class DaoTests {
         List<Long> allUserAccountsIds = List.of(1L, 2L, 3L);
         List<Long> allUserCategoriesIds = List.of(1L, 2L, 3L, 4L);
 
-        TransactionSearchCriteria searchCriteria =
-                new TransactionSearchCriteria(TransactionTypeFilter.ALL,
+        TransactionFilterParams searchCriteria =
+                new TransactionFilterParams(TransactionTypeFilter.ALL,
                         TransactionModeFilter.ALL,
                         allUserAccountsIds,
                         allUserCategoriesIds,
@@ -66,8 +66,8 @@ public class DaoTests {
         List<Long> allUserAccountsIds = List.of(1L, 2L, 3L);
         List<Long> allUserCategoriesIds = List.of(1L, 2L, 3L, 4L);
 
-        TransactionSearchCriteria searchCriteria =
-                new TransactionSearchCriteria(
+        TransactionFilterParams searchCriteria =
+                new TransactionFilterParams(
                         TransactionTypeFilter.ALL,
                         TransactionModeFilter.RECURRING,
                         allUserAccountsIds,
@@ -91,8 +91,8 @@ public class DaoTests {
         List<Long> allUserAccountsIds = List.of(1L, 2L, 3L);
         List<Long> allUserCategoriesIds = List.of(1L, 2L, 3L, 4L);
 
-        TransactionSearchCriteria searchCriteria =
-                new TransactionSearchCriteria(
+        TransactionFilterParams searchCriteria =
+                new TransactionFilterParams(
                         TransactionTypeFilter.ALL,
                         TransactionModeFilter.REGULAR,
                         allUserAccountsIds,
@@ -116,8 +116,8 @@ public class DaoTests {
         List<Long> allUserAccountsIds = List.of(1L);
         List<Long> allUserCategoriesIds = List.of(2L, 4L);
 
-        TransactionSearchCriteria searchCriteria =
-                new TransactionSearchCriteria(
+        TransactionFilterParams searchCriteria =
+                new TransactionFilterParams(
                         TransactionTypeFilter.ALL,
                         TransactionModeFilter.REGULAR,
                         allUserAccountsIds,
@@ -141,8 +141,8 @@ public class DaoTests {
         List<Long> allUserAccountsIds = List.of(1L);
         List<Long> allUserCategoriesIds = List.of(4L);
 
-        TransactionSearchCriteria searchCriteria =
-                new TransactionSearchCriteria(
+        TransactionFilterParams searchCriteria =
+                new TransactionFilterParams(
                         TransactionTypeFilter.ALL,
                         TransactionModeFilter.RECURRING,
                         allUserAccountsIds,
@@ -168,8 +168,8 @@ public class DaoTests {
         List<Long> allUserAccountsIds = List.of(1L, 2L, 3L);
         List<Long> allUserCategoriesIds = List.of(1L, 2L, 3L, 4L);
 
-        TransactionSearchCriteria searchCriteria =
-                new TransactionSearchCriteria(
+        TransactionFilterParams searchCriteria =
+                new TransactionFilterParams(
                         TransactionTypeFilter.ALL,
                         TransactionModeFilter.ALL,
                         allUserAccountsIds,
@@ -178,8 +178,8 @@ public class DaoTests {
                         null
                 );
 
-        TransactionPageRequest pageReq =
-                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+        TransactionPaginationParams pageReq =
+                new TransactionPaginationParams(page, limit, SortedBy.DATE, SortDirection.DESC);
 
         List<Tuple> transactions = transactionDao.getTuples(pageReq, searchCriteria);
 
@@ -200,8 +200,8 @@ public class DaoTests {
         List<Long> allUserAccountsIds = List.of(1L, 2L, 3L);
         List<Long> allUserCategoriesIds = List.of(1L, 2L, 3L, 4L);
 
-        TransactionSearchCriteria searchCriteria =
-                new TransactionSearchCriteria(
+        TransactionFilterParams searchCriteria =
+                new TransactionFilterParams(
                         TransactionTypeFilter.ALL,
                         TransactionModeFilter.ALL,
                         allUserAccountsIds,
@@ -210,8 +210,8 @@ public class DaoTests {
                         null
                 );
 
-        TransactionPageRequest pageReq =
-                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+        TransactionPaginationParams pageReq =
+                new TransactionPaginationParams(page, limit, SortedBy.DATE, SortDirection.DESC);
 
         List<Tuple> transactions = transactionDao.getTuples(pageReq, searchCriteria);
 
@@ -232,8 +232,8 @@ public class DaoTests {
         List<Long> allUserAccountsIds = List.of(1L, 2L, 3L);
         List<Long> allUserCategoriesIds = List.of(1L, 2L, 3L, 4L);
 
-        TransactionSearchCriteria searchCriteria =
-                new TransactionSearchCriteria(
+        TransactionFilterParams searchCriteria =
+                new TransactionFilterParams(
                         TransactionTypeFilter.EXPENSE,
                         TransactionModeFilter.ALL,
                         allUserAccountsIds,
@@ -242,8 +242,8 @@ public class DaoTests {
                         LocalDate.of(2025,10, 21)
                 );
 
-        TransactionPageRequest pageReq =
-                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+        TransactionPaginationParams pageReq =
+                new TransactionPaginationParams(page, limit, SortedBy.DATE, SortDirection.DESC);
 
         List<Tuple> transactions = transactionDao.getTuples(pageReq, searchCriteria);
 
@@ -264,8 +264,8 @@ public class DaoTests {
         List<Long> allUserAccountsIds = List.of(1L, 2L, 3L);
         List<Long> allUserCategoriesIds = List.of(1L, 2L, 3L, 4L);
 
-        TransactionSearchCriteria searchCriteria =
-                new TransactionSearchCriteria(
+        TransactionFilterParams searchCriteria =
+                new TransactionFilterParams(
                         TransactionTypeFilter.EXPENSE,
                         TransactionModeFilter.ALL,
                         allUserAccountsIds,
@@ -274,8 +274,8 @@ public class DaoTests {
                         LocalDate.of(2025,10, 21)
                 );
 
-        TransactionPageRequest pageReq =
-                new TransactionPageRequest(page, limit, SortedBy.DATE, SortDirection.DESC);
+        TransactionPaginationParams pageReq =
+                new TransactionPaginationParams(page, limit, SortedBy.DATE, SortDirection.DESC);
 
         List<Tuple> transactions = transactionDao.getTuples(pageReq, searchCriteria);
 

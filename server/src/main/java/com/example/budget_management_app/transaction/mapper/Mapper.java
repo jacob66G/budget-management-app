@@ -43,9 +43,9 @@ public class Mapper {
     public static Transaction fromDto(TransactionCreateRequest transactionCreate) {
         return new Transaction(
                 transactionCreate.amount(),
-                transactionCreate.title(),
+                transactionCreate.title().trim(),
                 transactionCreate.type(),
-                transactionCreate.description(),
+                transactionCreate.description().trim(),
                 LocalDateTime.now()
         );
     }

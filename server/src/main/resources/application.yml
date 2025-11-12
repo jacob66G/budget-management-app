@@ -35,6 +35,9 @@ spring:
     console:
       enabled: true
       path: /h2-console
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
   ai:
     openai:
       api-key: ${OPENAI_API_KEY:dummy_key}

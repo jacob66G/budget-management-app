@@ -4,8 +4,8 @@ import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
 import com.example.budget_management_app.recurring_transaction.domain.UpcomingTransactionsTimeRange;
-import com.example.budget_management_app.recurring_transaction.dto.UpcomingTransactionSearchCriteria;
-import com.example.budget_management_app.transaction_common.dto.PageRequest;
+import com.example.budget_management_app.recurring_transaction.dto.UpcomingTransactionFilterParams;
+import com.example.budget_management_app.transaction_common.dto.PaginationParams;
 import com.example.budget_management_app.user.domain.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -32,7 +32,7 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
      */
     @Transactional(readOnly = true)
     @Override
-    public List<Tuple> getSummaryTuplesByUserId(PageRequest pageReq, Long userId) {
+    public List<Tuple> getSummaryTuplesByUserId(PaginationParams paginationParams, Long userId) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Tuple> cq = cb.createTupleQuery();
@@ -55,15 +55,15 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
                 account.get("currency").alias("currency"),
                 category.get("id").alias("categoryId"),
                 category.get("name").alias("categoryName"),
-                category.get("iconPath").alias("iconPath")
+                category.get("iconKey").alias("iconKey")
         );
 
         Predicate p = cb.equal(user.get("id"), userId);
         cq.where(p);
         cq.orderBy(cb.desc(root.get("createdAt")));
 
-        int limit = pageReq.limit();
-        int offest = (pageReq.page() - 1) * limit;
+        int limit = paginationParams.getLimit();
+        int offest = (paginationParams.getPage() - 1) * limit;
 
         return em.createQuery(cq)
                 .setFirstResult(offest)
@@ -155,8 +155,8 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
      */
     @Transactional(readOnly = true)
     @Override
-    public List<Tuple> getUpcomingTransactionsTuples(PageRequest pageRequest,
-                                                     UpcomingTransactionSearchCriteria searchCriteria) {
+    public List<Tuple> getUpcomingTransactionsTuples(PaginationParams paginationParams,
+                                                     UpcomingTransactionFilterParams filterParams) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Tuple> cq = cb.createTupleQuery();
@@ -175,12 +175,12 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
                 account.get("currency").alias("currency"),
                 category.get("id").alias("categoryId"),
                 category.get("name").alias("categoryName"),
-                category.get("iconPath").alias("iconPath")
+                category.get("iconKey").alias("iconKey")
         );
 
         List<Predicate> predicates = this.setUpcomingTransactionsPredicates(
-                searchCriteria.range(),
-                searchCriteria.accountIds(),
+                filterParams.getRange(),
+                filterParams.getAccountIds(),
                 account,
                 root,
                 cb
@@ -189,8 +189,8 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
         cq.orderBy(cb.asc(root.get("nextOccurrence")));
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
 
-        int limit = pageRequest.limit();
-        int offset = (pageRequest.page() - 1) * limit;
+        int limit = paginationParams.getLimit();
+        int offset = (paginationParams.getPage() - 1) * limit;
 
         return em.createQuery(cq)
                 .setFirstResult(offset)
@@ -199,12 +199,12 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
     }
 
     /**
-     * @param searchCriteria
+     * @param filterParams
      * @return
      */
     @Transactional(readOnly = true)
     @Override
-    public Long getUpcomingTransactionsCount(UpcomingTransactionSearchCriteria searchCriteria) {
+    public Long getUpcomingTransactionsCount(UpcomingTransactionFilterParams filterParams) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
@@ -212,8 +212,8 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
         Join<RecurringTransaction, Account> account = root.join("account", JoinType.INNER);
 
         List<Predicate> predicates = this.setUpcomingTransactionsPredicates(
-                searchCriteria.range(),
-                searchCriteria.accountIds(),
+                filterParams.getRange(),
+                filterParams.getAccountIds(),
                 account,
                 root,
                 cb

@@ -1,6 +1,6 @@
 package com.example.budget_management_app.transaction.dto;
 
-public record TransactionCategoryUpdateResponse(
+public record TransactionCategoryChangeResponse(
         long categoryId,
         String categoryName,
         String categoryIconPath
