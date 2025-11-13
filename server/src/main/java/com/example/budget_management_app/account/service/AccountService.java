@@ -21,11 +21,11 @@ public interface AccountService {
 
     void deactivateAccount(Long userId, Long accountId);
 
-    void activateAllUserAccounts(Long id);
+    void activateAllByUser(Long userId);
 
-    void deactivateAllUserAccounts(Long userId);
+    void deactivateAllByUser(Long userId);
 
     void deleteAccount(Long userId, Long accountId);
 
-    void deleteAllUserAccounts(Long userId);
+    void deleteAllByUser(Long userId);
 }

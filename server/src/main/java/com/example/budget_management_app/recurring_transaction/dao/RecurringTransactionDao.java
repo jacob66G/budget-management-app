@@ -26,4 +26,19 @@ public interface RecurringTransactionDao {
                                               UpcomingTransactionSearchCriteria searchCriteria);
 
     Long getUpcomingTransactionsCount(UpcomingTransactionSearchCriteria searchCriteria);
+
+    void reassignCategoryForUser(Long userId, Long oldCategoryId, Long newCategoryId);
+
+    void activateAllTransactionsByAccount(Long accountId, Long userId);
+
+    void activateAllTransactionsByUser(Long userId);
+
+    void deactivateAllTransactionsByAccount(Long accountId, Long userId);
+
+    void deactivateAllTransactionsByUser(Long userId);
+
+    void deleteAllByAccount(Long accountId, Long userId);
+
+    void deleteAllByUser(Long userId);
+
 }

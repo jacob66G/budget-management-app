@@ -26,4 +26,14 @@ public interface TransactionDao {
     Optional<Transaction> findByIdAndUserIdAndCategoryId(Long id, Long categoryId, Long userId);
 
     List<Transaction> findByRecurringTransactionId(Long id);
+
+    boolean existsByCategoryIdAndUserId(Long categoryId, Long userId);
+
+    boolean existsByAccountIdAndUserId(Long accountId, Long userId);
+
+    void reassignCategoryForUser(Long userId, Long oldCategoryId, Long newCategoryId);
+
+    void deleteAllByAccount(Long accountId, Long userId);
+
+    void deleteAllByUser(Long userId);
 }

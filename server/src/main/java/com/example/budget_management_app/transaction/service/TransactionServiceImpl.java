@@ -16,6 +16,7 @@ import com.example.budget_management_app.transaction_common.service.AccountUpdat
 import com.example.budget_management_app.transaction_common.service.CategoryValidatorService;
 import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService{
 
@@ -139,5 +141,36 @@ public class TransactionServiceImpl implements TransactionService{
         transactionDao.delete(transaction);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public boolean existsByCategoryAndUser(Long categoryId, Long userId) {
+        return transactionDao.existsByCategoryIdAndUserId(categoryId, userId);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public boolean existsByAccountAndUser(Long accountId, Long userId) {
+        return transactionDao.existsByAccountIdAndUserId(accountId, userId);
+    }
+
+    @Transactional
+    @Override
+    public void reassignCategoryForUser(Long userId, Long oldCategoryId, Long newCategoryId) {
+        transactionDao.reassignCategoryForUser(userId, oldCategoryId, newCategoryId);
+        log.info("User: {} has reassigned category in transactions from: {} to: {}", userId, oldCategoryId, newCategoryId);
+    }
+
+    @Transactional
+    @Override
+    public void deleteAllByAccount(Long accountId, Long userId) {
+        transactionDao.deleteAllByAccount(accountId, userId);
+        log.info("User: {} has deleted transactions for account: {}.", userId, accountId);
+    }
+
+    @Override
+    public void deleteAllByUser(Long userId) {
+        transactionDao.deleteAllByUser(userId);
+        log.info("User: {} has deleted ALL transactions.", userId);
+    }
 
 }

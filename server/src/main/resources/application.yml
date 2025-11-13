@@ -30,7 +30,7 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
-    defer-datasource-initialization: true
+    defer-datasource-initialization: false
   h2:
     console:
       enabled: true

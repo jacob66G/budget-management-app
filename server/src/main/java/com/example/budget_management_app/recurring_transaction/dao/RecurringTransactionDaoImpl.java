@@ -21,10 +21,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class RecurringTransactionDaoImpl implements RecurringTransactionDao{
+public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
 
     @PersistenceContext
     private EntityManager em;
+
     /**
      * @param userId
      * @return
@@ -102,10 +103,10 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao{
     public Optional<RecurringTransaction> findByIdAndUserId(Long id, Long userId) {
 
         List<RecurringTransaction> result = em.createQuery("""
-                SELECT r FROM RecurringTransaction r
-                JOIN r.account a
-                WHERE r.id = :id AND a.user.id = :userId
-                """, RecurringTransaction.class)
+                        SELECT r FROM RecurringTransaction r
+                        JOIN r.account a
+                        WHERE r.id = :id AND a.user.id = :userId
+                        """, RecurringTransaction.class)
                 .setParameter("id", id)
                 .setParameter("userId", userId)
                 .getResultList();
@@ -142,9 +143,9 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao{
     public List<RecurringTransaction> searchForRecurringTransactionsToCreate() {
 
         return em.createQuery("""
-                SELECT r FROM RecurringTransaction r
-                WHERE r.isActive = TRUE AND r.nextOccurrence = :today
-                """, RecurringTransaction.class)
+                        SELECT r FROM RecurringTransaction r
+                        WHERE r.isActive = TRUE AND r.nextOccurrence = :today
+                        """, RecurringTransaction.class)
                 .setParameter("today", LocalDate.now())
                 .getResultList();
     }
@@ -222,6 +223,63 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao{
 
         return em.createQuery(countQuery)
                 .getSingleResult();
+    }
+
+    @Override
+    public void reassignCategoryForUser(Long userId, Long oldCategoryId, Long newCategoryId) {
+        em.createQuery(
+                "UPDATE RecurringTransaction r " +
+                        "SET r.category.id = :newCategoryId " +
+                        "WHERE r.category.id = :oldCategoryId AND r.account.user.id = :userId")
+                .setParameter("userId", userId)
+                .setParameter("oldCategoryId", oldCategoryId)
+                .setParameter("newCategoryId", newCategoryId)
+                .executeUpdate();
+    }
+
+    @Override
+    public void activateAllTransactionsByAccount(Long accountId, Long userId) {
+        em.createQuery("UPDATE RecurringTransaction r SET r.isActive = TRUE WHERE account.id = :accountId AND account.user.id = :userId")
+                .setParameter("accountId", accountId)
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
+
+    @Override
+    public void activateAllTransactionsByUser(Long userId) {
+        em.createQuery("UPDATE RecurringTransaction r SET r.isActive = TRUE WHERE account.user.id = :userId")
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
+
+    @Override
+    public void deactivateAllTransactionsByAccount(Long accountId, Long userId) {
+        em.createQuery("UPDATE RecurringTransaction r SET r.isActive = FALSE WHERE account.id = :accountId AND account.user.id = :userId")
+                .setParameter("accountId", accountId)
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
+
+    @Override
+    public void deactivateAllTransactionsByUser(Long userId) {
+        em.createQuery("UPDATE RecurringTransaction r SET r.isActive = FALSE WHERE account.user.id = :userId")
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
+
+    @Override
+    public void deleteAllByAccount(Long accountId, Long userId) {
+        em.createQuery("DELETE FROM RecurringTransaction r WHERE r.account.id = :accountId AND account.user.id = :userId")
+                .setParameter("accountId", accountId)
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
+
+    @Override
+    public void deleteAllByUser(Long userId) {
+        em.createQuery("DELETE FROM RecurringTransaction r WHERE r.account.user.id =  :userId")
+                .setParameter("userId", userId)
+                .executeUpdate();
     }
 
     private List<Predicate> setUpcomingTransactionsPredicates(

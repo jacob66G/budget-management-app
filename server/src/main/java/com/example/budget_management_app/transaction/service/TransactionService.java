@@ -18,4 +18,14 @@ public interface TransactionService {
     void update(Long id, TransactionUpdateRequest req, Long userId);
 
     void delete(Long id, Long userId);
+
+    boolean existsByCategoryAndUser(Long categoryId, Long userId);
+
+    boolean existsByAccountAndUser(Long accountId, Long userId);
+
+    void reassignCategoryForUser(Long userId, Long oldCategoryId, Long newCategoryId);
+
+    void deleteAllByAccount(Long accountId, Long userId);
+
+    void deleteAllByUser(Long userId);
 }

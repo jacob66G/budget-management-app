@@ -60,7 +60,7 @@ public class Account {
 
     private BigDecimal budget;
 
-    @Column(name = "alert_threshold")
+    @Column(name = "alert_treshold")
     private Double alertThreshold;
 
     @Column(name = "created_at", nullable = false)

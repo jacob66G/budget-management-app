@@ -35,7 +35,7 @@ VALUES
 
 
 -- 3. ACCOUNTS
-INSERT INTO accounts (id, name, balance, total_income, total_expense, account_status, account_type, currency, is_default, description, budget_type, budget, alter_treshold, created_at, icon_key, include_in_total_balance, user_id)
+INSERT INTO accounts (id, name, balance, total_income, total_expense, account_status, account_type, currency, is_default, description, budget_type, budget, alert_treshold, created_at, icon_key, include_in_total_balance, user_id)
 VALUES
     -- User 1
     (1, 'Main Wallet', 1500.50, 5000.00, 3500.50, 'ACTIVE', 'PERSONAL', 'PLN', true, 'Main personal account', 'MONTHLY', 3000.00, 0.8, TIMESTAMP '2025-02-15 10:00:00', '/icons/acc/wallet.png', true, 1),

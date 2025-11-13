@@ -25,4 +25,18 @@ public interface RecurringTransactionService {
     void update(Long id, RecurringTransactionUpdateRequest updateReq, UpdateRange range, Long userId);
 
     void generateRecurringTransactions();
+
+    void reassignCategoryForUser(Long userId, Long oldCategoryId, Long newCategoryId);
+
+    void activateAllByAccount(Long accountId, Long userId);
+
+    void activateAllByUser(Long id);
+
+    void deactivateAllByAccount(Long accountId, Long userId);
+
+    void deactivateAllByUser(Long userId);
+
+    void deleteAllByAccount(Long accountId, Long userId);
+
+    void deleteAllByUser(Long userId);
 }

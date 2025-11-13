@@ -21,10 +21,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class TransactionDaoImpl implements TransactionDao{
+public class TransactionDaoImpl implements TransactionDao {
 
     @PersistenceContext
     private EntityManager em;
+
     /**
      * @return List of TransactionView objects
      */
@@ -33,7 +34,7 @@ public class TransactionDaoImpl implements TransactionDao{
     public List<Tuple> getTuples(
             TransactionPageRequest pageReq,
             TransactionSearchCriteria searchCriteria
-                                       ) {
+    ) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Tuple> cq = cb.createTupleQuery();
@@ -148,11 +149,11 @@ public class TransactionDaoImpl implements TransactionDao{
     @Override
     public Optional<Transaction> findByIdAndUserId(Long id, Long userId) {
 
-         List<Transaction> results = em.createQuery("""
-                SELECT t FROM Transaction t
-                JOIN t.account a
-                WHERE t.id = :id AND a.user.id = :userId
-                """, Transaction.class)
+        List<Transaction> results = em.createQuery("""
+                        SELECT t FROM Transaction t
+                        JOIN t.account a
+                        WHERE t.id = :id AND a.user.id = :userId
+                        """, Transaction.class)
                 .setParameter("id", id)
                 .setParameter("userId", userId)
                 .getResultList();
@@ -165,10 +166,10 @@ public class TransactionDaoImpl implements TransactionDao{
     public Optional<Transaction> findByIdAndUserIdAndCategoryId(Long id, Long categoryId, Long userId) {
 
         List<Transaction> results = em.createQuery("""
-                SELECT t FROM Transaction t
-                JOIN t.category c
-                WHERE t.id = :id AND c.id = :categoryId AND c.user.id = :userId
-                """, Transaction.class)
+                        SELECT t FROM Transaction t
+                        JOIN t.category c
+                        WHERE t.id = :id AND c.id = :categoryId AND c.user.id = :userId
+                        """, Transaction.class)
                 .setParameter("id", id)
                 .setParameter("categoryId", categoryId)
                 .setParameter("userId", userId)
@@ -186,20 +187,75 @@ public class TransactionDaoImpl implements TransactionDao{
     public List<Transaction> findByRecurringTransactionId(Long id) {
 
         return em.createQuery("""
-                SELECT t FROM Transaction t
-                WHERE t.recurringTransaction.id = :recurringTransactionId
-                """, Transaction.class)
+                        SELECT t FROM Transaction t
+                        WHERE t.recurringTransaction.id = :recurringTransactionId
+                        """, Transaction.class)
                 .setParameter("recurringTransactionId", id)
                 .getResultList();
     }
 
+    @Override
+    public boolean existsByCategoryIdAndUserId(Long categoryId, Long userId) {
+        List<Long> result = em.createQuery(
+                        "SELECT t.id FROM Transaction t " +
+                                "WHERE t.category.id = :categoryId AND t.account.user.id = :userId",
+                        Long.class)
+                .setParameter("categoryId", categoryId)
+                .setParameter("userId", userId)
+                .setMaxResults(1)
+                .getResultList();
+
+        return !result.isEmpty();
+    }
+
+    @Override
+    public boolean existsByAccountIdAndUserId(Long accountId, Long userId) {
+        List<Long> result = em.createQuery(
+                        "SELECT t.id FROM Transaction t " +
+                                "WHERE t.account.id = :accountId AND t.account.user.id = :userId",
+                        Long.class)
+                .setParameter("accountId", accountId)
+                .setParameter("userId", userId)
+                .setMaxResults(1)
+                .getResultList();
+
+        return !result.isEmpty();
+    }
+
+    @Override
+    public void reassignCategoryForUser(Long userId, Long oldCategoryId, Long newCategoryId) {
+        em.createQuery(
+                        "UPDATE Transaction t " +
+                                "SET t.category.id = :newCategoryId " +
+                                "WHERE t.category.id = :oldCategoryId AND t.account.user.id = :userId")
+                .setParameter("userId", userId)
+                .setParameter("oldCategoryId", oldCategoryId)
+                .setParameter("newCategoryId", newCategoryId)
+                .executeUpdate();
+    }
+
+    @Override
+    public void deleteAllByAccount(Long accountId, Long userId) {
+        em.createQuery("DELETE FROM Transaction t WHERE t.account.id = :accountId AND t.account.user.id = :userId")
+                .setParameter("accountId", accountId)
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
+
+    @Override
+    public void deleteAllByUser(Long userId) {
+        em.createQuery("DELETE FROM Transaction t WHERE t.account.user.id = :userId")
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
+
     private List<Predicate> setPredicates(
-                                Join<Transaction, Account> account,
-                                Join<Transaction, Category> category,
-                                Join<Transaction, RecurringTransaction> recTransaction,
-                                Root<Transaction> root,
-                                CriteriaBuilder cb,
-                                TransactionSearchCriteria searchCriteria) {
+            Join<Transaction, Account> account,
+            Join<Transaction, Category> category,
+            Join<Transaction, RecurringTransaction> recTransaction,
+            Root<Transaction> root,
+            CriteriaBuilder cb,
+            TransactionSearchCriteria searchCriteria) {
 
         List<Predicate> predicates = new ArrayList<>();
 
@@ -211,7 +267,7 @@ public class TransactionDaoImpl implements TransactionDao{
         LocalDate to = searchCriteria.to();
 
         if (!type.equals(TransactionTypeFilter.ALL)) {
-            predicates.add(cb.equal(cb.lower(root.get("type")),  type.toString().toLowerCase()));
+            predicates.add(cb.equal(cb.lower(root.get("type")), type.toString().toLowerCase()));
         }
         if (!mode.equals(TransactionModeFilter.ALL)) {
             if (mode.equals(TransactionModeFilter.REGULAR)) {
@@ -223,7 +279,7 @@ public class TransactionDaoImpl implements TransactionDao{
         if (!accountIds.isEmpty()) {
             predicates.add(account.get("id").in(accountIds));
         }
-        if(!categoryIds.isEmpty()) {
+        if (!categoryIds.isEmpty()) {
             predicates.add(category.get("id").in(categoryIds));
         }
         if (since != null) {

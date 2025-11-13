@@ -22,6 +22,7 @@ import com.example.budget_management_app.transaction_common.service.AccountUpdat
 import com.example.budget_management_app.transaction_common.service.CategoryValidatorService;
 import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 
 @RequiredArgsConstructor
+@Slf4j
 @Service
 public class RecurringTransactionServiceImpl implements RecurringTransactionService{
 
@@ -305,6 +307,55 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
                     }
             );
         }
+    }
+
+    @Transactional
+    @Override
+    public void reassignCategoryForUser(Long userId, Long oldCategoryId, Long newCategoryId) {
+        recurringTransactionDao.reassignCategoryForUser(userId, oldCategoryId, newCategoryId);
+        log.info("User: {} has reassigned category in recurring transactions from: {} to: {}", userId, oldCategoryId, newCategoryId);
+    }
+
+    @Transactional
+    @Override
+    public void activateAllByAccount(Long accountId, Long userId) {
+        recurringTransactionDao.activateAllTransactionsByAccount(accountId, userId);
+        log.info("User: {} has activated recurring transactions for account: {}.", userId, accountId);
+    }
+
+    @Transactional
+    @Override
+    public void activateAllByUser(Long userId) {
+        recurringTransactionDao.activateAllTransactionsByUser(userId);
+        log.info("User: {} activated ALL recurring transactions.", userId);
+    }
+
+    @Transactional
+    @Override
+    public void deactivateAllByAccount(Long accountId, Long userId) {
+        recurringTransactionDao.deactivateAllTransactionsByAccount(accountId, userId);
+        log.info("User: {} has deactivated recurring transactions for account: {}.", userId, accountId);
+    }
+
+    @Transactional
+    @Override
+    public void deactivateAllByUser(Long userId) {
+        recurringTransactionDao.deactivateAllTransactionsByUser(userId);
+        log.info("User: {} dectivated ALL recurring transactions.", userId);
+    }
+
+    @Transactional
+    @Override
+    public void deleteAllByAccount(Long accountId, Long userId) {
+        recurringTransactionDao.deleteAllByAccount(accountId, userId);
+        log.info("User: {} has deleted recurring transactions for account: {}.", userId, accountId);
+    }
+
+    @Transactional
+    @Override
+    public void deleteAllByUser(Long userId) {
+        recurringTransactionDao.deleteAllByUser(userId);
+        log.info("User: {} has deleted recurring transactions.", userId);
     }
 
     private LocalDate calculateNextOccurrence(RecurringInterval interval, int recurringValue, LocalDate relativeDate) {

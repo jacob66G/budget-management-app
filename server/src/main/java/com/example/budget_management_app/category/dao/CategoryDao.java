@@ -4,7 +4,6 @@ import com.example.budget_management_app.category.domain.Category;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +21,6 @@ public class CategoryDao {
                 .getResultList();
     }
 
-    @Transactional(readOnly = true)
     public Optional<Category> findByIdAndUser(Long categoryId, Long userId) {
         List<Category> result = em.createQuery("SELECT c FROM Category c WHERE c.id =: categoryId AND c.user.id = :userId", Category.class)
                 .setParameter("categoryId", categoryId)
@@ -69,7 +67,7 @@ public class CategoryDao {
         em.remove(category);
     }
 
-    public void deleteAll(Long userId) {
+    public void deleteAllByUser(Long userId) {
         em.createQuery("DELETE FROM Category c WHERE c.user.id = :userId")
                 .setParameter("userId", userId)
                 .executeUpdate();
