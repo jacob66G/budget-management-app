@@ -1,19 +1,15 @@
 package com.example.budget_management_app.account.domain;
 
 import com.example.budget_management_app.common.enums.SupportedCurrency;
-import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
 
-@ToString(exclude = {"transactions", "user"})
 @Entity
 @Getter
 @Setter
@@ -75,7 +71,4 @@ public class Account {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
-    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
-    private List<Transaction> transactions;
 }

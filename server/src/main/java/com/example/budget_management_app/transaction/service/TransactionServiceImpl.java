@@ -21,7 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -44,12 +46,12 @@ public class TransactionServiceImpl implements TransactionService{
             Long userId
     ) {
 
-        if(!accountDao.areAccountsBelongToUser(userId, filterParams.getAccountIds())) {
-            throw new NotFoundException(Account.class.getSimpleName(), filterParams.getAccountIds(), ErrorCode.NOT_FOUND);
+        if (filterParams.getAccountIds() != null && !filterParams.getAccountIds().isEmpty()) {
+            this.validateAccountsIds(filterParams.getAccountIds(), userId);
         }
 
-        if (!categoryDao.areCategoriesBelongToUser(userId, filterParams.getCategoryIds())) {
-            throw new NotFoundException(Category.class.getSimpleName(), filterParams.getCategoryIds(), ErrorCode.NOT_FOUND);
+        if (filterParams.getCategoryIds() != null && !filterParams.getCategoryIds().isEmpty()) {
+            this.validateCategoryIds(filterParams.getCategoryIds(), userId);
         }
 
         List<Tuple> transactionTuples = transactionDao.getTuples(
@@ -104,8 +106,6 @@ public class TransactionServiceImpl implements TransactionService{
                 .orElseThrow( () -> new NotFoundException(Category.class.getSimpleName(), newCategoryId, ErrorCode.NOT_FOUND));
 
         transactionValidator.validateCategoryType(category.getType(), transaction.getType());
-
-        transaction.removeCategory();
         transaction.setCategory(category);
 
         return new TransactionCategoryChangeResponse(newCategoryId, category.getName(), category.getIconKey());
@@ -136,9 +136,30 @@ public class TransactionServiceImpl implements TransactionService{
                 .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
         accountUpdateService.calculateBalanceAfterTransactionDeletion(transaction.getAccount(), transaction.getAmount(), transaction.getType());
-        transaction.removeCategory();
-        transaction.removeAccount();
         transactionDao.delete(transaction);
+    }
+
+    private void validateAccountsIds(List<Long> accountIds, Long userId) {
+
+        Set<Long> userAccountIdsSet = new HashSet<>(accountDao.getUserAccountIds(userId));
+        List<Long> differences = accountIds.stream()
+                .filter(id -> !userAccountIdsSet.contains(id))
+                .toList();
+
+        if (!differences.isEmpty()) {
+            throw new NotFoundException(Account.class.getSimpleName(), differences, ErrorCode.NOT_FOUND);
+        }
+    }
+
+    private void validateCategoryIds(List<Long> categoryIds, Long userId) {
+        Set<Long> userCategoryIdsSet = new HashSet<>(categoryDao.getUserCategoryIds(userId));
+        List<Long> differences = categoryIds.stream().
+                filter( id -> !userCategoryIdsSet.contains(id))
+                .toList();
+
+        if (!differences.isEmpty()) {
+            throw new NotFoundException(Category.class.getSimpleName(), differences, ErrorCode.NOT_FOUND);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -172,5 +193,4 @@ public class TransactionServiceImpl implements TransactionService{
         transactionDao.deleteAllByUser(userId);
         log.info("User: {} has deleted ALL transactions.", userId);
     }
-
 }

@@ -1,16 +1,11 @@
 package com.example.budget_management_app.category.domain;
 
-import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
-import java.util.List;
-
-@ToString(exclude = "transactions")
 @Entity
 @Getter
 @Setter
@@ -38,7 +33,4 @@ public class Category {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
-    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
-    private List<Transaction> transactions;
 }

@@ -59,34 +59,6 @@ public class Transaction {
         this.transactionDate = transactionDate;
     }
 
-    public void setCategory(Category category) {
-        this.category = category;
-        if (category.getTransactions() != null) {
-            category.getTransactions().add(this);
-        }
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
-        if ( account.getTransactions() != null) {
-            account.getTransactions().add(this);
-        }
-    }
-
-    public void removeCategory() {
-        if (this.category != null) {
-            this.category.getTransactions().remove(this);
-            this.category = null;
-        }
-    }
-
-    public void removeAccount() {
-        if (this.account != null) {
-            this.account.getTransactions().remove(this);
-            this.account = null;
-        }
-    }
-
     @Override
     public String toString() {
         return "Transaction{" +

@@ -31,17 +31,15 @@ public class AccountDao {
         return result.stream().findFirst();
     }
 
-    public boolean areAccountsBelongToUser(Long userId, List<Long> accounts) {
-        Long count = em.createQuery("""
-            SELECT COUNT(a) FROM Account a
-            WHERE a.id IN :accounts AND a.user.id = :userId
-            """, Long.class)
-                .setParameter("accounts", accounts)
-                .setParameter("userId", userId)
-                .getSingleResult();
-        return count != null && count == accounts.size();
-    }
+    public List<Long> getUserAccountIds(Long userId) {
 
+        return em.createQuery("""
+                    SELECT a.id FROM Account a
+                    WHERE a.user.id = :userId
+                """, Long.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
 
     public List<Account> findByUserAndCriteria(Long userId, SearchCriteria criteria) {
         CriteriaBuilder cb = em.getCriteriaBuilder();

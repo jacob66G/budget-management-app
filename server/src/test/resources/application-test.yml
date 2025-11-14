@@ -24,7 +24,7 @@ spring:
   sql:
     init:
       data-locations: classpath:data-test.sql
-      mode: always
+      mode: never
 
 logging:
   level:

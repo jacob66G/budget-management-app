@@ -30,6 +30,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -83,8 +84,8 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
     @Override
     public PagedResponse<UpcomingTransactionSummary> getUpcomingTransactionsPage(PaginationParams paginationParams, UpcomingTransactionFilterParams filterParams, Long userId) {
 
-        if (!accountDao.areAccountsBelongToUser(userId, filterParams.getAccountIds())) {
-            throw new NotFoundException(Account.class.getSimpleName(), filterParams.getAccountIds(), ErrorCode.NOT_FOUND);
+        if (filterParams.getAccountIds() != null && !filterParams.getAccountIds().isEmpty()) {
+            this.validateAccountsIds(filterParams.getAccountIds(), userId);
         }
 
         List<Tuple> results = this.recurringTransactionDao.getUpcomingTransactionsTuples(
@@ -370,5 +371,17 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
             nextOccurrence = relativeDate.plusYears(recurringValue);
         }
         return nextOccurrence;
+    }
+
+    private void validateAccountsIds(List<Long> accountIds, Long userId) {
+
+        Set<Long> userAccountIdsSet = new HashSet<>(accountDao.getUserAccountIds(userId));
+        List<Long> differences = accountIds.stream()
+                .filter(id -> !userAccountIdsSet.contains(id))
+                .toList();
+
+        if (!differences.isEmpty()) {
+            throw new NotFoundException(Account.class.getSimpleName(), differences, ErrorCode.NOT_FOUND);
+        }
     }
 }
