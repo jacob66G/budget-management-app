@@ -8,16 +8,16 @@ import com.example.budget_management_app.transaction_common.dto.CategorySummary;
 import com.example.budget_management_app.transaction.dto.TransactionCreateRequest;
 import com.example.budget_management_app.transaction.dto.TransactionSummary;
 import jakarta.persistence.Tuple;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class Mapper {
+@Component
+public class TransactionMapper {
 
-    private Mapper(){}
-
-    public static List<TransactionSummary> toDto(List<Tuple> tuples) {
+    public List<TransactionSummary> toDto(List<Tuple> tuples) {
 
         return tuples.stream()
                 .map( tuple -> new TransactionSummary(
@@ -35,12 +35,13 @@ public class Mapper {
                                 tuple.get("categoryId", Long.class),
                                 tuple.get("categoryName", String.class),
                                 tuple.get("iconKey", String.class)
-                        )
+                        ),
+                        tuple.get("recId", Long.class)
                 ))
                 .toList();
     }
 
-    public static Transaction fromDto(TransactionCreateRequest transactionCreate) {
+    public Transaction fromDto(TransactionCreateRequest transactionCreate) {
         return new Transaction(
                 transactionCreate.amount(),
                 transactionCreate.title().trim(),

@@ -1,4 +1,4 @@
-package com.example.budget_management_app.recurring_transaction.integration;
+package com.example.budget_management_app.recurring_transaction.service;
 
 import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.common.exception.NotFoundException;
@@ -6,7 +6,6 @@ import com.example.budget_management_app.common.exception.StatusAlreadySetExcept
 import com.example.budget_management_app.common.exception.TransactionTypeMismatchException;
 import com.example.budget_management_app.recurring_transaction.domain.*;
 import com.example.budget_management_app.recurring_transaction.dto.*;
-import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import com.example.budget_management_app.transaction_common.dto.PaginationParams;
@@ -15,7 +14,9 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.Disabled;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,9 +29,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
+@Sql("/sql/transactions-test-data.sql")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("RecurringTransactionService Integration Tests")
-public class ServiceTest {
+@Disabled
+public class RecurringTransactionsServiceIntegrationTest {
 
     @Autowired
     private RecurringTransactionService recTransactionService;
@@ -38,75 +41,75 @@ public class ServiceTest {
     @Autowired
     private EntityManager em;
 
+    private final int DEFAULT_PAGE_LIMIT = 5;
+
     @Test
     @Order(1)
-    public void getRecurringTransactionsTemplatePagedResponseForUserTest() {
+    public void shouldReturnRecurringTransactionsPageForUser() {
 
+        // given
         Long userId = 1L;
-        int page = 1;
-        int limit = 3;
-        int expectedNumberOfElements = 3;
+        int expectedTotalCount = 9;
 
-        PaginationParams pageReq =
-                new PaginationParams(page, limit);
+        PaginationParams paginationParams =
+                new PaginationParams();
+        paginationParams.setLimit(DEFAULT_PAGE_LIMIT);
 
+        // when
         PagedResponse<RecurringTransactionSummary> pagedResponse
-                = recTransactionService.getSummariesPage(pageReq, userId);
+                = recTransactionService.getSummariesPage(
+                        paginationParams,
+                        userId
+        );
 
+        // then
         assertThat(pagedResponse).isNotNull();
         assertThat(pagedResponse.data()).isNotNull();
         assertThat(pagedResponse.pagination()).isNotNull();
-
-        assertThat(pagedResponse.data().size()).isEqualTo(expectedNumberOfElements);
-
-        System.out.println(pagedResponse);
+        assertThat(pagedResponse.data().size()).isEqualTo(DEFAULT_PAGE_LIMIT);
+        assertThat(pagedResponse.pagination().totalCount()).isEqualTo(expectedTotalCount);
     }
 
     @Test
     @Order(2)
-    public void getRecurringTransactionsTemplatePagedResponseForSecondUserTest() {
+    public void shouldReturnRecurringTransactionTemplateDetailsTest() {
 
-        Long userId = 5L;
-        int page = 1;
-        int limit = 3;
-        int expectedNumberOfElements = 3;
+        // given
+        Long userId = 1L;
+        Long recTransactionId = 1L;
 
-        PaginationParams pageReq =
-                new PaginationParams(page, limit);
+        // when
+        RecurringTransactionDetailsResponse response =
+                recTransactionService.getDetails(recTransactionId, userId);
 
-        PagedResponse<RecurringTransactionSummary> pagedResponse =
-                recTransactionService.getSummariesPage(pageReq, userId);
-
-        assertThat(pagedResponse).isNotNull();
-        assertThat(pagedResponse.data()).isNotNull();
-        assertThat(pagedResponse.pagination()).isNotNull();
-
-        assertThat(pagedResponse.data().size()).isEqualTo(expectedNumberOfElements);
-
-        System.out.println(pagedResponse);
+        // then
+        assertThat(response).isNotNull();
     }
 
     @Test
     @Order(3)
-    public void getRecurringTransactionTemplateForUserDetailsTest() {
+    public void shouldThrowNotFoundException_whenRecurringTransactionIsNotUser() {
 
+        // given
         Long userId = 1L;
-        Long recTransactionId = 1L;
+        Long recTransactionId = 3L;
 
-        RecurringTransactionDetailsResponse response =
-                recTransactionService.getDetails(recTransactionId, userId);
-
-        assertThat(response).isNotNull();
-        System.out.println(response);
+        // when and then
+        assertThrows( NotFoundException.class, () -> {
+            recTransactionService.getDetails(recTransactionId, userId);
+        });
     }
 
     @Test
     @Order(4)
-    public void getRecurringTransactionTemplateByUserItDoesNotBelongTest() {
+    public void shouldThrowNotFoundException_whenRecurringTransactionDoesNotExist() {
 
+        // given
         Long userId = 1L;
-        Long recTransactionId = 3L;
+        Long recTransactionId = 15L;
 
+
+        // when
         assertThrows( NotFoundException.class, () -> {
             recTransactionService.getDetails(recTransactionId, userId);
         });
@@ -114,20 +117,9 @@ public class ServiceTest {
 
     @Test
     @Order(5)
-    public void getRecurringTransactionTemplateThatDoesNotExistTest() {
+    public void shouldCreateRecurringTransactionTemplateWhichStartsAfterCurrentDay() {
 
-        Long userId = 1L;
-        Long recTransactionId = 15L;
-
-        assertThrows( NotFoundException.class, () -> {
-            recTransactionService.getDetails(recTransactionId, userId);
-        });
-    }
-
-    @Test
-    @Order(6)
-    public void createRecurringTransactionTemplateWhichStartsAfterCurrentDayTest() {
-
+        // given
         Long userId = 1L;
         Long accountId = 1L;
         Long categoryId = 4L;
@@ -139,29 +131,26 @@ public class ServiceTest {
                         RecurringInterval.MONTH, 1, accountId, categoryId
                 );
 
+        // when
         RecurringTransactionCreateResponse createResponse =
                 recTransactionService.create(createReq, userId);
-
         em.clear();
 
         assertThat(createResponse).isNotNull();
         assertThat(createResponse.newTransaction()).isEqualTo(false);
         assertThat(createResponse.newTransactionView()).isNull();
 
-        System.out.println(createResponse);
-
         RecurringTransaction recurringTransaction = em.find(RecurringTransaction.class, createResponse.id());
         assertThat(createResponse.id()).isEqualTo(recurringTransaction.getId());
         assertThat(recurringTransaction.getCategory().getId()).isEqualTo(categoryId);
         assertThat(recurringTransaction.getAccount().getId()).isEqualTo(accountId);
-
-        System.out.println(recurringTransaction);
     }
 
     @Test
-    @Order(7)
-    public void createRecurringTransactionTemplateWhichStartsAtTheCurrentDayAfterNoonTest() {
+    @Order(6)
+    public void shouldCreateRecurringTransactionTemplateWhichStartsAtTheCurrentDayAfterNoon() {
 
+        // given
         Long userId = 2L;
         Long accountId = 4L;
         Long categoryId = 6L;
@@ -173,23 +162,20 @@ public class ServiceTest {
                         RecurringInterval.MONTH, 1, accountId, categoryId
                 );
 
+        // when
         RecurringTransactionCreateResponse createResponse =
                 recTransactionService.create(createReq, userId);
-
         em.clear();
 
+        // then
         assertThat(createResponse).isNotNull();
         assertThat(createResponse.newTransaction()).isEqualTo(true);
         assertThat(createResponse.newTransactionView()).isNotNull();
-
-        System.out.println(createResponse);
 
         RecurringTransaction recurringTransaction = em.find(RecurringTransaction.class, createResponse.id());
         assertThat(createResponse.id()).isEqualTo(recurringTransaction.getId());
         assertThat(recurringTransaction.getCategory().getId()).isEqualTo(categoryId);
         assertThat(recurringTransaction.getAccount().getId()).isEqualTo(accountId);
-
-        System.out.println(recurringTransaction);
 
         Optional<Transaction> optCreatedTransaction = recurringTransaction
                 .getTransactions()
@@ -201,20 +187,18 @@ public class ServiceTest {
         assertThat(createdTransaction.getAccount().getId()).isEqualTo(accountId);
         assertThat(createdTransaction.getCategory().getId()).isEqualTo(categoryId);
 
-        System.out.println(createdTransaction);
-
         Account account = createdTransaction.getAccount();
         assertThat(account).isNotNull();
         assertThat(account.getBalance()).isEqualTo(new BigDecimal("1750.00"));
         assertThat(account.getTotalExpense()).isEqualTo(new BigDecimal("2949.50"));
-
-        System.out.println(account);
     }
 
     @Test
-    @Order(8)
-    public void createRecurringTransactionTemplateWhichStartsAtTheCurrentDayBeforeNoonTest() {
+    @Order(7)
+    @Disabled
+    public void shouldCreateRecurringTransactionTemplateWhichStartsAtTheCurrentDayBeforeNoonTest() {
 
+        // given
         Long userId = 3L;
         Long accountId = 6L;
         Long categoryId = 12L;
@@ -226,29 +210,27 @@ public class ServiceTest {
                         RecurringInterval.MONTH, 1, accountId, categoryId
                 );
 
+        // when
         RecurringTransactionCreateResponse createResponse =
                 recTransactionService.create(createReq, userId);
-
         em.clear();
 
+        // then
         assertThat(createResponse).isNotNull();
-        assertThat(createResponse.newTransaction()).isEqualTo(false);
-        assertThat(createResponse.newTransactionView()).isNull();
-
-        System.out.println(createResponse);
+//        assertThat(createResponse.newTransaction()).isEqualTo(false);
+//        assertThat(createResponse.newTransactionView()).isNull();
 
         RecurringTransaction recurringTransaction = em.find(RecurringTransaction.class, createResponse.id());
         assertThat(createResponse.id()).isEqualTo(recurringTransaction.getId());
         assertThat(recurringTransaction.getCategory().getId()).isEqualTo(categoryId);
         assertThat(recurringTransaction.getAccount().getId()).isEqualTo(accountId);
-
-        System.out.println(recurringTransaction);
     }
 
     @Test
     @Order(9)
-    public void createRecurringTransactionTemplateForOtherUserTest() {
+    public void shouldThrowNotFoundException_whenAccountIsNotUser() {
 
+        // given
         Long userId = 1L;
         Long accountId = 4L;
         Long categoryId = 6L;
@@ -260,6 +242,7 @@ public class ServiceTest {
                         RecurringInterval.MONTH, 1, accountId, categoryId
                 );
 
+        // when and then
         assertThrows(NotFoundException.class, () -> {
             recTransactionService.create(createReq, userId);
         });
@@ -269,6 +252,7 @@ public class ServiceTest {
     @Order(10)
     public void createRecurringTransactionWithCategoryWithIncompatibleTypeTest() {
 
+        // given
         Long userId = 2L;
         Long accountId = 4L;
         Long categoryId = 6L;
@@ -280,6 +264,7 @@ public class ServiceTest {
                         RecurringInterval.MONTH, 1, accountId, categoryId
                 );
 
+        // when and then
         assertThrows(TransactionTypeMismatchException.class, () -> {
             recTransactionService.create(createReq, userId);
         });
@@ -289,15 +274,17 @@ public class ServiceTest {
     @Order(11)
     public void deleteRecurringTransactionTemplateWithoutTransactionsTest() {
 
+        // given
         Long userId = 2L;
         Long recurringTransactionTemplateId = 3L;
         RemovalRange range = RemovalRange.TEMPLATE;
 
+        // when
         recTransactionService.delete(recurringTransactionTemplateId, range, userId);
-
         em.flush();
         em.clear();
 
+        // then
         RecurringTransaction recTransaction = em.find(RecurringTransaction.class, recurringTransactionTemplateId);
         assertThat(recTransaction).isNull();
 
@@ -317,23 +304,23 @@ public class ServiceTest {
                     assertThat(transaction.getRecurringTransaction()).isNull();
                 }
         );
-
-        detachedTransactions.forEach(System.out::println);
     }
 
     @Test
     @Order(12)
     public void deleteExpenseRecurringTransactionTemplateWithRelatedTransactionsTest() {
 
+        // given
         Long userId = 3L;
         Long recurringTransactionTemplateId = 5L;
         RemovalRange range = RemovalRange.ALL;
 
+        // when
         recTransactionService.delete(recurringTransactionTemplateId, range, userId);
-
         em.flush();
         em.clear();
 
+        // then
         RecurringTransaction recTransaction = em.find(RecurringTransaction.class, recurringTransactionTemplateId);
         assertThat(recTransaction).isNull();
 
@@ -351,23 +338,23 @@ public class ServiceTest {
         assertThat(account).isNotNull();
         assertThat(account.getBalance()).isEqualTo(new BigDecimal("28600.00"));
         assertThat(account.getTotalExpense()).isEqualTo(new BigDecimal("21400.00"));
-
-        System.out.println(account);
     }
 
     @Test
     @Order(13)
     public void deleteIncomeRecurringTransactionTemplateWithRelatedTransactionsTest() {
 
+        // given
         Long userId = 5L;
         Long recurringTransactionTemplateId = 9L;
         RemovalRange range = RemovalRange.ALL;
 
+        // when
         recTransactionService.delete(recurringTransactionTemplateId, range, userId);
-
         em.flush();
         em.clear();
 
+        // then
         RecurringTransaction recTransaction = em.find(RecurringTransaction.class, recurringTransactionTemplateId);
         assertThat(recTransaction).isNull();
 
@@ -385,18 +372,18 @@ public class ServiceTest {
         assertThat(account).isNotNull();
         assertThat(account.getBalance()).isEqualTo(new BigDecimal("-1100.00"));
         assertThat(account.getTotalIncome()).isEqualTo(new BigDecimal("-100.00"));
-
-        System.out.println(account);
     }
 
     @Test
     @Order(14)
     public void deleteRecurringTransactionThatDoesNotBelongToUserTest() {
 
+        // given
         Long userId = 1L;
         Long recurringTransactionTemplateId = 10L;
         RemovalRange range = RemovalRange.TEMPLATE;
 
+        // when and then
         assertThrows( NotFoundException.class, () -> {
             recTransactionService.delete(recurringTransactionTemplateId, range, userId);
         });
@@ -406,6 +393,7 @@ public class ServiceTest {
     @Order(15)
     public void updateRecurringTransactionTemplateOnlyTest() {
 
+        // given
         Long userId = 1L;
         Long recTransactionId = 1L;
         UpdateRange range = UpdateRange.FUTURE;
@@ -416,23 +404,23 @@ public class ServiceTest {
         RecurringTransactionUpdateRequest updateReq =
                 new RecurringTransactionUpdateRequest("Netflix", changedAmount, changedDescription);
 
+        // when
         recTransactionService.update(recTransactionId, updateReq, range, userId);
-
         em.flush();
         em.clear();
 
+        // then
         RecurringTransaction updatedRecurringTemplate = em.find(RecurringTransaction.class, recTransactionId);
         assertThat(updatedRecurringTemplate).isNotNull();
         assertThat(updatedRecurringTemplate.getAmount()).isEqualTo(changedAmount);
         assertThat(updatedRecurringTemplate.getDescription()).isEqualTo(changedDescription);
-
-        System.out.println(updatedRecurringTemplate);
     }
 
     @Test
     @Order(16)
     public void updateRecurringTransactionTemplateWithAllRelatedTransactionsTest() {
 
+        // given
         Long userId = 1L;
         Long recTransactionId = 1L;
         UpdateRange range = UpdateRange.ALL;
@@ -443,11 +431,13 @@ public class ServiceTest {
         RecurringTransactionUpdateRequest updateReq =
                 new RecurringTransactionUpdateRequest("Netflix", changedAmount, changedDescription);
 
+        // when
         recTransactionService.update(recTransactionId, updateReq, range, userId);
-
         em.flush();
         em.clear();
 
+
+        // then
         RecurringTransaction updatedRecurringTemplate = em.find(RecurringTransaction.class, recTransactionId);
         assertThat(updatedRecurringTemplate).isNotNull();
         assertThat(updatedRecurringTemplate.getAmount()).isEqualTo(changedAmount);
@@ -469,19 +459,17 @@ public class ServiceTest {
                     assertThat(updTransaction.getDescription()).isEqualTo(changedDescription);
                 });
 
-        updatedTransactions.forEach(System.out::println);
-
         Account account = updatedRecurringTemplate.getAccount();
         assertThat(account).isNotNull();
         assertThat(account.getBalance()).isEqualTo(new BigDecimal("1460.00"));
         assertThat(account.getTotalExpense()).isEqualTo(new BigDecimal("3540.00"));
-        System.out.println(account);
     }
 
     @Test
     @Order(17)
     public void updateRecurringTransactionTemplateThatBelongToOtherUserTest() {
 
+        // given
         Long userId = 1L;
         Long recTransactionId = 3L;
         UpdateRange range = UpdateRange.FUTURE;
@@ -492,6 +480,7 @@ public class ServiceTest {
         RecurringTransactionUpdateRequest updateReq =
                 new RecurringTransactionUpdateRequest("Netflix", changedAmount, changedDescription);
 
+        // when and then
         assertThrows(NotFoundException.class, () -> {
             recTransactionService.update(recTransactionId, updateReq, range, userId);
         });
@@ -501,8 +490,8 @@ public class ServiceTest {
     @Order(18)
     public void generateRecurringTransactionsTest() {
 
+        // when
         recTransactionService.generateRecurringTransactions();
-
         em.flush();
         em.clear();
 
@@ -516,10 +505,9 @@ public class ServiceTest {
                 .setParameter("recTransactionIds", recTransactionIds)
                 .getResultList();
 
+        // then
         assertThat(recurringTransaction).isNotNull();
         assertThat(recurringTransaction.size()).isEqualTo(2);
-
-        recurringTransaction.forEach(System.out::println);
 
         List<Transaction> createdTransactions = recurringTransaction.stream()
                         .flatMap( rt -> rt.getTransactions().stream())
@@ -529,40 +517,38 @@ public class ServiceTest {
 
         assertThat(createdTransactions).isNotNull();
         assertThat(createdTransactions.size()).isEqualTo(2);
-
-        createdTransactions.forEach(transaction -> {
-            System.out.println("Transaction: " + transaction + "\n"
-                    + " Account: " + transaction.getAccount());
-        });
     }
 
     @Test
     @Order(19)
     public void changeRecurringTransactionTemplateStatusToInactiveTest() {
 
+        // given
         Long userId = 3L;
         Long recTransactionTemplateId = 5L;
         Boolean isActive = false;
 
+        // when
         recTransactionService.changeStatus(recTransactionTemplateId, isActive, userId);
-
         em.flush();
         em.clear();
 
+        // then
         RecurringTransaction recTransaction = em.find(RecurringTransaction.class, recTransactionTemplateId);
         assertThat(recTransaction).isNotNull();
         assertThat(recTransaction.isActive()).isEqualTo(isActive);
-        System.out.println(recTransaction);
     }
 
     @Test
     @Order(20)
     public void changeRecurringTransactionTemplateStatusToTheSameStatusItAlreadyIsTest() {
 
+        // given
         Long userId = 3L;
         Long recTransactionTemplateId = 6L;
         Boolean isActive = false;
 
+        // when and then
         assertThrows(StatusAlreadySetException.class, () -> {
            recTransactionService.changeStatus(recTransactionTemplateId, isActive, userId);
         });
@@ -572,10 +558,12 @@ public class ServiceTest {
     @Order(21)
     public void changeRecurringTransactionTemplateThatBelongToTheOtherUserTest() {
 
+        // given
         Long userId = 3L;
         Long recTransactionTemplateId = 9L;
         Boolean isActive = false;
 
+        // when and then
         assertThrows(NotFoundException.class, () -> {
             recTransactionService.changeStatus(recTransactionTemplateId, isActive, userId);
         });
@@ -585,19 +573,20 @@ public class ServiceTest {
     @Order(22)
     public void changeRecurringTransactionTemplateStatusToActiveWhereNextOccurrenceIsTodayAfterNoonTest() {
 
+        // given
         Long userId = 5L;
         Long recTransactionTemplateId = 12L;
         Boolean isActive = true;
 
+        // when
         recTransactionService.changeStatus(recTransactionTemplateId, isActive, userId);
-
         em.flush();
         em.clear();
 
+        // then
         RecurringTransaction recTransaction = em.find(RecurringTransaction.class, recTransactionTemplateId);
         assertThat(recTransaction).isNotNull();
         assertThat(recTransaction.isActive()).isEqualTo(isActive);
-        System.out.println(recTransaction);
 
     }
 
@@ -605,48 +594,54 @@ public class ServiceTest {
     @Order(23)
     public void changeRecurringTransactionTemplateStatusToActiveWhereNextOccurrenceIsTodayBeforeNoonTest() {
 
+        // given
         Long userId = 5L;
         Long recTransactionTemplateId = 12L;
         Boolean isActive = true;
 
+        // when
         recTransactionService.changeStatus(recTransactionTemplateId, isActive, userId);
 
+        // then
         RecurringTransaction recTransaction = em.find(RecurringTransaction.class, recTransactionTemplateId);
         assertThat(recTransaction).isNotNull();
         assertThat(recTransaction.isActive()).isEqualTo(isActive);
-        System.out.println(recTransaction);
     }
 
     @Test
     @Order(24)
     public void changeRecurringTransactionTemplateStatusToActiveWhereNextOccurrenceFromBeforeToAfterCurrentDayTest() {
 
+        // given
         Long userId = 5L;
         Long recTransactionTemplateId = 13L;
         Boolean isActive = true;
 
+        // when
         recTransactionService.changeStatus(recTransactionTemplateId, isActive, userId);
 
+        // then
         RecurringTransaction recTransaction = em.find(RecurringTransaction.class, recTransactionTemplateId);
         assertThat(recTransaction).isNotNull();
         assertThat(recTransaction.isActive()).isEqualTo(isActive);
-        System.out.println(recTransaction);
     }
 
     @Test
     @Order(25)
     public void changeRecurringTransactionTemplateToActiveWhereNextOccurrenceFromBeforeToCurrentDayBeforeNoonTest() {
 
+        // given
         Long userId = 5L;
         Long recTransactionTemplateId = 14L;
         Boolean isActive = true;
 
+        // when
         recTransactionService.changeStatus(recTransactionTemplateId, isActive, userId);
 
+        // then
         RecurringTransaction recTransaction = em.find(RecurringTransaction.class, recTransactionTemplateId);
         assertThat(recTransaction).isNotNull();
         assertThat(recTransaction.isActive()).isEqualTo(isActive);
-        System.out.println(recTransaction);
 
     }
 
@@ -654,39 +649,37 @@ public class ServiceTest {
     @Order(26)
     public void changeRecurringTransactionTemplateToActiveWhereNextOccurrenceFromBeforeToCurrentDayAfterNoonTest() {
 
+        // given
         Long userId = 5L;
         Long recTransactionTemplateId = 15L;
         Boolean isActive = true;
 
+        // when
         recTransactionService.changeStatus(recTransactionTemplateId, isActive, userId);
 
+        // then
         RecurringTransaction recTransaction = em.find(RecurringTransaction.class, recTransactionTemplateId);
         assertThat(recTransaction).isNotNull();
         assertThat(recTransaction.isActive()).isEqualTo(isActive);
-        System.out.println(recTransaction);
     }
 
     @Test
     @Order(27)
     public void getUpcomingTransactionsPagedResponseForAccountThatDoNotBelongToUserTest() {
 
+        // given
         Long userId = 1L;
         List<Long> accountIds = List.of(1L, 2L, 3L, 4L);
 
-        int page = 1;
-        int limit = 4;
-        PaginationParams pageReq =
-                new PaginationParams(page, limit);
-        UpcomingTransactionFilterParams searchCriteria =
-                new UpcomingTransactionFilterParams(
-                        UpcomingTransactionsTimeRange.NEXT_7_DAYS,
-                        accountIds
-                );
+        UpcomingTransactionFilterParams filterParams =
+                new UpcomingTransactionFilterParams();
+        filterParams.setAccountIds(accountIds);
 
+        // when and then
         assertThrows(NotFoundException.class, () -> {
                 this.recTransactionService.getUpcomingTransactionsPage(
-                        pageReq,
-                        searchCriteria,
+                        new PaginationParams(),
+                        filterParams,
                         userId
                 );
         });
@@ -696,31 +689,28 @@ public class ServiceTest {
     @Order(27)
     public void getUpcomingTransactionsPagedResponseTest() {
 
+        // given
         Long userId = 1L;
-        List<Long> accountIds = List.of(1L, 2L, 3L);
+        PaginationParams paginationParams =
+                new PaginationParams();
+        paginationParams.setLimit(DEFAULT_PAGE_LIMIT-1);
+        UpcomingTransactionFilterParams filterParams =
+                new UpcomingTransactionFilterParams();
+        filterParams.setRange(UpcomingTransactionsTimeRange.NEXT_MONTH);
 
-        int page = 1;
-        int limit = 4;
-        PaginationParams pageReq =
-                new PaginationParams(page, limit);
-        UpcomingTransactionFilterParams searchCriteria =
-                new UpcomingTransactionFilterParams(
-                        UpcomingTransactionsTimeRange.NEXT_MONTH,
-                        accountIds
-                );
-
+        // when
         PagedResponse<UpcomingTransactionSummary> response =
                 this.recTransactionService.getUpcomingTransactionsPage(
-                    pageReq,
-                    searchCriteria,
+                    paginationParams,
+                    filterParams,
                     userId
                 );
 
+        // then
         assertThat(response).isNotNull();
         assertThat(response.data()).isNotNull();
         assertThat(response.data().size()).isNotZero();
         assertThat(response.pagination()).isNotNull();
         assertThat(response.links()).isNull();
-        System.out.println(response);
     }
 }

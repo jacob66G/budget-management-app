@@ -14,16 +14,16 @@ import com.example.budget_management_app.transaction_common.dto.AccountSummary;
 import com.example.budget_management_app.transaction_common.dto.CategorySummary;
 import com.example.budget_management_app.transaction.dto.TransactionSummary;
 import jakarta.persistence.Tuple;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-public class Mapper {
+@Component
+public class RecurringTransactionMapper {
 
-    private Mapper(){}
-
-    public static List<RecurringTransactionSummary> fromTuples(List<Tuple> tuples) {
+    public List<RecurringTransactionSummary> fromTuples(List<Tuple> tuples) {
 
         return tuples.stream()
                 .map( tuple -> new RecurringTransactionSummary(
@@ -48,7 +48,7 @@ public class Mapper {
                 )).toList();
     }
 
-    public static List<UpcomingTransactionSummary> fromUpcomingTuples(List<Tuple> tuples) {
+    public List<UpcomingTransactionSummary> fromUpcomingTuples(List<Tuple> tuples) {
         return tuples.stream()
                 .map( tuple -> new UpcomingTransactionSummary(
                         tuple.get("recurringTemplateId", Long.class),
@@ -64,12 +64,12 @@ public class Mapper {
                         new CategorySummary(
                                 tuple.get("categoryId", Long.class),
                                 tuple.get("categoryName", String.class),
-                                tuple.get("iconPath", String.class)
+                                tuple.get("iconKey", String.class)
                         )
                 )).toList();
     }
 
-    public static RecurringTransactionDetailsResponse toDetails(RecurringTransaction recurringTransaction) {
+    public RecurringTransactionDetailsResponse toDetails(RecurringTransaction recurringTransaction) {
         return new RecurringTransactionDetailsResponse(
                 recurringTransaction.getNextOccurrence(),
                 recurringTransaction.getStartDate(),
@@ -77,11 +77,11 @@ public class Mapper {
                 recurringTransaction.getCreatedAt());
     }
 
-    public static TransactionSummary toTransactionView(Transaction transaction) {
+    public TransactionSummary toTransactionView(Transaction transaction, Long recTransactionId) {
         Account account = transaction.getAccount();
         Category category = transaction.getCategory();
         return new TransactionSummary(transaction.getId(), transaction.getAmount(), transaction.getType(), transaction.getDescription(), transaction.getTransactionDate(),
                 new AccountSummary(account.getId(), account.getName(), account.getCurrency()),
-                new CategorySummary(category.getId(), category.getName(), category.getIconKey()));
+                new CategorySummary(category.getId(), category.getName(), category.getIconKey()), recTransactionId);
     }
 }

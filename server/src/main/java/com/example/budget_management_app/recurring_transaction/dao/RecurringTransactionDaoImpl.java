@@ -15,7 +15,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -120,7 +119,7 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
      */
     @Transactional
     @Override
-    public RecurringTransaction create(RecurringTransaction recurringTransaction) {
+    public RecurringTransaction save(RecurringTransaction recurringTransaction) {
         em.persist(recurringTransaction);
         em.flush();
         return recurringTransaction;
@@ -156,12 +155,14 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
     @Transactional(readOnly = true)
     @Override
     public List<Tuple> getUpcomingTransactionsTuples(PaginationParams paginationParams,
-                                                     UpcomingTransactionFilterParams filterParams) {
+                                                     UpcomingTransactionFilterParams filterParams,
+                                                     Long userId) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Tuple> cq = cb.createTupleQuery();
         Root<RecurringTransaction> root = cq.from(RecurringTransaction.class);
         Join<RecurringTransaction, Account> account = root.join("account", JoinType.INNER);
+        Join<Account, User> user = account.join("user", JoinType.INNER);
         Join<RecurringTransaction, Category> category = root.join("category", JoinType.INNER);
 
         cq.multiselect(
@@ -182,8 +183,10 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
                 filterParams.getRange(),
                 filterParams.getAccountIds(),
                 account,
+                user,
                 root,
-                cb
+                cb,
+                userId
         );
 
         cq.orderBy(cb.asc(root.get("nextOccurrence")));
@@ -204,19 +207,22 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
      */
     @Transactional(readOnly = true)
     @Override
-    public Long getUpcomingTransactionsCount(UpcomingTransactionFilterParams filterParams) {
+    public Long getUpcomingTransactionsCount(UpcomingTransactionFilterParams filterParams, Long userId) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<RecurringTransaction> root = countQuery.from(RecurringTransaction.class);
         Join<RecurringTransaction, Account> account = root.join("account", JoinType.INNER);
+        Join<Account, User> user = account.join("user", JoinType.INNER);
 
         List<Predicate> predicates = this.setUpcomingTransactionsPredicates(
                 filterParams.getRange(),
                 filterParams.getAccountIds(),
                 account,
+                user,
                 root,
-                cb
+                cb,
+                userId
         );
 
         countQuery.select(cb.count(root)).where(cb.and(predicates.toArray(new Predicate[0])));
@@ -286,10 +292,14 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
             UpcomingTransactionsTimeRange range,
             List<Long> accountIds,
             Join<RecurringTransaction, Account> account,
+            Join<Account, User> user,
             Root<RecurringTransaction> root,
-            CriteriaBuilder cb
+            CriteriaBuilder cb,
+            Long userId
     ) {
         List<Predicate> predicates = new ArrayList<>();
+
+        predicates.add(cb.equal(user.get("id"), userId));
 
         if (!accountIds.isEmpty()) {
             predicates.add(account.get("id").in(accountIds));
@@ -303,12 +313,7 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
         } else {
             predicates.add(cb.lessThanOrEqualTo(root.get("nextOccurrence"), range.calculateEndDate(LocalDate.now())));
         }
-
-        if (LocalTime.now().isAfter(LocalTime.NOON)) {
-            predicates.add(cb.greaterThan(root.get("nextOccurrence"), LocalDate.now()));
-        } else {
-            predicates.add(cb.greaterThanOrEqualTo(root.get("nextOccurrence"), LocalDate.now()));
-        }
+        predicates.add(cb.greaterThanOrEqualTo(root.get("nextOccurrence"), LocalDate.now()));
 
         return predicates;
     }

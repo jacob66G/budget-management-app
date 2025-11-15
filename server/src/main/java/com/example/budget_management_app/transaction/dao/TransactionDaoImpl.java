@@ -7,6 +7,7 @@ import com.example.budget_management_app.recurring_transaction.domain.RecurringT
 import com.example.budget_management_app.transaction.domain.*;
 import com.example.budget_management_app.transaction.dto.TransactionPaginationParams;
 import com.example.budget_management_app.transaction.dto.TransactionFilterParams;
+import com.example.budget_management_app.user.domain.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Tuple;
@@ -33,7 +34,8 @@ public class TransactionDaoImpl implements TransactionDao {
     @Override
     public List<Tuple> getTuples(
             TransactionPaginationParams paginationParams,
-            TransactionFilterParams filterParams
+            TransactionFilterParams filterParams,
+            Long userId
                                        ) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -41,6 +43,7 @@ public class TransactionDaoImpl implements TransactionDao {
         Root<Transaction> root = cq.from(Transaction.class);
         Join<Transaction, Category> category = root.join("category", JoinType.INNER);
         Join<Transaction, Account> account = root.join("account", JoinType.INNER);
+        Join<Account, User> user = account.join("user", JoinType.INNER);
         Join<Transaction, RecurringTransaction> recTransaction = root.join("recurringTransaction", JoinType.LEFT);
 
         cq.multiselect(
@@ -62,9 +65,11 @@ public class TransactionDaoImpl implements TransactionDao {
                 account,
                 category,
                 recTransaction,
+                user,
                 root,
                 cb,
-                filterParams
+                filterParams,
+                userId
         );
 
         SortedBy sortedBy = paginationParams.getSortedBy();
@@ -107,12 +112,13 @@ public class TransactionDaoImpl implements TransactionDao {
      */
     @Transactional(readOnly = true)
     @Override
-    public Long getCount(TransactionFilterParams filterParams) {
+    public Long getCount(TransactionFilterParams filterParams, Long userId) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<Transaction> root = countQuery.from(Transaction.class);
         Join<Transaction, Account> account = root.join("account", JoinType.INNER);
+        Join<Account, User> user = account.join("user", JoinType.INNER);
         Join<Transaction, Category> category = root.join("category", JoinType.INNER);
         Join<Transaction, RecurringTransaction> recTransaction = root.join("recurringTransaction", JoinType.LEFT);
 
@@ -120,9 +126,11 @@ public class TransactionDaoImpl implements TransactionDao {
                 account,
                 category,
                 recTransaction,
+                user,
                 root,
                 cb,
-                filterParams
+                filterParams,
+                userId
         );
 
         countQuery.select(cb.count(root)).where(cb.and(predicates.toArray(new Predicate[0])));
@@ -253,9 +261,11 @@ public class TransactionDaoImpl implements TransactionDao {
                                 Join<Transaction, Account> account,
                                 Join<Transaction, Category> category,
                                 Join<Transaction, RecurringTransaction> recTransaction,
+                                Join<Account, User> user,
                                 Root<Transaction> root,
                                 CriteriaBuilder cb,
-                                TransactionFilterParams filterParams) {
+                                TransactionFilterParams filterParams,
+                                Long userId) {
 
         List<Predicate> predicates = new ArrayList<>();
 
@@ -265,6 +275,8 @@ public class TransactionDaoImpl implements TransactionDao {
         List<Long> categoryIds = filterParams.getCategoryIds();
         LocalDate since = filterParams.getSince();
         LocalDate to = filterParams.getTo();
+
+        predicates.add(cb.equal(user.get("id"), userId));
 
         if (!type.equals(TransactionTypeFilter.ALL)) {
             predicates.add(cb.equal(cb.lower(root.get("type")), type.toString().toLowerCase()));
@@ -287,7 +299,7 @@ public class TransactionDaoImpl implements TransactionDao {
             predicates.add(cb.greaterThanOrEqualTo(root.get("transactionDate"), startDate));
         }
         if (to != null) {
-            LocalDateTime endDate = to.atStartOfDay();
+            LocalDateTime endDate = to.plusDays(1).atStartOfDay();
             predicates.add(cb.lessThanOrEqualTo(root.get("transactionDate"), endDate));
         }
 

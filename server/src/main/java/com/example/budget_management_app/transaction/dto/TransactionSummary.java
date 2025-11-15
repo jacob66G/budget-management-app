@@ -8,12 +8,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record TransactionSummary(
-        long id,
+        Long id,
         BigDecimal amount,
         TransactionType type,
         String description,
         LocalDateTime transactionDate,
         AccountSummary account,
-        CategorySummary category
+        CategorySummary category,
+        Long recurringTransactionId
 ) {
 }

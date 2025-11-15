@@ -14,7 +14,7 @@ import com.example.budget_management_app.recurring_transaction.domain.RecurringT
 import com.example.budget_management_app.recurring_transaction.domain.RemovalRange;
 import com.example.budget_management_app.recurring_transaction.domain.UpdateRange;
 import com.example.budget_management_app.recurring_transaction.dto.*;
-import com.example.budget_management_app.recurring_transaction.mapper.Mapper;
+import com.example.budget_management_app.recurring_transaction.mapper.RecurringTransactionMapper;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction_common.dto.PaginationParams;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
@@ -44,6 +44,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
     private final AccountUpdateService accountUpdateService;
     private final AccountDao accountDao;
     private final CategoryDao categoryDao;
+    private final RecurringTransactionMapper mapper;
 
     /**
      * @param userId
@@ -58,7 +59,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
 
         long recTransactionsCount = recurringTransactionDao.getSummaryTuplesCountByUserId(userId);
 
-        return PagedResponse.of(Mapper.fromTuples(results), page, limit, recTransactionsCount);
+        return PagedResponse.of(mapper.fromTuples(results), page, limit, recTransactionsCount);
     }
 
     /**
@@ -72,8 +73,9 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
         RecurringTransaction recurringTransaction = recurringTransactionDao.findByIdAndUserId(id, userId)
                 .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
-        return Mapper.toDetails(recurringTransaction);
+        return mapper.toDetails(recurringTransaction);
     }
+
 
     /**
      * @param paginationParams
@@ -90,12 +92,13 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
 
         List<Tuple> results = this.recurringTransactionDao.getUpcomingTransactionsTuples(
                 paginationParams,
-                filterParams
+                filterParams,
+                userId
         );
 
-        Long count = this.recurringTransactionDao.getUpcomingTransactionsCount(filterParams);
+        Long count = this.recurringTransactionDao.getUpcomingTransactionsCount(filterParams, userId);
 
-        return PagedResponse.of(Mapper.fromUpcomingTuples(results), paginationParams.getPage(), paginationParams.getLimit(), count);
+        return PagedResponse.of(mapper.fromUpcomingTuples(results), paginationParams.getPage(), paginationParams.getLimit(), count);
     }
 
     /**
@@ -138,7 +141,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
 
             this.accountUpdateService.calculateBalanceAfterTransactionCreation(account, createReq.amount(), createReq.type());
 
-            RecurringTransaction createdRecurringTransaction = recurringTransactionDao.create(recurringTransaction);
+            RecurringTransaction createdRecurringTransaction = recurringTransactionDao.save(recurringTransaction);
 
             Transaction createdTransaction = createdRecurringTransaction.getTransactions()
                     .stream()
@@ -150,7 +153,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
                     createdRecurringTransaction.getNextOccurrence(),
                     true,
                     true,
-                    Mapper.toTransactionView(createdTransaction)
+                    mapper.toTransactionView(createdTransaction, createdRecurringTransaction.getId())
             );
 
         } else {
@@ -164,7 +167,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
             recurringTransaction.setAccount(account);
             recurringTransaction.setCategory(category);
 
-            RecurringTransaction createdRecurringTransaction = recurringTransactionDao.create(recurringTransaction);
+            RecurringTransaction createdRecurringTransaction = recurringTransactionDao.save(recurringTransaction);
 
             return new RecurringTransactionCreateResponse(
                     createdRecurringTransaction.getId(),

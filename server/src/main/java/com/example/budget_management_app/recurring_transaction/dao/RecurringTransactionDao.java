@@ -16,16 +16,17 @@ public interface RecurringTransactionDao {
 
     Optional<RecurringTransaction> findByIdAndUserId(Long id, Long userId);
 
-    RecurringTransaction create(RecurringTransaction recurringTransaction);
+    RecurringTransaction save(RecurringTransaction recurringTransaction);
 
     void delete(RecurringTransaction recurringTransaction);
 
     List<RecurringTransaction> searchForRecurringTransactionsToCreate();
 
     List<Tuple> getUpcomingTransactionsTuples(PaginationParams paginationParams,
-                                              UpcomingTransactionFilterParams filterParams);
+                                              UpcomingTransactionFilterParams filterParams,
+                                              Long userId);
 
-    Long getUpcomingTransactionsCount(UpcomingTransactionFilterParams filterParams);
+    Long getUpcomingTransactionsCount(UpcomingTransactionFilterParams filterParams, Long userId);
 
     void reassignCategoryForUser(Long userId, Long oldCategoryId, Long newCategoryId);
 

@@ -10,7 +10,7 @@ import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.transaction.dao.TransactionDao;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction.dto.*;
-import com.example.budget_management_app.transaction.mapper.Mapper;
+import com.example.budget_management_app.transaction.mapper.TransactionMapper;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 import com.example.budget_management_app.transaction_common.service.AccountUpdateService;
 import com.example.budget_management_app.transaction_common.service.CategoryValidatorService;
@@ -35,6 +35,7 @@ public class TransactionServiceImpl implements TransactionService{
     private final AccountDao accountDao;
     private final CategoryValidatorService transactionValidator;
     private final AccountUpdateService accountUpdateService;
+    private final TransactionMapper mapper;
 
     /**
      * @return TransactionPage object
@@ -56,12 +57,14 @@ public class TransactionServiceImpl implements TransactionService{
 
         List<Tuple> transactionTuples = transactionDao.getTuples(
                 paginationParams,
-                filterParams);
+                filterParams,
+                userId);
 
         long transactionCount = transactionDao.getCount(
-                filterParams);
+                filterParams,
+                userId);
 
-        return PagedResponse.of(Mapper.toDto(transactionTuples), paginationParams.getPage(), paginationParams.getLimit(), transactionCount);
+        return PagedResponse.of(mapper.toDto(transactionTuples), paginationParams.getPage(), paginationParams.getLimit(), transactionCount);
     }
 
     @Transactional
@@ -81,7 +84,7 @@ public class TransactionServiceImpl implements TransactionService{
                 .orElseThrow( () -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
 
         accountUpdateService.calculateBalanceAfterTransactionCreation(account, createReq.amount(), createReq.type());
-        Transaction transaction = Mapper.fromDto(createReq);
+        Transaction transaction = mapper.fromDto(createReq);
         transaction.setCategory(category);
         transaction.setAccount(account);
 

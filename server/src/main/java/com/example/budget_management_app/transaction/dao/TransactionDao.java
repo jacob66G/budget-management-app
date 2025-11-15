@@ -12,10 +12,11 @@ public interface TransactionDao {
 
     List<Tuple> getTuples(
             TransactionPaginationParams paginationParams,
-            TransactionFilterParams filterParams
+            TransactionFilterParams filterParams,
+            Long userId
     );
 
-    Long getCount(TransactionFilterParams filterParams);
+    Long getCount(TransactionFilterParams filterParams, Long userId);
 
     Transaction save(Transaction transaction);
 
