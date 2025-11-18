@@ -1,1 +1,5 @@
-<p>transaction-page works!</p>
+<app-header
+    [title] = "headerTitle"
+    [buttonLabel]="createTransactionButtonTitle"
+    (createTransactionClick)="handleAddTransactionEvent()"
+></app-header>

@@ -1,0 +1,58 @@
+
+<h2 mat-dialog-title>Create Transaction</h2>
+<mat-dialog-content>
+    <form>
+        <div class="form-fields-container">
+            <!-- title input field -->
+            <mat-form-field appearance="fill">
+                <mat-label>Title</mat-label>
+                <input matInput>
+            </mat-form-field>
+
+            <!-- amount input field -->
+            <mat-form-field appearance="fill">
+                <mat-label>Amount</mat-label>
+                <input matInput>
+            </mat-form-field>
+
+            <!-- transaction type input field -->
+            <mat-form-field>
+                <mat-label>choose type</mat-label>
+                <mat-select (selectionChange)="onTransactionTypeChange($event)">
+                    @for (type of data.transactionTypes; track type) {
+                        <mat-option [value]="type">{{ type }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <!-- descirption input field -->
+            <mat-form-field>
+                <mat-label>Description</mat-label>
+                <textarea matInput></textarea>
+            </mat-form-field>
+
+            <!-- account input field -->
+            <mat-form-field>
+                <mat-label>choose account</mat-label>
+                <mat-select>
+                    @for (account of data.accountList; track account.id) {
+                        <mat-option [value]="account.id">{{ account.name }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <!-- category input field -->
+            <mat-form-field>
+                <mat-label>choose category</mat-label>
+                <mat-select>
+                    @for (category of categories; track category) {
+                        <mat-option [value]="category.id">{{ category.name }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+        </div>
+    </form>
+</mat-dialog-content>
+<mat-card-actions>
+    <button matButton mat-dialog-close>Cancel</button>
+</mat-card-actions>
