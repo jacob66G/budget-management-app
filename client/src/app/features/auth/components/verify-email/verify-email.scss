@@ -1,0 +1,80 @@
+@use '../../styles/auth-layout.mixin' as auth-layout;
+
+@include auth-layout.auth-page-layout;
+
+// .verification-card {
+//   width: 100%;
+//   max-width: 450px;
+//   border-radius: 12px;
+//   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+//   border: 1px solid rgba(0, 0, 0, 0.05);
+//   font-family: inherit !important;
+//   text-align: center;
+//   padding-bottom: 16px;
+// }
+
+// .verification-card mat-card-header {
+//   display: flex;
+//   justify-content: center;
+//   padding-top: 24px;
+// }
+
+// .card-icon {
+//   font-size: 64px;
+//   width: 64px;
+//   height: 64px;
+//   line-height: 64px;
+// }
+
+// .card-icon.success {
+//   color: #2e7d32;
+// }
+// .card-icon.error {
+//   color: #d93025;
+// }
+
+// .verification-card mat-card-title {
+//   font-size: 24px;
+//   font-weight: 500;
+//   padding: 16px;
+//   font-family: inherit;
+//   color: #333;
+// }
+
+// .state-content {
+//   padding: 0 24px 16px 24px;
+//   color: #5f6368;
+//   font-size: 15px;
+//   line-height: 1.6;
+  
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   gap: 16px;
+// }
+
+// .error-text {
+//   color: #d93025;
+//   font-weight: 500;
+// }
+
+// .card-actions {
+//   padding: 0 24px 16px 24px;
+// }
+
+// .submit-button {
+//   width: 100%;
+//   min-height: 48px;
+//   font-size: 16px;
+//   font-weight: 500;
+//   border-radius: 24px;
+//   box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+//   transition: all 0.3s ease;
+//   text-decoration: none;
+//   padding-top: 12px; 
+// }
+
+// .submit-button:hover:not([disabled]) {
+//   box-shadow: 0 6px 16px rgba(63, 81, 181, 0.4);
+//   transform: translateY(-1px);
+// }

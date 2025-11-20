@@ -25,7 +25,7 @@ import { MatIcon } from '@angular/material/icon';
     MatIcon
   ],
   templateUrl: './verification-email-sent.html',
-  styleUrl: './verification-email-sent.css'
+  styleUrl: './verification-email-sent.scss'
 })
 export class VerificationEmailSent {
   private authService = inject(AuthService)

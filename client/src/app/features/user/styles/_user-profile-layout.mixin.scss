@@ -1,0 +1,17 @@
+@use '@angular/material' as mat;
+
+@mixin user-profile-card-styles {
+  
+  :host {
+    display: block;
+  }
+
+  :host mat-card {
+    border-radius: var(--card-border-radius, 12px);
+    box-shadow: var(--card-shadow, 0 5px 15px rgba(0, 0, 0, 0.04));
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    padding: 0;
+  }
+  
+}

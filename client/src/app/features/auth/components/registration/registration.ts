@@ -23,22 +23,27 @@ import {RegistrationRequest} from '../../model/auth.model';
 import { AuthService } from '../../../../core/services/auth.service';
 
 
-export const passwordsMatchValidator: ValidatorFn = (
-  control: AbstractControl
-): ValidationErrors | null => {
-  const password = control.get('password');
-  const passwordConfirmation = control.get('passwordConfirmation');
+export function passwordsMatchValidator(
+  controlName: string,
+  matchingControlName: string
+): ValidatorFn {
+  
+  return (control: AbstractControl): ValidationErrors | null => {
+    
+    const password = control.get(controlName);
+    const passwordConfirmation = control.get(matchingControlName);
 
-  if (
-    password &&
-    passwordConfirmation &&
-    password.value !== passwordConfirmation.value
-  ) {
-    return { passwordsNotMatching: true };
-  }
-
-  return null;
-};
+    if (
+      password &&
+      passwordConfirmation &&
+      password.value !== passwordConfirmation.value
+    ) {
+      return { passwordsNotMatching: true };
+    }
+    
+    return null;
+  };
+}
 
 @Component({
   selector: 'app-registration',
@@ -56,7 +61,7 @@ export const passwordsMatchValidator: ValidatorFn = (
     MatSnackBarModule,
   ],
   templateUrl: './registration.html',
-  styleUrl: './registration.css',
+  styleUrl: './registration.scss',
 })
 export class Registration {
   private fb = inject(FormBuilder);
@@ -71,14 +76,14 @@ export class Registration {
   ngOnInit(): void {
      this.registerForm = this.fb.group(
       {
-        name: ['', [Validators.required, Validators.minLength(2)]],
-        surname: ['', [Validators.required, Validators.minLength(2)]],
+        name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
+        surname: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
         email: ['', [Validators.required, Validators.email]],
         password: ['', [Validators.required, Validators.minLength(5)]],
         passwordConfirmation: ['', [Validators.required]],
       },
       {
-        validators: passwordsMatchValidator,
+        validators: passwordsMatchValidator('password', 'passwordConfirmation'),
       }
     );
   }

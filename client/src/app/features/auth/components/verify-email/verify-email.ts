@@ -19,7 +19,7 @@ import { AuthService } from '../../../../core/services/auth.service';
     MatIconModule
   ],
   templateUrl: './verify-email.html',
-  styleUrl: './verify-email.css'
+  styleUrl: './verify-email.scss'
 })
 export class VerifyEmail {
   private route = inject(ActivatedRoute);

@@ -30,7 +30,7 @@ import { PasswordResetConfirmationRequest } from '../../model/auth.model';
     MatSnackBarModule,
   ],
   templateUrl: './reset-password.html',
-  styleUrl: './reset-password.css'
+  styleUrl: './reset-password.scss'
 })
 export class ResetPassword {
   private fb = inject(FormBuilder)
@@ -59,7 +59,7 @@ export class ResetPassword {
       this.resetPasswordForm = this.fb.group({
         password : ['', [Validators.required, Validators.minLength(5)]],
         confirmPassword : ['', [Validators.required]]
-      }, { validators: passwordsMatchValidator });
+      }, { validators: passwordsMatchValidator('password', 'confirmPassword') });
     });
   }
 

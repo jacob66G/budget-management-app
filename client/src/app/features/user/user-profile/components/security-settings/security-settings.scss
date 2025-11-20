@@ -1,0 +1,84 @@
+@use '../../../styles/user-profile-layout.mixin' as user-profile;
+
+@include user-profile.user-profile-card-styles;
+
+:host ::ng-deep {
+  .mat-mdc-card-header {
+    padding: 20px 24px 16px 24px;
+  }
+  .mat-mdc-card-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .mat-mdc-card-content.list-content {
+    padding: 0 24px 20px 24px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+.settings-list-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #e0e0e0; 
+  border-radius: 12px; 
+  padding: 16px 20px; 
+  transition: box-shadow 0.2s ease-out;
+  
+  &:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.icon-container {
+  flex-shrink: 0;
+  color: var(--primary-color, #3f51b5);
+  background-color: #f0f4ff;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#close-account-icon {
+  color: var(--warn-color, #d93025);
+}
+
+.item-content {
+  flex-grow: 1;
+  
+  .item-title {
+    font-weight: 500;
+    color: #333;
+    font-size: 1rem;
+  }
+  .item-subtitle {
+    font-size: 0.875rem;
+    color: #5f6368;
+  }
+}
+
+.item-action {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.status-enabled {
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.status-disabled {
+  color: #5f6368;
+  font-weight: 500;
+}
+
+#close-account-icon {
+
+}

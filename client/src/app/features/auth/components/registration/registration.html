@@ -1,5 +1,5 @@
-<div class="auth-container">
-  <mat-card class="registration-card">
+
+  <mat-card class="auth-card">
     <mat-card-title>Registration</mat-card-title>
     
     <mat-card-content>
@@ -14,6 +14,9 @@
           @if (registerForm.get('name')?.hasError('minlength')) {
             <mat-error>Name has to contains at least 2 characters.</mat-error>
           }
+          @if (registerForm.get('name')?.hasError('maxlength')) {
+            <mat-error>Name can contain up to 30 characters.</mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="form-field">
@@ -24,6 +27,9 @@
           }
           @if (registerForm.get('surname')?.hasError('minlength')) {
             <mat-error>Surname has to contains at least 2 characters.</mat-error>
+          }
+          @if (registerForm.get('surname')?.hasError('maxlength')) {
+            <mat-error>Surname can contain up to 30 characters.</mat-error>
           }
         </mat-form-field>
 
@@ -89,4 +95,4 @@
       <a routerLink="/login">Log in</a>
     </mat-card-footer>
   </mat-card>
-</div>
+

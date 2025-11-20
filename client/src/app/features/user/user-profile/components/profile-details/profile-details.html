@@ -1,0 +1,63 @@
+<mat-card class="user-profile-card">
+  <mat-card-header>
+    <div mat-card-avatar class="profile-avatar-icon">
+      <mat-icon>account_circle</mat-icon>
+    </div>
+    <!-- @if (currentUser()) {
+      <mat-card-title>{{ currentUser()?.name }} {{ currentUser()?.surname }}</mat-card-title>
+      <mat-card-subtitle>{{ currentUser()?.email }}</mat-card-subtitle>
+    } -->
+      <mat-card-title>Jan kowalski</mat-card-title>
+      <mat-card-subtitle>jan.kowal@gmail.com</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="details-form">
+      <div class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" type="text" />
+          @if (profileForm.get('name')?.touched && profileForm.get('name')?.hasError('required)')) {
+          <mat-error>Name cannot be empty.</mat-error>
+          }
+          @if (profileForm.get('name')?.touched && profileForm.get('name')?.hasError('minLength')) {
+          <mat-error>Name has to contains at least 2 characters.</mat-error>
+          }
+          @if (profileForm.get('name')?.touched && profileForm.get('name')?.hasError('maxLength')) {
+          <mat-error>Name can contain up to 30 characters.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Surname</mat-label>
+          <input matInput formControlName="surname" type="text" />
+          @if (profileForm.get('surname')?.touched && profileForm.get('surname')?.hasError('required)')) {
+          <mat-error>Surname cannot be empty.</mat-error>
+          }
+          @if (profileForm.get('surname')?.touched && profileForm.get('surname')?.hasError('minLength')) {
+          <mat-error>Surname has to contains at least 2 characters.</mat-error>
+          }
+          @if (profileForm.get('surname')?.touched && profileForm.get('surname')?.hasError('maxLength')) {
+          <mat-error>Surname can contain up to 30 characters.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="card-footer-actions">
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          class="submit-button"
+          [disabled]="profileForm.invalid || isLoading() || !profileForm.dirty">
+          
+          @if (!isLoading()) {
+            <span>Save Changes</span>
+          } @else {
+            <mat-spinner [diameter]="24" />
+          }
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

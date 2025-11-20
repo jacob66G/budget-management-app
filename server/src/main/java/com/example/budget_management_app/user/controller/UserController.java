@@ -62,7 +62,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/me/2fa/setup")
+    @GetMapping("/me/2fa/setup")
     public ResponseEntity<TfaQRCode> tfaSetup(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.tfaSetup(userDetails.getId()));
     }

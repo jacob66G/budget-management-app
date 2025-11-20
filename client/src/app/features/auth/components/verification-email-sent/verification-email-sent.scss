@@ -1,0 +1,86 @@
+@use '../../styles/auth-layout.mixin' as auth-layout;
+
+@include auth-layout.auth-page-layout;
+
+// .verification-sent-card {
+//   width: 100%;
+//   max-width: 450px;
+//   border-radius: 12px;
+//   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+//   border: 1px solid rgba(0, 0, 0, 0.05);
+//   font-family: inherit !important;
+//   text-align: center;
+// }
+
+// .verification-sent-card mat-card-header {
+//   display: flex;
+//   justify-content: center;
+//   padding-top: 24px;
+// }
+
+// .card-icon {
+//   font-size: 64px;
+//   width: 64px;
+//   height: 64px;
+//   line-height: 64px;
+//   color: var(--mat-primary-color, #3f51b5); 
+// }
+
+// .verification-sent-card mat-card-title {
+//   font-size: 24px;
+//   font-weight: 500;
+//   padding: 16px;
+//   font-family: inherit;
+//   color: #333;
+// }
+
+// .card-content {
+//   padding: 0 24px 16px 24px;
+//   color: #5f6368;
+//   font-size: 15px;
+//   line-height: 1.6;
+// }
+
+// .email-display {
+//   color: #000;
+//   font-weight: 500;
+//   display: block;
+//   margin-top: 8px;
+// }
+
+// .card-actions {
+//   padding: 0 24px 16px 24px;
+// }
+
+// .resend-button {
+//   width: 100%;
+//   min-height: 48px;
+//   font-size: 16px;
+//   font-weight: 500;
+//   border-radius: 24px;
+//   box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+//   transition: all 0.3s ease;
+// }
+
+// .resend-button:hover:not([disabled]) {
+//   box-shadow: 0 6px 16px rgba(63, 81, 181, 0.4);
+//   transform: translateY(-1px);
+// }
+
+// .verification-sent-card .card-footer {
+//   text-align: center;
+//   padding: 20px 24px;
+//   font-size: 14px;
+//   border-top: 1px solid #e0e0e0;
+//   margin-top: 10px;
+// }
+
+// .card-footer a {
+//   color: var(--mat-primary-color, #3f51b5);
+//   text-decoration: none;
+//   font-weight: 500;
+// }
+
+// .card-footer a:hover {
+//   text-decoration: underline;
+// }

@@ -26,7 +26,7 @@ import { RouterLink } from '@angular/router';
     MatInputModule
   ],
   templateUrl: './recover-password.html',
-  styleUrl: './recover-password.css'
+  styleUrl: './recover-password.scss'
 })
 export class RecoverPassword {
   private fb = inject(FormBuilder);

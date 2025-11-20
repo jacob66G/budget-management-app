@@ -27,7 +27,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatIconModule,
   ],
   templateUrl: './login.html',
-  styleUrl: './login.css'
+  styleUrl: './login.scss'
 })
 export class Login {
   private fb = inject(FormBuilder);
@@ -38,8 +38,6 @@ export class Login {
   isLoading = signal(false);
   hidePassword = signal(true);
   loginForm!: FormGroup;
-
-  constructor() {}
 
   ngOnInit(): void {
     this.loginForm = this.fb.group(
@@ -54,7 +52,7 @@ export class Login {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
-  }
+    }
     this.isLoading.set(true)
     const dto = this.loginForm.value as LoginRequest;
     

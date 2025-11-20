@@ -1,0 +1,59 @@
+<mat-card class="user-profile-card">
+  <mat-card-header>
+    <mat-card-title>Security Settings</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content class="list-content">
+
+    <div class="settings-list-item">
+      <div class="icon-container">
+        <mat-icon>lock</mat-icon>
+      </div>
+      <div class="item-content">
+        <div class="item-title">Change Password</div>
+        <div class="item-subtitle">Update your account password</div>
+      </div>
+      <div class="item-action">
+        <button mat-button color="primary" (click)="onChangePasswordClick()">
+          Change
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-list-item">
+      <div class="icon-container">
+        <mat-icon>security</mat-icon>
+      </div>
+      <div class="item-content">
+        <div class="item-title">Two-Factor Authentication</div>
+        <div class="item-subtitle">
+          @if (currentUser()?.isMfaEnabled) {
+          <span class="status-enabled">Enabled</span>
+          } @else {
+          <span class="status-disabled">Disabled</span>
+          }
+        </div>
+      </div>
+      <div class="item-action">
+        <button mat-button color="primary" (click)="onManageMfaClick()">
+          Manage
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-list-item">
+      <div class="icon-container" id="close-account-icon">
+        <mat-icon>no_accounts</mat-icon>
+      </div>
+      <div class="item-content">
+        <div class="item-title">Close account</div>
+      </div>
+      <div class="item-action">
+        <button mat-button color="warn" (click)="closeAccount()">
+          Close
+        </button>
+      </div>
+    </div>
+
+  </mat-card-content>
+</mat-card>

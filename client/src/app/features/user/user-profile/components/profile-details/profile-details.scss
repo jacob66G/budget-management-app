@@ -1,0 +1,69 @@
+@use '../../../styles/user-profile-layout.mixin' as user-profile;
+
+@include user-profile.user-profile-card-styles;
+
+:host ::ng-deep {
+  .mat-mdc-card-header {
+    padding: 20px 24px 36px 24px;
+  }
+
+  .mat-mdc-card-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .mat-mdc-card-subtitle {
+    color: #5f6368;
+  }
+
+  .mat-mdc-card-content {
+    padding: 0 24px 20px 24px;
+  }
+}
+
+.profile-avatar-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20%;
+  background-color: var(--primary-color, #3f51b5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 45px;
+    width: 45px;
+    height: 45px;
+    line-height: 45px;
+    color: white;
+  }
+}
+
+.details-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px;
+}
+
+.submit-button {
+  min-height: 40px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+}

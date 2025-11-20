@@ -1,32 +1,30 @@
-<div class = "auth-container">
-    <mat-card class="login-card">
-        <mat-card-title>Two-step verification</mat-card-title>
-        <mat-card-content>
-            <form [formGroup]="tfaForm" (ngSubmit)="onSubmit()">
-                <mat-form-field>
-                    <mat-label>Authentication code</mat-label>
-                    <input matInput formControlName="code" type="text"/>
-                    @if (tfaForm.get('code')?.touched && tfaForm.get('code')?.hasError('required')) {
-                        <mat-error>Authentication code is required.</mat-error>
-                    }
-                </mat-form-field>
-            </form>
-        </mat-card-content>
-
-        <mat-card-actions class="card-actions">
-            <button
-                mat-flat-button
-                color="primary"
-                class="submit-button"
-                [disabled]="tfaForm.invalid || isLoading()"
-                (click)="onSubmit()">
-
-                @if (!isLoading()) {
-                    <span>Log in</span>
-                } @else {
-                    <mat-spinner [diameter]="24" />
+<mat-card class="auth-card">
+    <mat-card-title>Two-step verification</mat-card-title>
+    <mat-card-content>
+        <form [formGroup]="tfaForm" (ngSubmit)="onSubmit()">
+            <mat-form-field>
+                <mat-label>Authentication code</mat-label>
+                <input matInput formControlName="code" type="text"/>
+                @if (tfaForm.get('code')?.touched && tfaForm.get('code')?.hasError('required')) {
+                    <mat-error>Authentication code is required.</mat-error>
                 }
-            </button>
-        </mat-card-actions>
-    </mat-card>
-</div>
+            </mat-form-field>
+        </form>
+    </mat-card-content>
+
+    <mat-card-actions class="card-actions">
+        <button
+            mat-flat-button
+            color="primary"
+            class="submit-button"
+            [disabled]="tfaForm.invalid || isLoading()"
+            (click)="onSubmit()">
+
+            @if (!isLoading()) {
+                <span>Log in</span>
+            } @else {
+                <mat-spinner [diameter]="24" />
+            }
+        </button>
+    </mat-card-actions>
+</mat-card>

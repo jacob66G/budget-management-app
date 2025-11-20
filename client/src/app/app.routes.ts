@@ -10,5 +10,10 @@ export const routes: Routes = [
         path: 'app',
         loadChildren: () =>
         import('./features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
+    },
+     {
+        path: 'profile',
+        loadChildren: () =>
+        import('./features/user/user-profile.routes').then((m) => m.USER_PROFILE_ROUTE),
     }
 ];

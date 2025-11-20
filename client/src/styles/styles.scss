@@ -1,0 +1,21 @@
+
+@use '@angular/material' as mat;
+
+@use 'variables' as vars;
+
+:root {
+  --primary-color: #{vars.$primary-color};
+  --accent-color: #{vars.$accent-color};
+  --warn-color: #{vars.$warn-color};
+  --font-family-default: #{vars.$font-family-default};
+}
+
+html, body { 
+  height: 100%; 
+}
+
+body {
+  margin: 0; 
+  font-family: var(--font-family-default); 
+  background-color: #f4f7f6;
+}

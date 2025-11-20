@@ -24,7 +24,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatProgressSpinnerModule,
   ],
   templateUrl: './login2fa.html',
-  styleUrl: './login2fa.css'
+  styleUrl: './login2fa.scss'
 })
 export class Login2fa {
   private fb = inject(FormBuilder);

@@ -1,35 +1,32 @@
-<div class="auth-container">
-    <mat-card class="verification-card">
-    
-        @if (isLoading()) {
-            <mat-card-content>
-            <mat-spinner [diameter]="50"></mat-spinner>
-            <p>Verifying your account...</p>
-            </mat-card-content>
-        }
+<mat-card class="auth-card">
+    @if (isLoading()) {
+        <mat-card-content>
+        <mat-spinner [diameter]="50"></mat-spinner>
+        <p>Verifying your account...</p>
+        </mat-card-content>
+    }
 
-        @if (isSuccess()) {
-            <mat-card-title>Account activated!</mat-card-title>
-            <mat-card-content>
-            <p>Your account is already active. You can log in now.</p>
-            </mat-card-content>
-            <mat-card-actions>
-            <a mat-flat-button color="primary" routerLink="/login" class="submit-button">
-                Go to login
-            </a>
-            </mat-card-actions>
-        }
+    @if (isSuccess()) {
+        <mat-card-title>Account activated!</mat-card-title>
+        <mat-card-content>
+        <p>Your account is already active. You can log in now.</p>
+        </mat-card-content>
+        <mat-card-actions>
+        <a mat-flat-button color="primary" routerLink="/login" class="submit-button">
+            Go to login
+        </a>
+        </mat-card-actions>
+    }
 
-        @if (errorMessage()) {
-            <mat-card-title>Verification Error</mat-card-title>
-            <mat-card-content>
-            <p class="error-text">{{ errorMessage() }}</p>
-            <p>Please try again</p>
-            </mat-card-content>
-            <mat-card-actions>
-            <a mat-stroked-button routerLink="/login">Go to login</a>
-            </mat-card-actions>
-        }
+    @if (errorMessage()) {
+        <mat-card-title>Verification Error</mat-card-title>
+        <mat-card-content>
+        <p class="error-text">{{ errorMessage() }}</p>
+        <p>Please try again</p>
+        </mat-card-content>
+        <mat-card-actions>
+        <a mat-stroked-button routerLink="/login">Go to login</a>
+        </mat-card-actions>
+    }
+</mat-card>
 
-    </mat-card>
-</div>

@@ -1,0 +1,26 @@
+:host {
+  font-family: var(--font-family-default);
+}
+
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+  color: #333;
+  padding: 16px 24px;
+}
+
+.dialog-content {
+  padding: 0 24px 20px 24px;
+  color: #5f6368;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: center;
+  padding: 8px 24px 16px 24px;
+  gap: 30px;
+}

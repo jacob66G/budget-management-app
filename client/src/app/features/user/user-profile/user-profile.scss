@@ -1,0 +1,43 @@
+:host {
+  display: block;
+  background-color: #f4f7f6; 
+  min-height: calc(100vh - 64px); 
+  padding: 24px 32px;
+  box-sizing: border-box;
+  font-family: var(--font-family-default);
+}
+
+.profile-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  color: #222;
+}
+
+.page-subtitle {
+  font-size: 1rem;
+  color: #5f6368;
+  margin-bottom: 32px;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr; 
+  gap: 24px;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.main-column,
+.sidebar-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
