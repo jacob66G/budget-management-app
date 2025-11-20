@@ -13,6 +13,8 @@ import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.ValidationException;
 import com.example.budget_management_app.common.service.IconKeyValidator;
 import com.example.budget_management_app.common.service.StorageService;
+import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
+import com.example.budget_management_app.transaction.service.TransactionService;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,8 @@ public class CategoryServiceImpl implements CategoryService {
     private final StorageService storageService;
     private final CategoryMapper mapper;
     private final IconKeyValidator iconKeyValidator;
+    private final TransactionService transactionService;
+    private final RecurringTransactionService recurringTransactionService;
 
     @Transactional(readOnly = true)
     @Override
@@ -62,6 +66,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         user.addCategory(category);
 
+        log.info("User: {} has created new category: {}", userId, dto.name());
         return mapper.toCategoryResponseDto(categoryDao.save(category));
     }
 
@@ -73,20 +78,21 @@ public class CategoryServiceImpl implements CategoryService {
 
         validateCategoryCanBeModify(category);
 
-        if (StringUtils.hasText(dto.name())) {
+        if (StringUtils.hasText(dto.name()) && !category.getName().equals(dto.name())) {
             validateNameUniqueness(userId, dto.name(), categoryId);
             category.setName(dto.name());
         }
-        if (StringUtils.hasText(dto.type())) {
-            //TODO check if transactions with category has the same type
+        if (StringUtils.hasText(dto.type()) && !category.getType().name().equalsIgnoreCase(dto.type())) {
             validateType(dto.type());
+            validateCategoryTypeChange(categoryId, userId);
             category.setType(CategoryType.valueOf(dto.type().toUpperCase()));
         }
-        if (StringUtils.hasText(dto.iconKey())) {
+        if (StringUtils.hasText(dto.iconKey()) && !category.getIconKey().equals(dto.iconKey())) {
             validateIcon(dto.iconKey());
             category.setIconKey(dto.iconKey());
         }
 
+        log.info("User: {} has updated category: {}", userId, categoryId);
         return mapper.toCategoryResponseDto(categoryDao.update(category));
     }
 
@@ -97,9 +103,10 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
 
         validateCategoryCanBeModify(category);
-        ///TODO check is category is assign to transaction/recurring
-        ///TODO The user should be able to assign a different category to a transaction that contains a category to be deleted.
+        validateCategoryCanBeDeleted(categoryId, userId);
+
         categoryDao.delete(category);
+        log.info("User: {} has deleted category: {}", userId, categoryId);
     }
 
     @Override
@@ -117,8 +124,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Transactional
     @Override
-    public void deleteAllUserCategories(Long userId) {
-        categoryDao.deleteAll(userId);
+    public void deleteAllByUser(Long userId) {
+        categoryDao.deleteAllByUser(userId);
+        log.info("Deleting all user: {} categories", userId);
     }
 
     @Transactional
@@ -136,8 +144,26 @@ public class CategoryServiceImpl implements CategoryService {
 
         validateCategoryReassignment(oldCategory.getType(), newCategory.getType());
 
-        //TODO transactionService.reassignCategoryForUser(userId, oldCategoryId, newCategoryId);
+        transactionService.reassignCategoryForUser(userId, oldCategoryId, newCategoryId);
+        recurringTransactionService.reassignCategoryForUser(userId, oldCategoryId, newCategoryId);
+    }
 
+    private void validateCategoryTypeChange(Long categoryId, Long userId) {
+        if (transactionService.existsByCategoryAndUser(categoryId, userId)) {
+            throw new ValidationException(
+                    "Cannot change the type of a category that already has transactions assigned to it.",
+                    ErrorCode.CATEGORY_IS_IN_USE
+            );
+        }
+    }
+
+    private void validateCategoryCanBeDeleted(Long categoryId, Long userId) {
+        if (transactionService.existsByCategoryAndUser(categoryId, userId)) {
+            throw new ValidationException(
+                    "Cannot delete a category that already has transactions assigned to it.",
+                    ErrorCode.CATEGORY_IS_IN_USE
+            );
+        }
     }
 
     private void validateCategoryReassignment(CategoryType oldType, CategoryType newType) {
@@ -157,7 +183,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         if (oldType.equals(CategoryType.EXPENSE) && newType.equals(CategoryType.INCOME) ||
-            oldType.equals(CategoryType.INCOME) && newType.equals(CategoryType.EXPENSE)) {
+                oldType.equals(CategoryType.INCOME) && newType.equals(CategoryType.EXPENSE)) {
             throw new ValidationException(
                     "Cannot reassign transactions between INCOME and EXPENSE categories.",
                     ErrorCode.WRONG_CATEGORY_TYPE

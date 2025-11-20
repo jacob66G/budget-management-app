@@ -5,9 +5,11 @@ import com.example.budget_management_app.auth.dto.RegistrationRequestDto;
 import com.example.budget_management_app.category.service.CategoryService;
 import com.example.budget_management_app.common.dto.ResponseMessageDto;
 import com.example.budget_management_app.common.exception.*;
+import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.security.service.TwoFactorAuthenticationService;
 import com.example.budget_management_app.session.domain.UserSession;
 import com.example.budget_management_app.session.service.UserSessionService;
+import com.example.budget_management_app.transaction.service.TransactionService;
 import com.example.budget_management_app.user.dao.UserDao;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.domain.UserStatus;
@@ -37,6 +39,8 @@ public class UserServiceImpl implements UserService {
     private final UserMapper mapper;
     private final UserSessionService userSessionService;
     private final UserService self;
+    private final RecurringTransactionService recurringTransactionService;
+    private final TransactionService transactionService;
 
     public UserServiceImpl(
             UserDao userDao,
@@ -46,8 +50,9 @@ public class UserServiceImpl implements UserService {
             @Lazy AccountService accountService,
             @Lazy UserSessionService userSessionService,
             @Lazy UserService self,
-            UserMapper mapper
-    ) {
+            UserMapper mapper,
+            RecurringTransactionService recurringTransactionService,
+            TransactionService transactionService) {
         this.userDao = userDao;
         this.tfaService = tfaService;
         this.encoder = encoder;
@@ -56,6 +61,8 @@ public class UserServiceImpl implements UserService {
         this.mapper = mapper;
         this.userSessionService = userSessionService;
         this.self = self;
+        this.recurringTransactionService = recurringTransactionService;
+        this.transactionService = transactionService;
     }
 
     @Transactional(readOnly = true)
@@ -112,10 +119,10 @@ public class UserServiceImpl implements UserService {
 
         validateUserIsActive(user);
 
-        if (StringUtils.hasText(dto.name())) {
+        if (StringUtils.hasText(dto.name()) && !user.getName().equals(dto.name())) {
             user.setName(dto.name());
         }
-        if (StringUtils.hasText(dto.surname())) {
+        if (StringUtils.hasText(dto.surname()) && !user.getSurname().equals(dto.surname())) {
             user.setSurname(dto.surname());
         }
 
@@ -138,8 +145,8 @@ public class UserServiceImpl implements UserService {
             return;
         }
 
-        accountService.activateAllUserAccounts(user.getId());
-        //TODO recurringTransactionService.activateAllUserRecurringTransactions(userId);
+        accountService.activateAllByUser(user.getId());
+        recurringTransactionService.activateAllByUser(user.getId());
 
         user.setStatus(UserStatus.ACTIVE);
         userDao.update(user);
@@ -153,8 +160,8 @@ public class UserServiceImpl implements UserService {
 
         validateUserIsActive(user);
 
-        accountService.deactivateAllUserAccounts(userId);
-        //TODO recurringTransactionService.deactivateAllUserRecurringTransactions(userId);
+        accountService.deactivateAllByUser(userId);
+        recurringTransactionService.deactivateAllByUser(userId);
 
         user.setRequestCloseAt(Instant.now());
         user.setStatus(UserStatus.PENDING_DELETION);
@@ -290,10 +297,10 @@ public class UserServiceImpl implements UserService {
             );
         }
 
-        //TODO recurringTransactionService.deleteAllUserTransactions(userId);
-        //TODO transactionService.deleteAllUserTransactions(userId);
-        accountService.deleteAllUserAccounts(userId);
-        categoryService.deleteAllUserCategories(userId);
+        recurringTransactionService.deleteAllByUser(userId);
+        transactionService.deleteAllByUser(userId);
+        accountService.deleteAllByUser(userId);
+        categoryService.deleteAllByUser(userId);
 
         userDao.delete(user);
         log.info("User with ID: {} has been successfully deleted.", userId);

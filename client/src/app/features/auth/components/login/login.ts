@@ -39,6 +39,8 @@ export class Login {
   hidePassword = signal(true);
   loginForm!: FormGroup;
 
+  constructor() {}
+
   ngOnInit(): void {
     this.loginForm = this.fb.group(
       {
@@ -55,14 +57,14 @@ export class Login {
     }
     this.isLoading.set(true)
     const dto = this.loginForm.value as LoginRequest;
-    
+
     this.authService.login(dto).subscribe({
       next: (response: LoginResponse) => {
         this.isLoading.set(false);
 
         if (response.isMfaRequired) {
-          this.router.navigate(['/login/2fa'], { 
-            state: { userId: response.user?.userId } 
+          this.router.navigate(['/login/2fa'], {
+            state: { userId: response.user?.userId }
           });
         } else {
           this.snackBar.open(

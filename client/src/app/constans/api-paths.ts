@@ -1,4 +1,3 @@
-
 export class ApiPaths {
     public static readonly BASE_URL = 'http://localhost:4200';
     public static readonly BASE_API = '/api';
@@ -18,4 +17,4 @@ export class ApiPaths {
     public static readonly TFA_VERIFY = '/api/user/me/2fa/verify';
     public static readonly TFA_DISABLE = '/api/user/me/2fa/disable';
     public static readonly CLOSE_USER_ACCOUNT = '/api/user/me/close-account'
-}    
+}

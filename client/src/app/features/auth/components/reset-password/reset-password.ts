@@ -38,7 +38,7 @@ export class ResetPassword {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private snackBar = inject(MatSnackBar);
-  
+
   isLoading = signal(false);
   hidePassword = signal(true);
 
@@ -70,7 +70,7 @@ export class ResetPassword {
     }
 
     this.isLoading.set(true);
-    
+
     const dto: PasswordResetConfirmationRequest = {
       token: this.token,
       newPassword: this.resetPasswordForm.value.newPassword,
@@ -84,7 +84,7 @@ export class ResetPassword {
           duration: 5000,
           panelClass: 'success-snackbar',
         });
-  
+
         this.router.navigate(['/login']);
       },
       error: (err: HttpErrorResponse) => {

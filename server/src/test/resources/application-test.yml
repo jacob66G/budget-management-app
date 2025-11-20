@@ -21,11 +21,6 @@ spring:
       enabled: true
       path: /h2-console
 
-  sql:
-    init:
-      data-locations: classpath:data-test.sql
-      mode: always
-
 logging:
   level:
     org.hibernate.SQL: debug

@@ -31,6 +31,16 @@ public class AccountDao {
         return result.stream().findFirst();
     }
 
+    public List<Long> getUserAccountIds(Long userId) {
+
+        return em.createQuery("""
+                    SELECT a.id FROM Account a
+                    WHERE a.user.id = :userId
+                """, Long.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
+
     public List<Account> findByUserAndCriteria(Long userId, SearchCriteria criteria) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Account> cq = cb.createQuery(Account.class);

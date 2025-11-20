@@ -15,6 +15,8 @@ import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.ValidationException;
 import com.example.budget_management_app.common.service.IconKeyValidator;
 import com.example.budget_management_app.common.service.StorageService;
+import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
+import com.example.budget_management_app.transaction.service.TransactionService;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,10 +52,10 @@ public class AccountServiceTest {
     private StorageService storageService;
     @Mock
     private IconKeyValidator iconKeyValidator;
-    //    @Mock
-//    private RecurringTransactionService recurringTransactionService;
-//    @Mock
-//    private TransactionService transactionService;
+    @Mock
+    private RecurringTransactionService recurringTransactionService;
+    @Mock
+    private TransactionService transactionService;
     @InjectMocks
     private AccountServiceImpl accountService;
 
@@ -533,7 +535,7 @@ public class AccountServiceTest {
         }
 
         @Test
-        void should_update_currency_and_call_consistency_check() {
+        void should_update_currency() {
             //given
             String newCurrency = "USD";
             AccountUpdateRequestDto dto = new AccountUpdateRequestDto(
@@ -555,8 +557,6 @@ public class AccountServiceTest {
             accountService.updateAccount(userId, accountId, dto);
 
             //then
-            // TODO: Po implementacji validateCurrencyConsistency, dodaj verify() dla tej metody.
-
             verify(accountDao, times(1)).update(accountCaptor.capture());
             Account updatedAccount = accountCaptor.getValue();
             assertThat(updatedAccount.getCurrency()).isEqualTo(SupportedCurrency.USD);
@@ -580,17 +580,44 @@ public class AccountServiceTest {
 
             when(accountDao.update(any(Account.class))).thenReturn(existingAccount);
             when(mapper.toDetailsResponseDto(existingAccount)).thenReturn(mock(AccountDetailsResponseDto.class));
+            when(transactionService.existsByAccountAndUser(accountId, userId)).thenReturn(false);
 
             //when
             accountService.updateAccount(userId, accountId, dto);
 
             //then
-            // TODO: Po implementacji logiki sprawdzania transakcji, rozbuduj ten test.
-
+            verify(transactionService, times(1)).existsByAccountAndUser(accountId, userId);
             verify(accountDao, times(1)).update(accountCaptor.capture());
             Account updatedAccount = accountCaptor.getValue();
             assertThat(updatedAccount.getBalance()).isEqualByComparingTo(newBalance);
         }
+
+        @Test
+        void should_throw_ValidationException_when_change_initial_balance_when_transactions_exists() {
+            //given
+            BigDecimal newBalance = BigDecimal.valueOf(999.00);
+            AccountUpdateRequestDto dto = new AccountUpdateRequestDto(
+                    null,
+                    null,
+                    null,
+                    newBalance,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
+
+            when(transactionService.existsByAccountAndUser(accountId, userId)).thenReturn(true);
+
+            //when + then
+            ValidationException ex = assertThrows(ValidationException.class, () -> accountService.updateAccount(userId, accountId, dto));
+
+            assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.MODIFY_BUDGET_WITH_TRANSACTIONS);
+            verify(accountDao, never()).update(any());
+            verify(mapper, never()).toDetailsResponseDto(any());
+        }
+
 
         // --- changeBudget tests ---
 
@@ -781,8 +808,7 @@ public class AccountServiceTest {
 
             assertThat(updatedAccount.getAccountStatus()).isEqualTo(AccountStatus.ACTIVE);
             assertThat(updatedAccount.isIncludeInTotalBalance()).isTrue();
-
-            // TODO verify(recurringTransactionService, times(1)).activateAllTransactions(accountId);
+            verify(recurringTransactionService, times(1)).activateAllByAccount(accountId, userId);
         }
 
         @Test
@@ -796,8 +822,7 @@ public class AccountServiceTest {
 
             //then
             verify(accountDao, never()).update(any());
-
-            // TODO: verify(recurringTransactionService, never()).activateAllTransactions(anyLong());
+            verify(recurringTransactionService, never()).activateAllByAccount(anyLong(), anyLong());
         }
 
         @Test
@@ -848,7 +873,7 @@ public class AccountServiceTest {
             assertThat(updatedAccount.getAccountStatus()).isEqualTo(AccountStatus.INACTIVE);
             assertThat(updatedAccount.isIncludeInTotalBalance()).isFalse();
 
-            // TODO: verify(recurringTransactionService, times(1)).deactivateAllTransactions(accountId);
+            verify(recurringTransactionService, times(1)).deactivateAllByAccount(accountId, userId);
         }
 
         @Test
@@ -862,8 +887,7 @@ public class AccountServiceTest {
 
             //then
             verify(accountDao, never()).update(any());
-
-            // TODO: verify(recurringTransactionService, never()).deactivateAllTransactions(anyLong());
+            verify(recurringTransactionService, never()).deactivateAllByAccount(anyLong(), anyLong());
         }
 
         @Test
@@ -908,7 +932,7 @@ public class AccountServiceTest {
             accountService.deleteAccount(userId, accountId);
 
             //then
-            // TODO: verify(transactionService, times(1)).deleteAllByAccount(accountId);
+            verify(transactionService, times(1)).deleteAllByAccount(accountId, userId);
             verify(accountDao, times(1)).delete(account);
         }
 
@@ -925,7 +949,7 @@ public class AccountServiceTest {
             //then
             assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.DELETE_DEFAULT_ACCOUNT);
             verify(accountDao, never()).delete(any());
-            // TODO: verify(transactionService, never()).deleteAllByAccount(anyLong());
+            verify(transactionService, never()).deleteAllByAccount(anyLong(), anyLong());
         }
 
         @Test
@@ -941,7 +965,7 @@ public class AccountServiceTest {
             //then
             assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.DELETE_ACTIVE_ACCOUNT);
             verify(accountDao, never()).delete(any());
-            // TODO: verify(transactionService, never()).deleteAllByAccount(anyLong());
+            verify(transactionService, never()).deleteAllByAccount(anyLong(), anyLong());
         }
 
         @Test

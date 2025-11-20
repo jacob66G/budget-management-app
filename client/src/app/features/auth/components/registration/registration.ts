@@ -27,9 +27,9 @@ export function passwordsMatchValidator(
   controlName: string,
   matchingControlName: string
 ): ValidatorFn {
-  
+
   return (control: AbstractControl): ValidationErrors | null => {
-    
+
     const password = control.get(controlName);
     const passwordConfirmation = control.get(matchingControlName);
 
@@ -40,7 +40,7 @@ export function passwordsMatchValidator(
     ) {
       return { passwordsNotMatching: true };
     }
-    
+
     return null;
   };
 }
@@ -105,7 +105,7 @@ export class Registration {
           'OK',
           { duration: 5000, panelClass: 'success-snackbar' }
         );
-        
+
         this.router.navigate(['/verifi-pending'], {
           queryParams: { email: dto.email }
         });
@@ -116,7 +116,7 @@ export class Registration {
         let errorMessage = 'Registration failed. Please try again.';
         if (err.error && err.error.message) {
           errorMessage = err.error.message;
-        } 
+        }
         this.snackBar.open(errorMessage, 'OK', {
           duration: 5000,
           panelClass: 'error-snackbar',

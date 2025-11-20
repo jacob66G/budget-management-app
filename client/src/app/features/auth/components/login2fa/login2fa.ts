@@ -53,11 +53,11 @@ export class Login2fa {
       this.tfaForm.markAllAsTouched();
       return;
     }
-    
+
     if (!this.userId) return;
 
     this.isLoading.set(true);
-    
+
     const payload: TwoFactorLoginRequest = {
       userId: this.userId,
       code: this.tfaForm.value.code
@@ -77,7 +77,7 @@ export class Login2fa {
         } else if (err.status === 401) {
             errorMessage = 'Incorrect code.';
         }
-        
+
         this.snackBar.open(errorMessage, 'OK', { duration: 5000, panelClass: 'error-snackbar' });
       }
     });

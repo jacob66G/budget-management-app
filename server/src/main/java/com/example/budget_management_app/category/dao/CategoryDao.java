@@ -42,6 +42,16 @@ public class CategoryDao {
         return count > 0;
     }
 
+    public List<Long> getUserCategoryIds(Long userId) {
+
+        return em.createQuery("""
+                    SELECT c.id FROM Category c
+                    WHERE c.user.id = :userId
+                """, Long.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
+
     public Category save(Category category) {
         em.persist(category);
         em.flush();
@@ -56,7 +66,7 @@ public class CategoryDao {
         em.remove(category);
     }
 
-    public void deleteAll(Long userId) {
+    public void deleteAllByUser(Long userId) {
         em.createQuery("DELETE FROM Category c WHERE c.user.id = :userId")
                 .setParameter("userId", userId)
                 .executeUpdate();

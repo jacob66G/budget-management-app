@@ -13,6 +13,8 @@ import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.ValidationException;
 import com.example.budget_management_app.common.service.IconKeyValidator;
 import com.example.budget_management_app.common.service.StorageService;
+import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
+import com.example.budget_management_app.transaction.service.TransactionService;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,8 @@ public class AccountServiceImpl implements AccountService {
     private final UserService userService;
     private final StorageService storageService;
     private final IconKeyValidator iconKeyValidator;
+    private final TransactionService transactionService;
+    private final RecurringTransactionService recurringTransactionService;
 
     @Transactional(readOnly = true)
     @Override
@@ -92,7 +96,7 @@ public class AccountServiceImpl implements AccountService {
             validateNameUniqueness(userId, dto.name(), accountId);
             account.setName(dto.name());
         }
-        if (StringUtils.hasText(dto.currency()) && !account.getCurrency().name().equals(dto.currency().toUpperCase())) {
+        if (StringUtils.hasText(dto.currency()) && !account.getCurrency().name().equalsIgnoreCase(dto.currency())) {
             validateCurrency(dto.currency());
             account.setCurrency(SupportedCurrency.valueOf(dto.currency().toUpperCase()));
         }
@@ -100,7 +104,7 @@ public class AccountServiceImpl implements AccountService {
             account.setDescription(dto.description());
         }
         if (dto.initialBalance() != null && (account.getBalance() == null || account.getBalance().compareTo(dto.initialBalance()) != 0)) {
-            //TODO check is account has transactions
+            validateBalanceCanBeChanged(accountId, userId);
             account.setBalance(dto.initialBalance());
         }
         if (dto.includeInTotalBalance() != null) {
@@ -144,10 +148,11 @@ public class AccountServiceImpl implements AccountService {
 
         account.setAccountStatus(AccountStatus.ACTIVE);
         account.setIncludeInTotalBalance(true);
-        // TODO activate recurring transactions - recurringTransactionService.activateAllTransactions(accountId)
 
-        log.info("User: {} activated account: {}.", userId, accountId);
+        recurringTransactionService.activateAllByAccount(accountId, userId);
+
         accountDao.update(account);
+        log.info("User: {} activated account: {}.", userId, accountId);
     }
 
     @Transactional
@@ -162,22 +167,23 @@ public class AccountServiceImpl implements AccountService {
 
         account.setAccountStatus(AccountStatus.INACTIVE);
         account.setIncludeInTotalBalance(false);
-        // TODO deactivate recurring transactions - recurringTransactionService.deactivateAllTransactions(accountId)
 
-        log.info("User: {} deactivated account: {}.", userId, accountId);
+        recurringTransactionService.deactivateAllByAccount(accountId, userId);
+
         accountDao.update(account);
+        log.info("User: {} deactivated account: {}.", userId, accountId);
     }
 
     @Transactional
     @Override
-    public void activateAllUserAccounts(Long userId) {
+    public void activateAllByUser(Long userId) {
         accountDao.activateAll(userId);
         log.info("Activated all accounts for user {}", userId);
     }
 
     @Transactional
     @Override
-    public void deactivateAllUserAccounts(Long userId) {
+    public void deactivateAllByUser(Long userId) {
         accountDao.deactivateAll(userId);
         log.info("Deactivated all accounts for user {}", userId);
     }
@@ -190,14 +196,15 @@ public class AccountServiceImpl implements AccountService {
 
         validateAccountCanBeDeleted(account);
 
-        //TODO transasctionService.deleteAllByAccount(accountId);
+        recurringTransactionService.deleteAllByAccount(accountId, userId);
+        transactionService.deleteAllByAccount(accountId, userId);
         accountDao.delete(account);
-        log.info("User: {} has removed account: {}.", userId, accountId);
+        log.info("User: {} has deleted account: {}.", userId, accountId);
     }
 
     @Transactional
     @Override
-    public void deleteAllUserAccounts(Long userId) {
+    public void deleteAllByUser(Long userId) {
         accountDao.deleteAll(userId);
     }
 
@@ -323,6 +330,12 @@ public class AccountServiceImpl implements AccountService {
     private void validateAccountIsActive(Account account) {
         if (!account.getAccountStatus().equals(AccountStatus.ACTIVE)) {
             throw new ValidationException("You cannot modify an inactive account.", ErrorCode.INACTIVE_ACCOUNT);
+        }
+    }
+
+    private void validateBalanceCanBeChanged(Long accountId, Long userId) {
+        if (transactionService.existsByAccountAndUser(accountId, userId)) {
+            throw new ValidationException("The budget cannot be changed because there are already transactions in the account.", ErrorCode.MODIFY_BUDGET_WITH_TRANSACTIONS);
         }
     }
 

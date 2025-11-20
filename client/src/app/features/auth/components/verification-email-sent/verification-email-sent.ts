@@ -31,7 +31,7 @@ export class VerificationEmailSent {
   private authService = inject(AuthService)
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
-  private route = inject(ActivatedRoute); 
+  private route = inject(ActivatedRoute);
 
   isLoading = signal(false);
   email = signal<string | null>(null);
@@ -74,7 +74,7 @@ export class VerificationEmailSent {
         let errorMessage = 'Action failed. Try again.';
         if (err.error && err.error.message) {
           errorMessage = err.error.message;
-        } 
+        }
 
        this.snackBar.open(
           errorMessage,

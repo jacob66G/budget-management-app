@@ -5,7 +5,9 @@ import com.example.budget_management_app.auth.dto.RegistrationRequestDto;
 import com.example.budget_management_app.category.service.CategoryService;
 import com.example.budget_management_app.common.dto.ResponseMessageDto;
 import com.example.budget_management_app.common.exception.*;
+import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.security.service.TwoFactorAuthenticationService;
+import com.example.budget_management_app.transaction.service.TransactionService;
 import com.example.budget_management_app.user.dao.UserDao;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.domain.UserStatus;
@@ -52,6 +54,10 @@ class UserServiceTest {
     private CategoryService categoryService;
     @Mock
     private AccountService accountService;
+    @Mock
+    private TransactionService transactionService;
+    @Mock
+    private RecurringTransactionService recurringTransactionService;
     @Mock
     private UserMapper mapper;
 
@@ -260,15 +266,15 @@ class UserServiceTest {
         @Test
         void should_activate_user_successfully() {
             //given
-            doNothing().when(accountService).activateAllUserAccounts(userId);
-            // TODO: doNothing().when(recurringTransactionService).activateAllUserRecurringTransactions(userId);
+            doNothing().when(accountService).activateAllByUser(userId);
+            doNothing().when(recurringTransactionService).activateAllByUser(userId);
 
             //when
             userService.activateUser(email);
 
             //then
-            verify(accountService, times(1)).activateAllUserAccounts(userId);
-            // TODO: verify(recurringTransactionService, times(1)).activateAllUserRecurringTransactions(userId);
+            verify(accountService, times(1)).activateAllByUser(userId);
+            verify(recurringTransactionService, times(1)).activateAllByUser(userId);
 
             verify(userDao, times(1)).update(userCaptor.capture());
             User activatedUser = userCaptor.getValue();
@@ -287,9 +293,9 @@ class UserServiceTest {
 
             //then
             verify(userDao, times(1)).findByEmail(email);
-            verify(accountService, never()).activateAllUserAccounts(anyLong());
+            verify(accountService, never()).activateAllByUser(anyLong());
             verify(userDao, never()).update(any(User.class));
-            // TODO: verify(recurringTransactionService, never()).activateAllUserRecurringTransactions(anyLong());
+            verify(recurringTransactionService, never()).activateAllByUser(anyLong());
         }
 
         @Test
@@ -303,7 +309,7 @@ class UserServiceTest {
 
             //then
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
-            verify(accountService, never()).activateAllUserAccounts(anyLong());
+            verify(accountService, never()).activateAllByUser(anyLong());
             verify(userDao, never()).update(any(User.class));
         }
     }
@@ -328,8 +334,8 @@ class UserServiceTest {
         @Test
         void should_mark_user_for_deletion_successfully() {
             //given
-            doNothing().when(accountService).deactivateAllUserAccounts(userId);
-            // TODO: doNothing().when(recurringTransactionService).deactivateAllUserRecurringTransactions(userId);
+            doNothing().when(accountService).deactivateAllByUser(userId);
+            doNothing().when(recurringTransactionService).deactivateAllByUser(userId);
 
             //when
             ResponseMessageDto response = userService.closeUser(userId);
@@ -338,8 +344,8 @@ class UserServiceTest {
             assertThat(response).isNotNull();
             assertThat(response.message()).contains("30 days");
 
-            verify(accountService, times(1)).deactivateAllUserAccounts(userId);
-            // TODO: verify(recurringTransactionService, times(1)).deactivateAllUserRecurringTransactions(userId);
+            verify(accountService, times(1)).deactivateAllByUser(userId);
+            verify(recurringTransactionService, times(1)).deactivateAllByUser(userId);
 
             verify(userDao, times(1)).update(userCaptor.capture());
             User updatedUser = userCaptor.getValue();
@@ -361,7 +367,7 @@ class UserServiceTest {
 
             //then
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
-            verify(accountService, never()).deactivateAllUserAccounts(anyLong());
+            verify(accountService, never()).deactivateAllByUser(anyLong());
             verify(userDao, never()).update(any(User.class));
         }
 
@@ -376,7 +382,7 @@ class UserServiceTest {
 
             //then
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_ACTIVE);
-            verify(accountService, never()).deactivateAllUserAccounts(anyLong());
+            verify(accountService, never()).deactivateAllByUser(anyLong());
             verify(userDao, never()).update(any(User.class));
         }
     }
@@ -651,19 +657,19 @@ class UserServiceTest {
             when(userDao.findById(1L)).thenReturn(Optional.of(user1));
             when(userDao.findById(2L)).thenReturn(Optional.of(user2));
 
-            doNothing().when(accountService).deleteAllUserAccounts(anyLong());
-            doNothing().when(categoryService).deleteAllUserCategories(anyLong());
+            doNothing().when(accountService).deleteAllByUser(anyLong());
+            doNothing().when(categoryService).deleteAllByUser(anyLong());
             doNothing().when(userDao).delete(any(User.class));
 
             //when
             userService.deleteUsersPendingDeletion();
 
             //then
-            verify(accountService, times(1)).deleteAllUserAccounts(1L);
-            verify(accountService, times(1)).deleteAllUserAccounts(2L);
+            verify(accountService, times(1)).deleteAllByUser(1L);
+            verify(accountService, times(1)).deleteAllByUser(2L);
 
-            verify(categoryService, times(1)).deleteAllUserCategories(1L);
-            verify(categoryService, times(1)).deleteAllUserCategories(2L);
+            verify(categoryService, times(1)).deleteAllByUser(1L);
+            verify(categoryService, times(1)).deleteAllByUser(2L);
 
             verify(userDao, times(1)).delete(user1);
             verify(userDao, times(1)).delete(user2);
@@ -680,8 +686,8 @@ class UserServiceTest {
 
             //then
             verify(userDao, never()).findById(anyLong());
-            verify(accountService, never()).deleteAllUserAccounts(anyLong());
-            verify(categoryService, never()).deleteAllUserCategories(anyLong());
+            verify(accountService, never()).deleteAllByUser(anyLong());
+            verify(categoryService, never()).deleteAllByUser(anyLong());
             verify(userDao, never()).delete(any());
         }
 
@@ -696,20 +702,20 @@ class UserServiceTest {
             when(userDao.findById(1L)).thenReturn(Optional.of(user1));
             when(userDao.findById(2L)).thenReturn(Optional.of(user2));
 
-            doNothing().when(accountService).deleteAllUserAccounts(2L);
-            doNothing().when(categoryService).deleteAllUserCategories(2L);
+            doNothing().when(accountService).deleteAllByUser(2L);
+            doNothing().when(categoryService).deleteAllByUser(2L);
             doNothing().when(userDao).delete(user2);
 
             //when
             userService.deleteUsersPendingDeletion();
 
             //then
-            verify(accountService, never()).deleteAllUserAccounts(1L);
-            verify(categoryService, never()).deleteAllUserCategories(1L);
+            verify(accountService, never()).deleteAllByUser(1L);
+            verify(categoryService, never()).deleteAllByUser(1L);
             verify(userDao, never()).delete(user1);
 
-            verify(accountService, times(1)).deleteAllUserAccounts(2L);
-            verify(categoryService, times(1)).deleteAllUserCategories(2L);
+            verify(accountService, times(1)).deleteAllByUser(2L);
+            verify(categoryService, times(1)).deleteAllByUser(2L);
             verify(userDao, times(1)).delete(user2);
         }
     }
