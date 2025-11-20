@@ -17,7 +17,10 @@ export class ApiPaths {
 
     // categories
     public static readonly CATEGORIES = '/api/categories';
-}
+
+    // transactions
+    public static readonly TRANSACTIONS = '/api/v1/transactions';
+
     private static readonly API = '/api';
 
     public static readonly AUTH_BASE = `${ApiPaths.API}/auth`;

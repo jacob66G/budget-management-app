@@ -3,3 +3,78 @@
     [buttonLabel]="createTransactionButtonTitle"
     (createTransactionClick)="handleAddTransactionEvent()"
 ></app-header>
+<div class="container">
+  
+  <mat-card class="filters-card">
+    <div class="filters-row">
+      
+      <mat-form-field appearance="outline" class="dense-form-field">
+        <mat-label>Frequency</mat-label>
+        <mat-select [(value)]="selectedMode" (selectionChange)="onModeChange($event)">
+          @for (mode of modeOptions; track mode.value) {
+                <mat-option [value]="mode.value">{{mode.label}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="dense-form-field">
+        <mat-label>Transaction Type</mat-label>
+        <mat-select [(value)]="selectedType" (selectionChange)="onTypeChange($event)">
+          @for (type of typeOptions; track type.value) {
+            <mat-option [value]="type.value">{{type.label}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="dense-form-field">
+        <mat-label>Category</mat-label>
+        <mat-select [(value)]="selectedCategory" (selectionChange)="onCategoryChange($event)">
+          <mat-option value="ALL">All</mat-option>
+          @for (category of categories; track category.id) {
+            <mat-option [value]="category.id">{{category.name}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="dense-form-field">
+        <mat-label>Account</mat-label>
+        <mat-select [(value)]="selectedAccount" (selectionChange)="onAccountChange($event)">
+          <mat-option value="ALL">All</mat-option>
+          @for (account of accounts; track account.id) {
+            <mat-option [value]="account.id">{{account.name}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="dense-form-field">
+        <mat-label>Date Range</mat-label>
+        <mat-select [(value)]="selectedDateRange" (selectionChange)="onAccountChange($event)">
+          @for (range of dateRangeOptions; track range.value) {
+            <mat-option [value]="range.value">{{range.label}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="divider-vertical"></div>
+
+      <div class="sort-controls">
+        <mat-form-field appearance="outline" class="dense-form-field sort-select">
+          <mat-label>Sort By</mat-label>
+          <mat-select [(value)]="selectedSortBy">
+            @for (sortField of sortByOptions; track sortField.value) {
+              <mat-option [value]="sortField.value">{{sortField.label}}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-stroked-button color="primary" (click)="onSortDirectionChange($event)">
+          <mat-icon>{{ selectedSortingDirection === 'DESC' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+          <!-- {{ sortDirection | uppercase}} -->
+        </button>
+      </div>
+
+    </div>
+  </mat-card>
+
+  
+</div>

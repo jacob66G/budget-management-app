@@ -48,6 +48,7 @@ public class TransactionDaoImpl implements TransactionDao {
 
         cq.multiselect(
                 root.get("id").alias("transactionId"),
+                root.get("title").alias("title"),
                 root.get("amount").alias("amount"),
                 root.get("type").alias("type"),
                 root.get("description").alias("description"),

@@ -1,24 +1,24 @@
 
 <h2 mat-dialog-title>Create Transaction</h2>
 <mat-dialog-content>
-    <form>
+    <form [formGroup]="addTransactionForm">
         <div class="form-fields-container">
             <!-- title input field -->
             <mat-form-field appearance="fill">
                 <mat-label>Title</mat-label>
-                <input matInput>
+                <input matInput formControlName="title">
             </mat-form-field>
 
             <!-- amount input field -->
             <mat-form-field appearance="fill">
                 <mat-label>Amount</mat-label>
-                <input matInput>
+                <input matInput type="number" formControlName="amount">
             </mat-form-field>
 
             <!-- transaction type input field -->
             <mat-form-field>
                 <mat-label>choose type</mat-label>
-                <mat-select (selectionChange)="onTransactionTypeChange($event)">
+                <mat-select formControlName="type" (selectionChange)="onTransactionTypeChange($event)">
                     @for (type of data.transactionTypes; track type) {
                         <mat-option [value]="type">{{ type }}</mat-option>
                     }
@@ -28,13 +28,13 @@
             <!-- descirption input field -->
             <mat-form-field>
                 <mat-label>Description</mat-label>
-                <textarea matInput></textarea>
+                <textarea matInput formControlName="description"></textarea>
             </mat-form-field>
 
             <!-- account input field -->
             <mat-form-field>
                 <mat-label>choose account</mat-label>
-                <mat-select>
+                <mat-select formControlName="account">
                     @for (account of data.accountList; track account.id) {
                         <mat-option [value]="account.id">{{ account.name }}</mat-option>
                     }
@@ -44,8 +44,8 @@
             <!-- category input field -->
             <mat-form-field>
                 <mat-label>choose category</mat-label>
-                <mat-select>
-                    @for (category of categories; track category) {
+                <mat-select formControlName="category">
+                    @for (category of categories; track category.id) {
                         <mat-option [value]="category.id">{{ category.name }}</mat-option>
                     }
                 </mat-select>
@@ -55,4 +55,6 @@
 </mat-dialog-content>
 <mat-card-actions>
     <button matButton mat-dialog-close>Cancel</button>
+    <button matButton type="button" (click)="clearForm()">Reset</button>
+    <button matButton type="button" (click)="onSubmit()" [disabled]="addTransactionForm.invalid">Submit</button>
 </mat-card-actions>
