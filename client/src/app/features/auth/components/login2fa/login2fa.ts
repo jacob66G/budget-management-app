@@ -38,14 +38,14 @@ export class Login2fa {
   private userId: number | null = null;
 
   ngOnInit(): void {
-    if (!this.userId) {
-      this.router.navigate(['/login']);
-      return;
-    }
-
     this.tfaForm = this.fb.group({
       code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
     });
+
+     if (!this.userId) {
+      this.router.navigate(['/login']);
+      return;
+    }
   }
 
   onSubmit(): void {

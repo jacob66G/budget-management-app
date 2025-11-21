@@ -152,7 +152,7 @@ public class UserSessionServiceImpl implements UserSessionService {
         return ResponseCookie.from(ApiConstants.REFRESH_TOKEN_COOKIE, refreshToken)
                 .httpOnly(true)
                 .maxAge(refreshTokenExpiration)
-                .sameSite("None")
+                .sameSite("Lax")
                 .secure(false)
                 .path("/api/auth")
                 .build();
@@ -163,7 +163,7 @@ public class UserSessionServiceImpl implements UserSessionService {
         return ResponseCookie.from(ApiConstants.REFRESH_TOKEN_COOKIE, "")
                 .httpOnly(true)
                 .maxAge(0)
-                .sameSite("None")
+                .sameSite("Lax")
                 .secure(false)
                 .path("/api/auth")
                 .build();

@@ -49,6 +49,8 @@
       <div class="qr-code-container">
         @if (qrCodeUrl()) {
           <img [src]="qrCodeUrl()" alt="QR Code for 2FA setup">
+        } @else {
+          <mat-error>The QR code could not be generated.<br> Please try again later.</mat-error>
         }
       </div>
 

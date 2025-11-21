@@ -41,7 +41,7 @@ export class SecuritySettings {
   private snackBar = inject(MatSnackBar)
 
   currentUser = this.authService.currentUser;
-  isMfaEnabled = () => this.authService.currentUser()?.isMfaEnabled ?? false;
+  isMfaEnabled = () => this.authService.currentUser()?.mfaEnabled ?? false;
 
   isLoading = signal(false);
 
@@ -71,12 +71,9 @@ export class SecuritySettings {
 
     dialogRef.afterClosed().subscribe(newStatus => {
       if (typeof newStatus === 'boolean') {
-        this.authService.currentUser.update(user => {
-          if (user) {
-            return { ...user, isMfaEnabled: newStatus };
-          }
-          return null;
-        });
+        const isMfaEnabled = newStatus;
+
+        this.authService.patchCurrentUser({ mfaEnabled: isMfaEnabled });
 
         const message = newStatus ? '2FA enabled!' : '2FA disabled.';
         this.snackBar.open(message, 'OK', { duration: 3000 });

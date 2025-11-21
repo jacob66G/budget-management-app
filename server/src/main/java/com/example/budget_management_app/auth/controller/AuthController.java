@@ -42,7 +42,7 @@ public class AuthController {
             @CookieValue(name = ApiConstants.REFRESH_TOKEN_COOKIE, required = false) String oldRefreshToken
     ) {
         LoginResponseDto response = authService.authenticateUser(loginRequestDto);
-        if (response.isMfaEnabled()) {
+        if (response.getIsMfaRequired()) {
             return ResponseEntity.ok(response);
         }
 

@@ -27,7 +27,7 @@
       <div class="item-content">
         <div class="item-title">Two-Factor Authentication</div>
         <div class="item-subtitle">
-          @if (currentUser()?.isMfaEnabled) {
+          @if (currentUser()?.mfaEnabled) {
           <span class="status-enabled">Enabled</span>
           } @else {
           <span class="status-disabled">Disabled</span>

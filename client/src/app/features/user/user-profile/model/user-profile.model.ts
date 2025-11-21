@@ -10,7 +10,7 @@ export interface ChangePasswordRequest {
 }
 
 export interface TfaQRCode {
-    qrCodeUri: string
+    secretImageUri: string
 }
 
 export interface TfaVerifyRequest {

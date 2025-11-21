@@ -1,9 +1,10 @@
 export interface User {
-  userId: number;
+  id: number;
   name?: string;
   surname?: string;
   email?: string;
   status?: string;
-  isMfaEnabled?: boolean;
+  mfaEnabled?: boolean;
   createdAt?: string;
+  requestCloseAt?: string | null;
 }

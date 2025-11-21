@@ -19,8 +19,14 @@ export interface TwoFactorLoginRequest {
 }
 
 export interface LoginResponse {
-  user?: User;
-  accessToken?: string | null;
+  userId: number;
+  name: string;
+  surname: string;
+  email: string;
+  status: string;
+  mfaEnabled: boolean;
+  createdAt: string;
+  accessToken: string;
   isMfaRequired: boolean;
 }
 

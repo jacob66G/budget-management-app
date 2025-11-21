@@ -64,7 +64,7 @@ export class Login {
 
         if (response.isMfaRequired) {
           this.router.navigate(['/login/2fa'], {
-            state: { userId: response.user?.userId }
+            state: { userId: response.userId }
           });
         } else {
           this.snackBar.open(
@@ -80,10 +80,8 @@ export class Login {
         let errorMessage = 'Log in failed. Try again.';
         if (err.error && err.error.message) {
           errorMessage = err.error.message;
-        } else if (err.status === 401) {
-           errorMessage = 'Nieprawidłowy e-mail lub hasło.';
-        }
-
+        } 
+        
        this.snackBar.open(
           errorMessage,
           'OK',

@@ -9,8 +9,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const token = authService.accessToken();
 
+  const excludedUrls = [
+    ApiPaths.AUTH_BASE
+  ]
+
+  const isExcluded = excludedUrls.some(url => req.url.includes(url));
+  
   let authReq = req;
-  if (token) {
+  if (token && !isExcluded) {
     authReq = addTokenToRequest(req, token);
   }
   
@@ -18,12 +24,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
 
-        if (req.url === ApiPaths.REFRESH_TOKEN) {
+        if (req.url.includes(ApiPaths.Auth.REFRESH_TOKEN)) {
           authService.logout();
           return throwError(() => error);
         }
       
-
       return authService.refreshToken().pipe(
         switchMap((response: LoginResponse | null) => {
           if (response?.accessToken) {

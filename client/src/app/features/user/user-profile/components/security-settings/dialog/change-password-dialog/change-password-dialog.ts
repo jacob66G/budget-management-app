@@ -46,10 +46,10 @@ export class ChangePasswordDialog {
       {
         oldPassword: ['', [Validators.required]],
         newPassword: ['', [Validators.required, Validators.minLength(5)]],
-        confirmedNewPassword: ['', [Validators.required]],
+        passwordConfirmation: ['', [Validators.required]],
       },
       {
-        validators: passwordsMatchValidator('newPassword', 'confirmedNewPassword'),
+        validators: passwordsMatchValidator('newPassword', 'passwordConfirmation'),
       }
     );
   }

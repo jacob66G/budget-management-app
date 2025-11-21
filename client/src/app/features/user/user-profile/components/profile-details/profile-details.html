@@ -3,12 +3,12 @@
     <div mat-card-avatar class="profile-avatar-icon">
       <mat-icon>account_circle</mat-icon>
     </div>
-    <!-- @if (currentUser()) {
+    @if (currentUser()) {
       <mat-card-title>{{ currentUser()?.name }} {{ currentUser()?.surname }}</mat-card-title>
+    }
+    @if (currentUser()) {
       <mat-card-subtitle>{{ currentUser()?.email }}</mat-card-subtitle>
-    } -->
-      <mat-card-title>Jan kowalski</mat-card-title>
-      <mat-card-subtitle>jan.kowal@gmail.com</mat-card-subtitle>
+    }
   </mat-card-header>
 
   <mat-card-content>

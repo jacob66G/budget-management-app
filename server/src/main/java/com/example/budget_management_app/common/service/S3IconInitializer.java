@@ -1,6 +1,7 @@
 package com.example.budget_management_app.common.service;
 
 import com.example.budget_management_app.config.IconConfig;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

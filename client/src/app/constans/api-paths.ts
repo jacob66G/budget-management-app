@@ -1,20 +1,31 @@
 export class ApiPaths {
-    public static readonly BASE_URL = 'http://localhost:4200';
-    public static readonly BASE_API = '/api';
-    public static readonly AUTH = '/api/auth';
-    public static readonly REGISTER = '/api/auth/register';
-    public static readonly LOGIN = '/api/auth/login';
-    public static readonly LOGIN_2FA = '/api/auth/login/2fa';
-    public static readonly REFRESH_TOKEN = '/api/auth/refresh';
-    public static readonly LOGOUT = '/api/auth/logout';
-    public static readonly VERIFY_EMAIL = '/api/auth/verify';
-    public static readonly RESEND_VERIFICATION_EMAIL = '/api/auth/resend-verification';
-    public static readonly RESET_PASSWORD = '/api/auth/password-reset-request';
-    public static readonly REST_PASSWORD_CONFIRM = '/api/auth/password-reset-confirm';
-    public static readonly USER = '/api/user/me';
-    public static readonly CHANGE_PASSWORD = '/api/user/change-password';
-    public static readonly TFA_SETUP = '/api/user/me/2fa/setup';
-    public static readonly TFA_VERIFY = '/api/user/me/2fa/verify';
-    public static readonly TFA_DISABLE = '/api/user/me/2fa/disable';
-    public static readonly CLOSE_USER_ACCOUNT = '/api/user/me/close-account'
+    private static readonly API = '/api';
+
+    public static readonly AUTH_BASE = `${ApiPaths.API}/auth`;
+    public static readonly USERS_BASE = `${ApiPaths.API}/users`;
+
+    public static readonly Auth = {
+        LOGIN: `${ApiPaths.AUTH_BASE}/login`,
+        LOGIN_2FA: `${ApiPaths.AUTH_BASE}/login/2fa`,
+        REGISTER: `${ApiPaths.AUTH_BASE}/register`,
+        REFRESH_TOKEN: `${ApiPaths.AUTH_BASE}/refresh`,
+        LOGOUT: `${ApiPaths.AUTH_BASE}/logout`,
+        VERIFY_EMAIL: `${ApiPaths.AUTH_BASE}/verify`,
+        RESEND_VERIFICATION: `${ApiPaths.AUTH_BASE}/resend-verification`,
+        RESET_PASSWORD_REQUEST: `${ApiPaths.AUTH_BASE}/password-reset-request`,
+        RESET_PASSWORD_CONFIRM: `${ApiPaths.AUTH_BASE}/password-reset-confirm`,
+    };
+
+    public static readonly User = {
+        ME: `${ApiPaths.USERS_BASE}/me`,
+
+        CHANGE_PASSWORD: `${ApiPaths.USERS_BASE}/me/change-password`,
+        CLOSE_ACCOUNT: `${ApiPaths.USERS_BASE}/me/close-account`,
+
+        TFA_SETUP: `${ApiPaths.USERS_BASE}/me/2fa/setup`,
+        TFA_VERIFY: `${ApiPaths.USERS_BASE}/me/2fa/verify`,
+        TFA_DISABLE: `${ApiPaths.USERS_BASE}/me/2fa/disable`,
+
+        SESSIONS: `${ApiPaths.USERS_BASE}/me/sessions`,
+    };
 }

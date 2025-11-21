@@ -48,7 +48,7 @@ export class ManageTfaDialog {
       code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
     });
 
-    if (this.data.isMfaEnabled) {
+    if (!this.data.isMfaEnabled) {
       this.fetchQrCode();
     }
   }
@@ -58,7 +58,7 @@ export class ManageTfaDialog {
 
     this.userService.tfaSetup().subscribe({
       next: (response: TfaQRCode) => {
-        this.qrCodeUrl.set(response.qrCodeUri);
+        this.qrCodeUrl.set(response.secretImageUri);
         this.isQrLoading.set(false);
       },
       error: (err: HttpErrorResponse) => {
@@ -86,7 +86,7 @@ export class ManageTfaDialog {
     }
 
     this.isLoading.set(true);
-    const data = this.tfaForm.value.code as TfaVerifyRequest;
+    const data = this.tfaForm.value as TfaVerifyRequest;
 
     if (this.data.isMfaEnabled) {
       this.submitDisableTfa(data);

@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,7 +37,7 @@ public class ApplicationExceptionHandler {
             fieldErrors.put(error.getField(), error.getDefaultMessage());
         });
 
-        ErrorResponse errorResponse =  new ErrorResponse(
+        ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation Failed",
@@ -45,6 +46,21 @@ public class ApplicationExceptionHandler {
                 request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    //from security core
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
+        log.warn("Authentication exception occurred= {}, path= {}", ex.getMessage(), request.getRequestURI(), ex);
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "Authorization Failed",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -98,24 +114,24 @@ public class ApplicationExceptionHandler {
             if (mismatchedInput.getTargetType() != null && mismatchedInput.getTargetType().isEnum()) {
 
                 String originalMessage = mismatchedInput.getOriginalMessage();
-                 try {
-                     String incorrectValue = originalMessage.split("\"")[1];
-                     errorMessage = String.format(
-                             "Invalid value '%s'. Allowed values are: %s",
-                                    incorrectValue,
-                                    Arrays.toString(mismatchedInput.getTargetType().getEnumConstants())
-                     );
-                 } catch (Exception e) {
+                try {
+                    String incorrectValue = originalMessage.split("\"")[1];
+                    errorMessage = String.format(
+                            "Invalid value '%s'. Allowed values are: %s",
+                            incorrectValue,
+                            Arrays.toString(mismatchedInput.getTargetType().getEnumConstants())
+                    );
+                } catch (Exception e) {
 
-                     log.warn("Could not parse bad enum value from exception message: {}", originalMessage, e);
+                    log.warn("Could not parse bad enum value from exception message: {}", originalMessage, e);
 
-                     String enumTypeName = mismatchedInput.getTargetType().getSimpleName();
-                     errorMessage = String.format(
-                             "Invalid value has been received for enum type %s. Allowed values are: %s",
-                             enumTypeName,
-                             Arrays.toString(mismatchedInput.getTargetType().getEnumConstants())
-                     );
-                 }
+                    String enumTypeName = mismatchedInput.getTargetType().getSimpleName();
+                    errorMessage = String.format(
+                            "Invalid value has been received for enum type %s. Allowed values are: %s",
+                            enumTypeName,
+                            Arrays.toString(mismatchedInput.getTargetType().getEnumConstants())
+                    );
+                }
             }
         }
 
@@ -136,7 +152,7 @@ public class ApplicationExceptionHandler {
     public ResponseEntity<ErrorResponse> handleApplicationException(ApplicationException ex, HttpServletRequest request) {
         log.error("Application exception: {}", ex.getMessage(), ex);
         ErrorCode errorCode = ex.getErrorCode();
-        ErrorResponse errorResponse =  new ErrorResponse(
+        ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
                 errorCode.getStatus().value(),
                 errorCode.name(),

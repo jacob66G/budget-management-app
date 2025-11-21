@@ -1,46 +1,53 @@
 import { Routes } from "@angular/router";
 import { Login } from "./components/login/login";
 import { Registration } from "./components/registration/registration";
-import { Login2fa } from "./components/login2fa/login2fa";
 import { VerificationEmailSent } from "./components/verification-email-sent/verification-email-sent";
 import { RecoverPassword } from "./components/recover-password/recover-password";
 import { ResetPassword } from "./components/reset-password/reset-password";
 import { VerifyEmail } from "./components/verify-email/verify-email";
 
 export const AUTH_ROUTES: Routes = [
-  {
-    path: 'login',
-    component: Login,
-    title: 'Login',
-  },
-  {
+    {
     path: 'login/2fa',
-    component: Login2fa,
+    loadComponent: () =>
+      import('./components/login2fa/login2fa').then((m) => m.Login2fa),
     title: 'Verification 2FA'
   },
   {
+    path: 'login',
+    loadComponent: () =>
+      import('./components/login/login').then((m) => m.Login),
+    title: 'Login',
+    pathMatch: 'full'
+  },
+  {
     path: 'register',
-    component: Registration,
+    loadComponent: () =>
+      import('./components/registration/registration').then((m) => m.Registration),
     title: 'Rejestracja',
   },
   {
     path: 'verify',
-    component: VerifyEmail,
+    loadComponent: () =>
+      import('./components/verify-email/verify-email').then((m) => m.VerifyEmail),
     title: 'Verify Email'
   },
   {
     path: 'verifi-pending',
-    component: VerificationEmailSent,
+    loadComponent: () =>
+        import('./components/verification-email-sent/verification-email-sent').then((m) => m.VerificationEmailSent),
     title: 'Verification Email'
   },
   {
     path: 'recover-password',
-    component: RecoverPassword,
+    loadComponent: () =>
+      import('./components/recover-password//recover-password').then((m) => m.RecoverPassword),
     title: 'Recover Password'
   },
   {
     path: "reset-password",
-    component: ResetPassword,
+    loadComponent: () =>
+      import('./components/reset-password/reset-password').then((m) => m.ResetPassword),
     title: "Reset Password"
   }
 ];

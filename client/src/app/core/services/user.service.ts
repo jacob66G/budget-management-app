@@ -14,26 +14,27 @@ export class UserService {
   constructor(private http: HttpClient) { }
 
   updateUser(userData: UpdateUserRequest): Observable<User> {
-    return this.http.patch<User>(ApiPaths.USER, userData);
+    return this.http.patch<User>(ApiPaths.User.ME, userData);
   }
 
   changePassword(changePasswordData: ChangePasswordRequest): Observable<void> {
-    return this.http.post<void>(ApiPaths.CHANGE_PASSWORD, changePasswordData);
+    return this.http.post<void>(ApiPaths.User.CHANGE_PASSWORD, changePasswordData);
   }
 
   tfaDisable(tfaVerifyData: TfaVerifyRequest): Observable<void> {
-    return this.http.post<void>(ApiPaths.TFA_DISABLE, tfaVerifyData);
+    return this.http.post<void>(ApiPaths.User.TFA_DISABLE, tfaVerifyData);
   }
 
   verifyTfaSetup(tfaVerifyData: TfaVerifyRequest): Observable<void> {
-    return this.http.post<void>(ApiPaths.TFA_VERIFY, tfaVerifyData);
+    return this.http.post<void>(ApiPaths.User.TFA_VERIFY, tfaVerifyData);
   }
 
   tfaSetup(): Observable<TfaQRCode> {
-    return this.http.get<TfaQRCode>(ApiPaths.TFA_SETUP);
+    return this.http.get<TfaQRCode>(ApiPaths.User.TFA_SETUP);
   }
 
   closeAccount(): Observable<ResponseMessage> {
-    return this.http.delete<ResponseMessage>(ApiPaths.CLOSE_USER_ACCOUNT);
+    return this.http.delete<ResponseMessage>(ApiPaths.User.CLOSE_ACCOUNT);
   }
+  
 }

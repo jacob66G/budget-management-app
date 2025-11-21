@@ -17,10 +17,10 @@ public class LoginResponseDto {
         private String surname;
         private String email;
         private String status;
-        private boolean mfaEnabled;
+        private Boolean mfaEnabled;
         private Instant createdAt;
         private String accessToken;
-        private boolean isMfaRequired;
+        private Boolean isMfaRequired;
 
     public LoginResponseDto(Long userId, Boolean isMfaRequired) {
         this.userId = userId;

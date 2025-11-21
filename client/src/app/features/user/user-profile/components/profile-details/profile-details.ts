@@ -25,7 +25,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule
-],
+  ],
   templateUrl: './profile-details.html',
   styleUrl: './profile-details.scss'
 })
@@ -42,8 +42,8 @@ export class ProfileDetails {
   ngOnInit(): void {
     this.profileForm = this.fb.group(
       {
-        name: ["this.currentUser()?.name", [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
-        surname: ["this.currentUser()?.surname", [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
+        name: [this.currentUser()?.name, [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
+        surname: [this.currentUser()?.surname, [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
       }
     )
   }
@@ -58,9 +58,9 @@ export class ProfileDetails {
 
     this.userService.updateUser(dto).subscribe({
       next: (response: User) => {
-          this.isLoading.set(false);
-          this.authService.currentUser.set(response);
-          this.snackBar.open('Data updated successfully', 'Close', { duration: 3000 });
+        this.isLoading.set(false);
+        this.authService.updateCurrentUser(response);
+        this.snackBar.open('Data updated successfully', 'Close', { duration: 3000 });
       },
       error: (error: HttpErrorResponse) => {
         this.isLoading.set(false);
