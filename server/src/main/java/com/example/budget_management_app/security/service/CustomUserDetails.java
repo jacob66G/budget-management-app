@@ -12,11 +12,13 @@ public class CustomUserDetails implements UserDetails {
     private final Long id;
     private final String email;
     private final String password;
+    private final Long sessionId;
 
-    public CustomUserDetails(Long id, String email, String password) {
+    public CustomUserDetails(Long id, String email, String password, Long sessionId) {
         this.id = id;
         this.email = email;
         this.password = password;
+        this.sessionId = sessionId;
     }
 
     @Override

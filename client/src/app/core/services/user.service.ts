@@ -1,10 +1,11 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { ChangePasswordRequest, TfaQRCode, TfaVerifyRequest, UpdateUserRequest } from "../../features/user/user-profile/model/user-profile.model";
+import { ChangePasswordRequest, TfaQRCode, TfaVerifyRequest, UpdateUserRequest, UserSession } from "../../features/user/user-profile/model/user-profile.model";
 import { User } from "../models/user.model";
 import { Observable } from "rxjs";
 import { ApiPaths } from "../../constans/api-paths";
 import { ResponseMessage } from "../models/response-message.model";
+import { A } from "@angular/cdk/keycodes";
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +36,14 @@ export class UserService {
 
   closeAccount(): Observable<ResponseMessage> {
     return this.http.delete<ResponseMessage>(ApiPaths.User.CLOSE_ACCOUNT);
+  }
+
+  getSessions(): Observable<UserSession[]> {
+    return this.http.get<UserSession[]>(ApiPaths.User.SESSIONS);
+  }
+
+  revokeSession(sessionId: number): Observable<void> {
+    return this.http.delete<void>(`${ApiPaths.User.SESSIONS}/${sessionId}`)
   }
   
 }

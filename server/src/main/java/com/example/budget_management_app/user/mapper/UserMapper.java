@@ -21,12 +21,17 @@ public class UserMapper {
         );
     }
 
-    public UserSessionResponseDto toUserSessionResponseDto (UserSession session) {
+    public UserSessionResponseDto toUserSessionResponseDto (UserSession session, Long currentSessionId) {
+        boolean isCurrent = session.getId().equals(currentSessionId);
+
         return new UserSessionResponseDto(
                 session.getId(),
                 session.getIpAddress(),
-                session.getUserAgent(),
-                session.getCreatedAt()
+                session.getDeviceInfo(),
+                session.getDeviceType().name(),
+                session.getCreatedAt(),
+                session.getLastUsedAt(),
+                isCurrent
         );
     }
 }

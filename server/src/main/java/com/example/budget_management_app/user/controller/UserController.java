@@ -26,14 +26,14 @@ public class UserController {
 
     @GetMapping("/me/sessions")
     public ResponseEntity<List<UserSessionResponseDto>> getUserSessions(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(userService.getUserSessions(userDetails.getId()));
+        Long currentSessionId = userDetails.getSessionId();
+        return ResponseEntity.ok(userService.getUserSessions(userDetails.getId(), currentSessionId));
     }
 
-    @DeleteMapping("/me/session/{sessionId}")
+    @DeleteMapping("/me/sessions/{sessionId}")
     public ResponseEntity<Void> logoutSession(
             @PathVariable Long sessionId,
-            @AuthenticationPrincipal CustomUserDetails userDetails)
-    {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         userService.logoutSession(userDetails.getId(), sessionId);
         return ResponseEntity.noContent().build();
     }

@@ -279,9 +279,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserSessionResponseDto> getUserSessions(Long userId) {
+    public List<UserSessionResponseDto> getUserSessions(Long userId, Long currentSessionId) {
         List<UserSession> sessions = userSessionService.findSessionsByUser(userId);
-        return sessions.stream().map(mapper::toUserSessionResponseDto).toList();
+        return sessions.stream().map(session -> mapper.toUserSessionResponseDto(session, currentSessionId)).toList();
     }
 
     @Override

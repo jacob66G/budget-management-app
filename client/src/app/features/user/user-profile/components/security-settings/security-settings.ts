@@ -66,8 +66,8 @@ export class SecuritySettings {
   onManageMfaClick(): void {
     const dialogRef = this.dialog.open(ManageTfaDialog, {
       width: '500px',
-      data: { 
-        isMfaEnabled: this.isMfaEnabled() 
+      data: {
+        isMfaEnabled: this.isMfaEnabled()
       }
     });
 
@@ -84,7 +84,7 @@ export class SecuritySettings {
 
   }
 
-closeAccount(): void {
+  closeAccount(): void {
     const dialogData: ConfirmDialogData = {
       title: 'Close your account?',
       message: 'Are you sure you want to close your account? All your data will be marked for deletion in 30 days. You can cancel this process by logging in again during this period.',
@@ -100,7 +100,7 @@ closeAccount(): void {
 
     dialogRef.afterClosed()
       .pipe(
-        filter(result => result === true) 
+        filter(result => result === true)
       )
       .subscribe(() => {
         this.executeCloseAccount();
@@ -109,13 +109,13 @@ closeAccount(): void {
 
 
   private executeCloseAccount(): void {
-    this.isLoading.set(true); 
+    this.isLoading.set(true);
 
     this.userService.closeAccount().subscribe({
       next: (response: ResponseMessage) => {
         this.isLoading.set(false);
-        this.snackBar.open(response.message, 'OK', { 
-          duration: 7000, 
+        this.snackBar.open(response.message, 'OK', {
+          duration: 7000,
           panelClass: 'success-snackbar'
         });
         this.authService.logout().subscribe({

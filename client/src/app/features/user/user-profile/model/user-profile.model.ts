@@ -16,3 +16,13 @@ export interface TfaQRCode {
 export interface TfaVerifyRequest {
     code: string
 }
+
+export interface UserSession {
+    id: number,
+    ipAddress: string,
+    deviceInfo: string,
+    deviceType: string,
+    createdAt: string,
+    lastUsedAt: string,
+    isCurrent: boolean;
+}

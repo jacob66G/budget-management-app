@@ -5,7 +5,10 @@ import java.time.Instant;
 public record UserSessionResponseDto(
         Long id,
         String ipAddress,
-        String userAgent,
-        Instant createdAt
+        String deviceInfo,
+        String deviceType,
+        Instant createdAt,
+        Instant lastUsedAt,
+        Boolean isCurrent
 ) {
 }

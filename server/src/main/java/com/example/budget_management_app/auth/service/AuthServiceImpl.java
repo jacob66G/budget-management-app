@@ -11,13 +11,16 @@ import com.example.budget_management_app.common.service.CacheService;
 import com.example.budget_management_app.common.service.RedisServiceImpl;
 import com.example.budget_management_app.security.service.JwtService;
 import com.example.budget_management_app.security.service.TwoFactorAuthenticationService;
+import com.example.budget_management_app.session.domain.UserSession;
 import com.example.budget_management_app.session.service.UserSessionService;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.domain.UserStatus;
 import com.example.budget_management_app.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -63,8 +66,9 @@ public class AuthServiceImpl implements AuthService {
         return new ResponseMessageDto("Registration successful. Please check your email to activate your account.");
     }
 
+    @Transactional
     @Override
-    public LoginResponseDto authenticateUser(LoginRequestDto loginRequest) {
+    public LoginResult authenticateUser(LoginRequestDto loginRequest, HttpServletRequest request, String oldRefreshToken) {
         UsernamePasswordAuthenticationToken authentication =
                 UsernamePasswordAuthenticationToken.unauthenticated(loginRequest.email(), loginRequest.password());
         try {
@@ -83,17 +87,18 @@ public class AuthServiceImpl implements AuthService {
         verifyUserStatus(user);
 
         if (user.isMfaEnabled()) {
-            return new LoginResponseDto(user.getId(), true);
+            return LoginResult.mfaRequired(new LoginResponseDto(user.getId(), true));
         }
 
-        String accessToken = jwtService.generateToken(user.getEmail());
+        LoginResult result = finalizeLogin(user, request, oldRefreshToken);
 
         log.info("User logged in: email={}", user.getEmail());
-        return mapper.toLoginResponseDto(user, accessToken, false);
+        return result;
     }
 
+    @Transactional
     @Override
-    public LoginResponseDto authenticateWith2fa(TwoFactorLoginRequest loginRequest) {
+    public LoginResult authenticateWith2fa(TwoFactorLoginRequest loginRequest, HttpServletRequest request, String oldRefreshToken) {
         User user = userService.findUserById(loginRequest.userId())
                 .orElseThrow(() -> new UsernameNotFoundException("User with id: " + loginRequest.userId() + " not found."));
 
@@ -105,10 +110,9 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("Invalid code");
         }
 
-        String accessToken = jwtService.generateToken(user.getEmail());
-
+        LoginResult result = finalizeLogin(user, request, oldRefreshToken);
         log.info("User logged in: email={}", user.getEmail());
-        return mapper.toLoginResponseDto(user, accessToken, false);
+        return result;
     }
 
     @Transactional
@@ -205,6 +209,16 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("User email={} has sent reset password request", user.getEmail());
         return defaultResponse;
+    }
+
+    private LoginResult finalizeLogin(User user, HttpServletRequest request, String oldRefreshToken) {
+        UserSession session = sessionService.createUserSession(user.getId(), request, oldRefreshToken);
+        ResponseCookie cookie = sessionService.generateResponseCookie(session.getRawRefreshToken());
+
+        String accessToken = jwtService.generateToken(user.getEmail(), session.getId());
+
+        LoginResponseDto response = mapper.toLoginResponseDto(user, accessToken, false);
+        return new LoginResult(response, cookie);
     }
 
     private String generateTokenValue() {

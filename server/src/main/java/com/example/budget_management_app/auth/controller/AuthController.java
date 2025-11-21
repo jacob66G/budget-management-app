@@ -6,7 +6,6 @@ import com.example.budget_management_app.common.dto.ResponseMessageDto;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.UserSessionException;
 import com.example.budget_management_app.constants.ApiConstants;
-import com.example.budget_management_app.session.domain.UserSession;
 import com.example.budget_management_app.session.dto.RefreshTokenResult;
 import com.example.budget_management_app.session.service.UserSessionService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,12 +40,15 @@ public class AuthController {
             HttpServletRequest request,
             @CookieValue(name = ApiConstants.REFRESH_TOKEN_COOKIE, required = false) String oldRefreshToken
     ) {
-        LoginResponseDto response = authService.authenticateUser(loginRequestDto);
-        if (response.getIsMfaRequired()) {
-            return ResponseEntity.ok(response);
+        LoginResult result = authService.authenticateUser(loginRequestDto, request, oldRefreshToken);
+
+        if (result.response().getIsMfaRequired()) {
+            return ResponseEntity.ok(result.response());
         }
 
-        return buildLoginResponseWithSession(response, request, oldRefreshToken);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, result.cookie().toString())
+                .body(result.response());
     }
 
     @PostMapping("/login/2fa")
@@ -55,9 +57,11 @@ public class AuthController {
             HttpServletRequest request,
             @CookieValue(name = ApiConstants.REFRESH_TOKEN_COOKIE, required = false) String oldRefreshToken
     ) {
-        LoginResponseDto response = authService.authenticateWith2fa(loginRequestDto);
+        LoginResult result = authService.authenticateWith2fa(loginRequestDto, request, oldRefreshToken);
 
-        return buildLoginResponseWithSession(response, request, oldRefreshToken);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, result.cookie().toString())
+                .body(result.response());
     }
 
     @PostMapping("/refresh")
@@ -69,8 +73,7 @@ public class AuthController {
             log.warn("Refresh token missing in request from IP {}", request.getRemoteAddr());
             throw new UserSessionException("No refresh token found in request", ErrorCode.TOKEN_NOT_FOUND);
         }
-        String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
-        RefreshTokenResult result = userSessionService.refreshToken(refreshToken, userAgent);
+        RefreshTokenResult result = userSessionService.refreshToken(refreshToken);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, result.cookie())
@@ -114,14 +117,5 @@ public class AuthController {
     public ResponseEntity<ResponseMessageDto> passwordResetRequest(@Valid @RequestBody PasswordResetRequestDto requestDto) {
         return ResponseEntity
                 .ok(authService.resetPassword(requestDto));
-    }
-
-    private ResponseEntity<LoginResponseDto> buildLoginResponseWithSession(LoginResponseDto response, HttpServletRequest request, String oldRefreshToken) {
-        String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
-        UserSession session = userSessionService.createUserSession(response.getUserId(), userAgent, oldRefreshToken);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, userSessionService.generateResponseCookie(session.getRawRefreshToken()).toString())
-                .body(response);
     }
 }

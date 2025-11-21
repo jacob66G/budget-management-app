@@ -1,38 +1,64 @@
 <mat-card class="user-profile-card">
-    <mat-card-header>
-        <mat-card-title>Active Sessions</mat-card-title>
-    </mat-card-header>
+  <mat-card-header>
+    <mat-card-title>Active Sessions</mat-card-title>
+  </mat-card-header>
 
-    <mat-card-content class="list-content">
-        <div class="session-list-item">
-            <div class="icon-container">
-                <mat-icon>desktop_windows</mat-icon>
-            </div>
-            <div class="item-content">
-                <div class="item-title">Chrome desktop</div>
-                <div class="item-subtitle">Bialystok, Poland</div>
-            </div>
-            <div class="item-action">
-                <button mat-button color="primary">
-                    Revoke
-                </button>
-            </div>
+  <mat-card-content class="list-content">
+    @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner [diameter]="40"></mat-spinner>
+    </div>
+    } @else {
+
+    @for (session of sessions(); track session.id) {
+
+    <div class="session-list-item">
+
+      <div class="icon-container">
+        @if (session.deviceType === 'MOBILE') {
+        <mat-icon>smartphone</mat-icon>
+        } @else {
+        <mat-icon>desktop_windows</mat-icon>
+        }
+      </div>
+
+      <div class="item-content">
+        <div class="item-title">{{ session.deviceInfo || 'Unknown Device' }}</div>
+
+        <div class="item-subtitle">
+          @if (!session.isCurrent) {
+          <span class="bullet">•</span>
+          <span>Last active at: {{ session.lastUsedAt | date:'short' }}</span>
+          }
         </div>
+      </div>
 
-        <div class="session-list-item">
-            <div class="icon-container">
-                <mat-icon>desktop_windows</mat-icon>
-            </div>
-            <div class="item-content">
-                <div class="item-title"></div>
-                <div class="item-subtitle"></div>
-            </div>
-            <div class="item-action">
-                <button mat-button color="primary">
-                    Revoke
-                </button>
-            </div>
-        </div>
+      <div class="item-action">
+        @if (session.isCurrent) {
+        <span class="status-current">Current session</span>
+        } @else {
+        <button mat-button color="warn" (click)="onRevoke(session.id)" [disabled]="isRevoking() === session.id">
+          @if (isRevoking() === session.id) {
+          <mat-spinner [diameter]="20" color="warn"></mat-spinner>
+          } @else {
+          Revoke
+          }
+        </button>
+        }
+      </div>
 
-    </mat-card-content>
+    </div>
+    }
+    }
+  </mat-card-content>
+
+  <!-- <div class="card-footer-actions">
+    <button mat-stroked-button color="warn" (click)="onRevokeAll()" [disabled]="isRevokingAll()">
+      @if (isRevokingAll()) {
+      <mat-spinner [diameter]="20" color="warn"></mat-spinner>
+      } @else {
+      Revoke All Sessions
+      }
+    </button>
+  </div> -->
 </mat-card>

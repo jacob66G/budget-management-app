@@ -47,18 +47,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (ExpiredJwtException e) {
             throw new CredentialsExpiredException("Token is expired", e);
 
-        } catch (JwtException e)  {
+        } catch (JwtException e) {
             throw new BadCredentialsException("Token is invalid", e);
         }
 
-        if (claims == null)  {
+        if (claims == null) {
             throw new AuthenticationCredentialsNotFoundException("Token is missing");
         }
 
-
         CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(claims.getSubject());
+
+        Long sessionId = claims.get("sessionId", Long.class);
+
+        CustomUserDetails userWithSession = new CustomUserDetails(
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getPassword(),
+                sessionId
+        );
+
         UsernamePasswordAuthenticationToken authentication =
-                UsernamePasswordAuthenticationToken.authenticated(userDetails, null, new ArrayList<>());
+                UsernamePasswordAuthenticationToken.authenticated(userWithSession, null, new ArrayList<>());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         filterChain.doFilter(request, response);

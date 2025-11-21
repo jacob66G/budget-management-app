@@ -38,7 +38,7 @@ public interface UserService {
 
     void tfaDisable(Long userId, String code);
 
-    List<UserSessionResponseDto> getUserSessions(Long userId);
+    List<UserSessionResponseDto> getUserSessions(Long userId, Long currentSessionId);
 
     void logoutSession(Long userId, Long sessionId);
 }

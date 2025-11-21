@@ -15,6 +15,7 @@ import com.example.budget_management_app.session.domain.UserSession;
 import com.example.budget_management_app.session.dto.RefreshTokenResult;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,15 +42,16 @@ public class UserSessionServiceImpl implements UserSessionService {
     private final JwtService jwtService;
     private final CacheService cacheService;
     private final AuthMapper authMapper;
+    private final ClientInfoService clientInfoService;
 
     @Transactional
     @Override
-    public RefreshTokenResult refreshToken(String token, String userAgent) {
+    public RefreshTokenResult refreshToken(String token) {
         UserSession userSession = validateRefreshToken(token);
 
         User user = userSession.getUser();
-        String accessToken = jwtService.generateToken(user.getEmail());
-        String newRefreshTokenValue = rotateRefreshToken(userSession, userAgent, token);
+        String accessToken = jwtService.generateToken(user.getEmail(), userSession.getId());
+        String newRefreshTokenValue = rotateRefreshToken(userSession, token);
 
         ResponseCookie cookie = generateResponseCookie(newRefreshTokenValue);
         LoginResponseDto loginResponse = authMapper.toLoginResponseDto(user, accessToken, false);
@@ -60,9 +62,11 @@ public class UserSessionServiceImpl implements UserSessionService {
 
     @Transactional
     @Override
-    public UserSession createUserSession(Long userId, String userAgent, String oldRefreshToken) {
+    public UserSession createUserSession(Long userId, HttpServletRequest request, String oldRefreshToken) {
         User user = userService.findUserById(userId)
                 .orElseThrow(() -> new NotFoundException(User.class.getSimpleName(), userId, ErrorCode.USER_NOT_FOUND));
+
+        ClientInfoService.ClientMetadata metadata = clientInfoService.extract(request);
 
         if (StringUtils.hasText(oldRefreshToken)) {
             Optional<UserSession> oldSessionOpt = findSessionByToken(oldRefreshToken);
@@ -81,8 +85,9 @@ public class UserSessionServiceImpl implements UserSessionService {
         enforceMaxSessions(user);
 
         UserSession userSession = new UserSession();
-        userSession.setUserAgent(userAgent);
-        userSession.setCreatedAt(Instant.now());
+        userSession.setIpAddress(metadata.ip());
+        userSession.setDeviceInfo(metadata.deviceInfo());
+        userSession.setDeviceType(metadata.type());
 
         String refreshToken = generateTokenValue();
         userSession.setRawRefreshToken(refreshToken);
@@ -177,9 +182,7 @@ public class UserSessionServiceImpl implements UserSessionService {
 
     private void performLogoutCleanup(UserSession session) {
         evictUserSessionFromCache(session);
-
         userSessionDao.delete(session);
-
         log.info("User {} has successfully logged out (session {}).", session.getUser().getId(), session.getId());
     }
 
@@ -210,9 +213,9 @@ public class UserSessionServiceImpl implements UserSessionService {
                 .orElseThrow(() -> new UserSessionException("Invalid token", ErrorCode.INVALID_TOKEN));
     }
 
-    private String rotateRefreshToken(UserSession session, String userAgent, String oldToken) {
+    private String rotateRefreshToken(UserSession session, String oldToken) {
         String newToken = generateTokenValue();
-        session.setUserAgent(userAgent);
+        session.setLastUsedAt(Instant.now());
         userSessionDao.save(session);
 
         cacheService.delete(RedisServiceImpl.KeyPrefix.REFRESH_TOKEN, TokenHasher.hash(oldToken));
