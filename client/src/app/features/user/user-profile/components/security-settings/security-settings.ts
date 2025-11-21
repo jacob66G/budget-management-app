@@ -16,6 +16,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ConfirmDialog, ConfirmDialogData } from '../../../../../shared/confirm-dialog/confirm-dialog';
 import { filter } from 'rxjs';
 import { ResponseMessage } from '../../../../../core/models/response-message.model';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -39,6 +40,7 @@ export class SecuritySettings {
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar)
+  private router = inject(Router)
 
   currentUser = this.authService.currentUser;
   isMfaEnabled = () => this.authService.currentUser()?.mfaEnabled ?? false;
@@ -116,7 +118,11 @@ closeAccount(): void {
           duration: 7000, 
           panelClass: 'success-snackbar'
         });
-        this.authService.logout();
+        this.authService.logout().subscribe({
+          next: () => {
+            this.router.navigate(['/login']);
+          }
+        })
       },
       error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);

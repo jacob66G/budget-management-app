@@ -45,22 +45,28 @@ export class ResetPassword {
   resetPasswordForm!: FormGroup;
   private token: string | null = null;
 
-  ngOnInit(): void {
-    this.route.queryParamMap.subscribe(params => {
-      this.token = params.get('token');
-      if (!this.token) {
-        this.snackBar.open('Invalid or missing password reset token.', 'OK', {
-          duration: 5000,
-          panelClass: 'error-snackbar',
-        });
-        this.router.navigate(['/login']);
+  constructor() {
+    this.resetPasswordForm = this.fb.group(
+      {
+        newPassword: ['', [Validators.required, Validators.minLength(5)]],
+        passwordConfirmation: ['', [Validators.required]],
+      },
+      {
+        validators: passwordsMatchValidator('newPassword', 'passwordConfirmation'),
       }
+    );
 
-      this.resetPasswordForm = this.fb.group({
-        password : ['', [Validators.required, Validators.minLength(5)]],
-        confirmPassword : ['', [Validators.required]]
-      }, { validators: passwordsMatchValidator('password', 'confirmPassword') });
-    });
+    this.token = this.route.snapshot.queryParamMap.get('code');
+  }
+
+  ngOnInit(): void {
+    if (!this.token) {
+      this.snackBar.open('Invalid or missing password reset token.', 'OK', {
+        duration: 5000,
+        panelClass: 'error-snackbar',
+      });
+      this.router.navigate(['/login']);
+    }
   }
 
   onSubmit(): void {

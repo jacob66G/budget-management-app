@@ -1,10 +1,4 @@
 import { Routes } from "@angular/router";
-import { Login } from "./components/login/login";
-import { Registration } from "./components/registration/registration";
-import { VerificationEmailSent } from "./components/verification-email-sent/verification-email-sent";
-import { RecoverPassword } from "./components/recover-password/recover-password";
-import { ResetPassword } from "./components/reset-password/reset-password";
-import { VerifyEmail } from "./components/verify-email/verify-email";
 
 export const AUTH_ROUTES: Routes = [
     {
@@ -24,7 +18,7 @@ export const AUTH_ROUTES: Routes = [
     path: 'register',
     loadComponent: () =>
       import('./components/registration/registration').then((m) => m.Registration),
-    title: 'Rejestracja',
+    title: 'Registration',
   },
   {
     path: 'verify',
@@ -41,7 +35,7 @@ export const AUTH_ROUTES: Routes = [
   {
     path: 'recover-password',
     loadComponent: () =>
-      import('./components/recover-password//recover-password').then((m) => m.RecoverPassword),
+      import('./components/recover-password/recover-password').then((m) => m.RecoverPassword),
     title: 'Recover Password'
   },
   {

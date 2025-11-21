@@ -11,10 +11,9 @@ security:
   verification-code:
     expiration: 1800000 # 30 min
     retry: 1800000 # 30 min
-  user-details-expiration: 600000 # 10 min
   reset-password-token:
     expiration: 1800000 # 30 min
-    retry: 1800000 # 30 min
+    retry: 60000 # 1 min
 
 config:
   session:

@@ -10,16 +10,23 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = authService.accessToken();
 
   const excludedUrls = [
-    ApiPaths.AUTH_BASE
+    ApiPaths.Auth.LOGIN,
+    ApiPaths.Auth.LOGIN_2FA,
+    ApiPaths.Auth.REGISTER,
+    ApiPaths.Auth.REFRESH_TOKEN,
+    ApiPaths.Auth.VERIFY_EMAIL,
+    ApiPaths.Auth.RESEND_VERIFICATION,
+    ApiPaths.Auth.RESET_PASSWORD_REQUEST,
+    ApiPaths.Auth.RESET_PASSWORD_CONFIRM
   ]
 
-  const isExcluded = excludedUrls.some(url => req.url.includes(url));
-  
+  const isPublicEndpoint = excludedUrls.some(url => req.url.includes(url));
+
   let authReq = req;
-  if (token && !isExcluded) {
+  if (token && !isPublicEndpoint) {
     authReq = addTokenToRequest(req, token);
   }
-  
+
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
@@ -28,13 +35,17 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           authService.logout();
           return throwError(() => error);
         }
-      
-      return authService.refreshToken().pipe(
-        switchMap((response: LoginResponse | null) => {
-          if (response?.accessToken) {
-            authReq = addTokenToRequest(req, response.accessToken);
-            return next(authReq);
-          }
+
+        if (isPublicEndpoint) {
+           return throwError(() => error);
+        }
+
+        return authService.refreshToken().pipe(
+          switchMap((response: LoginResponse | null) => {
+            if (response?.accessToken) {
+              authReq = addTokenToRequest(req, response.accessToken);
+              return next(authReq);
+            }
             return throwError(() => error);
           }),
           catchError((refreshError) => {

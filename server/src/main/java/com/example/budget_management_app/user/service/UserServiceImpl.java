@@ -4,7 +4,10 @@ import com.example.budget_management_app.account.service.AccountService;
 import com.example.budget_management_app.auth.dto.RegistrationRequestDto;
 import com.example.budget_management_app.category.service.CategoryService;
 import com.example.budget_management_app.common.dto.ResponseMessageDto;
-import com.example.budget_management_app.common.exception.*;
+import com.example.budget_management_app.common.exception.ErrorCode;
+import com.example.budget_management_app.common.exception.NotFoundException;
+import com.example.budget_management_app.common.exception.UserStatusException;
+import com.example.budget_management_app.common.exception.ValidationException;
 import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.security.service.TwoFactorAuthenticationService;
 import com.example.budget_management_app.session.domain.UserSession;
@@ -328,7 +331,7 @@ public class UserServiceImpl implements UserService {
     private void validateTfaCode(Long userId, String userSecret, String code) {
         if (!tfaService.isOptValid(userSecret, code)) {
             log.warn("User: {}, delivered invalid tfa code. Failed setup.", userId);
-            throw new TfaException("Invalid code", ErrorCode.INVALID_CODE);
+            throw new ValidationException("Invalid 2FA code provided", ErrorCode.INVALID_CODE);
         }
     }
 

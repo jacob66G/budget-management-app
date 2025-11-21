@@ -24,16 +24,7 @@ export class AuthService {
     return this.http.post<LoginResponse>(ApiPaths.Auth.LOGIN, loginData, { withCredentials: true }).pipe(
       tap((response) => {
         if (!response.isMfaRequired && response.accessToken) {
-          const user: User = {
-            id: response.userId,
-            name: response.name,
-            surname: response.surname,
-            email: response.email,
-            status: response.status,
-            createdAt: response.createdAt,
-            requestCloseAt: null
-          };
-
+          const user = this.buildUser(response);
           this.setAuthState(response.accessToken, user);
         }
       })
@@ -44,16 +35,7 @@ export class AuthService {
     return this.http.post<LoginResponse>(ApiPaths.Auth.LOGIN_2FA, twoFactorData, { withCredentials: true }).pipe(
       tap((response) => {
         if (response.accessToken) {
-          const user: User = {
-            id: response.userId,
-            name: response.name,
-            surname: response.surname,
-            email: response.email,
-            status: response.status,
-            createdAt: response.createdAt,
-            requestCloseAt: null
-          };
-
+          const user = this.buildUser(response);
           this.setAuthState(response.accessToken, user);
         }
       })
@@ -73,16 +55,7 @@ export class AuthService {
       ApiPaths.Auth.REFRESH_TOKEN, { withCredentials: true }).pipe(
         tap((response) => {
           if (response.accessToken) {
-            const user: User = {
-              id: response.userId,
-              name: response.name,
-              surname: response.surname,
-              email: response.email,
-              status: response.status,
-              createdAt: response.createdAt,
-              requestCloseAt: null
-            };
-
+            const user = this.buildUser(response);
             this.setAuthState(response.accessToken, user);
           }
         }),
@@ -107,6 +80,19 @@ export class AuthService {
 
   resetPasswordConfirm(resetPasswordData: PasswordResetConfirmationRequest): Observable<ResponseMessage> {
     return this.http.post<ResponseMessage>(ApiPaths.Auth.RESET_PASSWORD_CONFIRM, resetPasswordData);
+  }
+
+  patchCurrentUser(partialUser: Partial<User>): void {
+    const current = this.currentUser();
+    if (current) {
+      const updatedUser = { ...current, ...partialUser };
+      this.updateCurrentUser(updatedUser);
+    }
+  }
+
+  updateCurrentUser(user: User): void {
+    this.currentUser.set(user);
+    localStorage.setItem(StorageKesy.USER_KEY, JSON.stringify(user));
   }
 
   private getStoredToken(): string | null {
@@ -138,17 +124,19 @@ export class AuthService {
     localStorage.removeItem(StorageKesy.USER_KEY);
   }
 
-  patchCurrentUser(partialUser: Partial<User>): void {
-    const current = this.currentUser();
-    if (current) {
-      const updatedUser = { ...current, ...partialUser };
-      this.updateCurrentUser(updatedUser);
-    }
-  }
+  private buildUser(response: LoginResponse): User {
+    const user: User = {
+      id: response.userId,
+      name: response.name,
+      surname: response.surname,
+      email: response.email,
+      status: response.status,
+      mfaEnabled: response.mfaEnabled,
+      createdAt: response.createdAt,
+      requestCloseAt: null
+    };
 
-  updateCurrentUser(user: User): void {
-    this.currentUser.set(user);
-    localStorage.setItem(StorageKesy.USER_KEY, JSON.stringify(user));
+    return user;
   }
 
 }

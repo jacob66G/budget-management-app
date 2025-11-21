@@ -28,17 +28,21 @@ export class VerifyEmail {
   isLoading = signal(true);
   isSuccess = signal(false);
   errorMessage = signal<string | null>(null);
+  
+  private code: string | null = null;
+
+  constructor() {
+    this.code = this.route.snapshot.queryParamMap.get('code');
+  }
 
   ngOnInit(): void {
-    const code = this.route.snapshot.queryParamMap.get('code');
-
-    if (!code) {
+    if (!this.code) {
       this.isLoading.set(false);
       this.errorMessage.set('No verification code in the link.');
       return;
     }
 
-    this.authService.verifyEmail(code).subscribe({
+    this.authService.verifyEmail(this.code).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.isSuccess.set(true);

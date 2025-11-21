@@ -37,6 +37,11 @@ export class Login2fa {
 
   private userId: number | null = null;
 
+  constructor() {
+    const navigation = this.router.currentNavigation();
+    this.userId = navigation?.extras?.state?.['userId']
+  }
+
   ngOnInit(): void {
     this.tfaForm = this.fb.group({
       code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
@@ -44,7 +49,6 @@ export class Login2fa {
 
      if (!this.userId) {
       this.router.navigate(['/login']);
-      return;
     }
   }
 
