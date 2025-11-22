@@ -1,4 +1,4 @@
-import { catchError, Observable, of, tap } from "rxjs";
+import { catchError, map, Observable, of, tap } from "rxjs";
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { LoginRequest, LoginResponse, PasswordResetConfirmationRequest, RegistrationRequest, TwoFactorLoginRequest } from "../../features/auth/model/auth.model";
 import { ResponseMessage } from "../models/response-message.model";
@@ -15,6 +15,22 @@ export class AuthService {
   accessToken = signal<string | null>(this.getStoredToken());
 
   constructor(private http: HttpClient) { }
+
+  checkAuth(): Observable<boolean> {
+    if (this.currentUser()) {
+      return of(true);
+    }
+
+    return this.refreshToken().pipe(
+      map(response => {
+        if (response) {
+          return true;
+        }
+        return false;
+      }),
+      catchError(() => of(false))
+    );
+  }
 
   register(registrationData: RegistrationRequest): Observable<ResponseMessage> {
     return this.http.post<ResponseMessage>(ApiPaths.Auth.REGISTER, registrationData);

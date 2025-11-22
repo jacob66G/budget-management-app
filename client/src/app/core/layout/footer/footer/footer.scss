@@ -1,0 +1,32 @@
+:host {
+  display: block;
+  width: 100%;
+  background-color: #fff; 
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  margin-top: auto;
+}
+
+.footer-content {
+  padding: 20px 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.copyright {
+  font-size: 0.875rem;
+  color: #5f6368;
+
+  strong {
+    font-weight: 500;
+    color: var(--primary-color, #3f51b5);
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-content {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+}

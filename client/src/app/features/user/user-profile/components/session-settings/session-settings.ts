@@ -11,9 +11,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserSession } from '../../model/user-profile.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
-import { ConfirmDialog, ConfirmDialogData } from '../../../../../shared/confirm-dialog/confirm-dialog';
 import { MatDialog } from '@angular/material/dialog';
-import { filter } from 'rxjs';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { Router } from '@angular/router';
 

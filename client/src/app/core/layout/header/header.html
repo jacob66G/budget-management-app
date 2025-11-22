@@ -1,0 +1,34 @@
+<mat-toolbar color="primary" class="app-header">
+
+  <a routerLink="/app/dashboard" class="brand-logo">
+    <mat-icon class="logo-icon">account_balance_wallet</mat-icon>
+    <span class="app-name">SmartBudget</span>
+  </a>
+
+  <span class="spacer"></span>
+
+  @if (currentUser(); as user) {
+
+  <div class="user-profile">
+
+    <div class="user-avatar-small">
+      <mat-icon>account_circle</mat-icon>
+    </div>
+
+    <button mat-button class="user-profile-btn" (click)="onProfileClick()" matTooltip="Go to profile">
+      <span class="user-name">
+        {{ user.name }} {{ user.surname }}
+      </span>
+    </button>
+
+  </div>
+
+  <div class="vertical-divider"></div>
+
+  <button mat-icon-button (click)="onLogout()" matTooltip="Log out">
+    <mat-icon>logout</mat-icon>
+  </button>
+
+  }
+
+</mat-toolbar>

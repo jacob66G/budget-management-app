@@ -1,0 +1,39 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-header {
+  z-index: 1000;
+  flex-shrink: 0;
+}
+
+.sidenav-container {
+  flex: 1; 
+  background-color: #f4f7f6;
+}
+
+.app-sidenav {
+  width: 250px;
+  background-color: #fff;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.content-wrapper-with-footer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%; 
+  box-sizing: border-box;
+}
+
+.router-content {
+  flex: 1; 
+}

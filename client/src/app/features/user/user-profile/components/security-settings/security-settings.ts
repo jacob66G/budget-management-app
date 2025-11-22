@@ -9,14 +9,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ChangePasswordDialog } from './dialog/change-password-dialog/change-password-dialog';
-import { ManageTfaDialog } from './dialog/manage-tfa-dialog/manage-tfa-dialog';
 import { UserService } from '../../../../../core/services/user.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ConfirmDialog, ConfirmDialogData } from '../../../../../shared/confirm-dialog/confirm-dialog';
 import { filter } from 'rxjs';
 import { ResponseMessage } from '../../../../../core/models/response-message.model';
 import { Router } from '@angular/router';
+import { ChangePasswordDialog } from './dialogs/change-password-dialog/change-password-dialog';
+import { ManageTfaDialog } from './dialogs/manage-tfa-dialog/manage-tfa-dialog';
+import { ConfirmDialog, ConfirmDialogData } from '../../../../../shared/components/dialogs/confirm-dialog/confirm-dialog';
 
 
 @Component({
