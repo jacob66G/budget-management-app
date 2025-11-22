@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { UserService } from '../../../../../../../core/services/user.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { passwordsMatchValidator } from '../../../../../../auth/components/registration/registration';
+import { passwordsMatchValidator } from '../../../../../../auth/pages/registration/registration';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangePasswordRequest } from '../../../../model/user-profile.model';
 import { CommonModule } from '@angular/common';

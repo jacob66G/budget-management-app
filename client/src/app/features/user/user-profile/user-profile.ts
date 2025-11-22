@@ -3,9 +3,9 @@ import { Component } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { ProfileDetails } from "./components/profile-details/profile-details";
-import { SecuritySettings } from "./components/security-settings/security-settings";
-import { SessionSettings } from "./components/session-settings/session-settings";
+import { ProfileDetails } from "./pages/profile-details/profile-details";
+import { SecuritySettings } from "./pages/security-settings/security-settings";
+import { SessionSettings } from "./pages/session-settings/session-settings";
 
 @Component({
   selector: 'app-user-profile',

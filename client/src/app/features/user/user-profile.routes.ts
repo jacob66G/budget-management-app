@@ -8,17 +8,17 @@ export const USER_PROFILE_ROUTE: Routes = [
         children: [
             {
                 path: 'details',
-                loadComponent: () => import('./user-profile/components/profile-details/profile-details').then(m => m.ProfileDetails),
+                loadComponent: () => import('./user-profile/pages/profile-details/profile-details').then(m => m.ProfileDetails),
                 title: 'Profile Details'
             },
             {
                 path: 'security',
-                loadComponent: () => import('./user-profile/components/security-settings/security-settings').then(m => m.SecuritySettings),
+                loadComponent: () => import('./user-profile/pages/security-settings/security-settings').then(m => m.SecuritySettings),
                 title: 'Security Settings'
             },
             {
                 path: 'sessions',
-                loadComponent: () => import('./user-profile/components/session-settings/session-settings').then(m => m.SessionSettings),
+                loadComponent: () => import('./user-profile/pages/session-settings/session-settings').then(m => m.SessionSettings),
                 title: 'Session Settings'
             },
             {

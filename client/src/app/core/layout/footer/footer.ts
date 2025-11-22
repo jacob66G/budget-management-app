@@ -8,9 +8,8 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     MatButtonModule
-  ],
+],
   templateUrl: './footer.html',
   styleUrl: './footer.scss'
 })
