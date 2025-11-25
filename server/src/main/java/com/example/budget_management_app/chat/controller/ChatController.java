@@ -28,14 +28,14 @@ public class ChatController {
     public ResponseEntity<List<Chat>> getAllChatsForUser(
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
-        return ResponseEntity.ok(chatService.getAllChatsForUser(userDetails.getUser().getId()));
+        return ResponseEntity.ok(chatService.getAllChatsForUser(userDetails.getId()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<List<ChatMessage>> getChatMessages(
             @PathVariable String id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(chatService.getChatMessages(id, userDetails.getUser().getId()));
+        return ResponseEntity.ok(chatService.getChatMessages(id, userDetails.getId()));
     }
 
     @PostMapping
@@ -44,11 +44,11 @@ public class ChatController {
             @RequestBody ChatRequest request
             ) {
 
-        ChatStartResponse response = chatService.createChat(userDetails.getUser().getId(), request.message());
+        ChatStartResponse response = chatService.createChat(userDetails.getId(), request.message());
 
         return ResponseEntity
                 .created(UriComponentsBuilder.fromPath(ApiPaths.BASE_API)
-                        .pathSegment(ApiPaths.VERSION)
+                        .pathSegment(ApiPaths.VERSIONING)
                         .pathSegment(ApiPaths.CHATS)
                         .pathSegment(String.valueOf(response.chatId()))
                         .build().toUri())
@@ -60,6 +60,6 @@ public class ChatController {
             @PathVariable String id,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody ChatRequest request) {
-        return ResponseEntity.ok(new ChatMessage(chatService.chat(id, userDetails.getUser().getId(), request.message(), false), Constants.ASSISTANT_MESSAGE_TYPE));
+        return ResponseEntity.ok(new ChatMessage(chatService.chat(id, userDetails.getId(), request.message(), false), Constants.ASSISTANT_MESSAGE_TYPE));
     }
 }

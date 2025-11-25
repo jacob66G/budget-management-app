@@ -1,6 +1,5 @@
 package com.example.budget_management_app.chat.service;
 
-import com.example.budget_management_app.chat.constants.Constants;
 import com.example.budget_management_app.chat.dao.ChatMemoryDao;
 import com.example.budget_management_app.chat.dto.Chat;
 import com.example.budget_management_app.chat.dto.ChatMessage;
@@ -13,13 +12,19 @@ import com.example.budget_management_app.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
+
+    @Value("classpath:ai-prompts/system-message-description.st")
+    private Resource descriptionCreatorSystemMessage;
 
     private final ChatClient chatClient;
     private final ChatMemoryDao chatMemoryDao;
@@ -70,6 +75,8 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public String chat(String chatId, Long userId, String message, boolean justCreated) {
 
+        String today = LocalDate.now().toString();
+
         if (!this.chatMemoryDao.chatExists(chatId, userId)) {
             throw new NotFoundException("Chat", chatId, ErrorCode.CHAT_NOT_FOUND);
         }
@@ -83,6 +90,7 @@ public class ChatServiceImpl implements ChatService {
 
         return this.chatClient
                 .prompt(message)
+                .system( s -> s.param("current_date", today))
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
                 .call()
                 .content();
@@ -96,7 +104,7 @@ public class ChatServiceImpl implements ChatService {
     private String generateDescription(String message) {
         return this.chatClient
                 .prompt()
-                .system(Constants.DESCRIPTION_PROMPT)
+                .system(descriptionCreatorSystemMessage)
                 .user(message)
                 .call()
                 .content();

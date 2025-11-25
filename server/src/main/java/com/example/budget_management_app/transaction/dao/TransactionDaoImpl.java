@@ -7,6 +7,7 @@ import com.example.budget_management_app.recurring_transaction.domain.RecurringT
 import com.example.budget_management_app.transaction.domain.*;
 import com.example.budget_management_app.transaction.dto.TransactionPaginationParams;
 import com.example.budget_management_app.transaction.dto.TransactionFilterParams;
+import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import com.example.budget_management_app.user.domain.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -248,6 +249,49 @@ public class TransactionDaoImpl implements TransactionDao {
         em.createQuery("DELETE FROM Transaction t WHERE t.account.user.id = :userId")
                 .setParameter("userId", userId)
                 .executeUpdate();
+    }
+
+    /**
+     * @param startDate
+     * @param endDate
+     * @param accountName
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<Tuple> getUserExpensesByAccount(LocalDate startDate, LocalDate endDate, String accountName, Long userId) {
+
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Tuple> cq = cb.createTupleQuery();
+        Root<Transaction> root = cq.from(Transaction.class);
+        Join<Transaction, Category> category = root.join("category", JoinType.INNER);
+        Join<Transaction, Account> account = root.join("account", JoinType.INNER);
+        Join<Account, User> user = account.join("user", JoinType.INNER);
+
+        cq.multiselect(
+                root.get("title").alias("title"),
+                root.get("amount").alias("amount"),
+                category.get("name").alias("categoryName")
+        );
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        predicates.add(cb.equal(root.get("type"), TransactionType.EXPENSE));
+        predicates.add(cb.equal(user.get("id"), userId));
+        predicates.add(cb.equal(account.get("name"), accountName));
+
+        if (startDate != null) {
+            predicates.add(cb.greaterThanOrEqualTo(root.get("transactionDate"), startDate));
+        }
+        if (endDate != null) {
+            predicates.add(cb.lessThanOrEqualTo(root.get("transactionDate"), endDate));
+        }
+
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        cq.orderBy(cb.desc(root.get("transactionDate")));
+
+        return em.createQuery(cq)
+                .getResultList();
     }
 
     private List<Predicate> setPredicates(

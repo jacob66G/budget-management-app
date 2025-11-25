@@ -1,0 +1,1 @@
+Generate a chat description based on the message, limiting the description to 30 characters.

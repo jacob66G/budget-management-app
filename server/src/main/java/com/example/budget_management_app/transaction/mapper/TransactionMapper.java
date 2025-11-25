@@ -1,5 +1,6 @@
 package com.example.budget_management_app.transaction.mapper;
 
+import com.example.budget_management_app.chat.dto.TransactionDataResponse;
 import com.example.budget_management_app.common.enums.SupportedCurrency;
 import com.example.budget_management_app.common.service.StorageService;
 import com.example.budget_management_app.transaction.domain.Transaction;
@@ -22,6 +23,16 @@ public class TransactionMapper {
 
     private final StorageService storageService;
 
+    public List<TransactionDataResponse> toTransactionDataResponse(List<Tuple> tuples) {
+
+        return tuples.stream()
+                .map( tuple -> new TransactionDataResponse(
+                        tuple.get("title", String.class),
+                        tuple.get("amount", BigDecimal.class),
+                        tuple.get("categoryName", String.class)
+                ))
+                .toList();
+    }
     public List<TransactionSummary> toDto(List<Tuple> tuples) {
 
         return tuples.stream()

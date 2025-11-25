@@ -1,10 +1,11 @@
 package com.example.budget_management_app.transaction.dao;
 
 import com.example.budget_management_app.transaction.domain.Transaction;
-import com.example.budget_management_app.transaction.dto.TransactionPaginationParams;
 import com.example.budget_management_app.transaction.dto.TransactionFilterParams;
+import com.example.budget_management_app.transaction.dto.TransactionPaginationParams;
 import jakarta.persistence.Tuple;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,4 +38,6 @@ public interface TransactionDao {
     void deleteAllByAccount(Long accountId, Long userId);
 
     void deleteAllByUser(Long userId);
+
+    List<Tuple> getUserExpensesByAccount(LocalDate startDate, LocalDate endDate, String accountName, Long userId);
 }
