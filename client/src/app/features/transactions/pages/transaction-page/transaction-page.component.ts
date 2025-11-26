@@ -10,7 +10,6 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { MatDialog } from '@angular/material/dialog';
 import { AddTransactionDialogComponent } from '../../components/add-transaction-dialog/add-transaction-dialog.component';
 import { TransactionType } from '../../constants/transaction-type.enum';
-import { CategoryType } from '../../../../core/models/category-response-dto.model';
 import { TransactionCreateRequest } from '../../model/transaction-create-request.model';
 import { TransactionMapper } from '../../mappers/transaction.mapper';
 import { TransactionService } from '../../services/transaction.service';
@@ -24,15 +23,30 @@ import { TransactionModeFilter } from '../../constants/transaction-mode-filter.e
 import { TransactionDateRangeFilter } from '../../constants/transaction-data-range-filter.enum';
 import { TransactionSortingDirection } from '../../constants/transaction-sorting-direction.enum';
 import { TransactionSortByFilter } from '../../constants/transaction-sort-by-filter.enum';
-import { UpperCasePipe } from '@angular/common';
+import { TransactionFilterParams } from '../../model/transaction-filter-params.model';
+import { MatTooltip } from "@angular/material/tooltip";
+import { MatDividerModule } from '@angular/material/divider';
+import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
+import { DatePipe } from '@angular/common';
+import { Pagination } from '../../model/pagination.model';
+import { DecimalPipe } from '@angular/common';
+import { ConfirmDialog } from '../../../../shared/components/dialogs/confirm-dialog/confirm-dialog';
+import { MatSnackBar} from '@angular/material/snack-bar';
+import { UpdateTransactionDialogComponent } from '../../components/update-transaction-dialog/update-transaction-dialog.component';
+import { TransactionUpdateData } from '../../model/transaction-update-data.model';
+import { TransactionUpdateRequest } from '../../model/transaction-update-request.model';
 
 @Component({
   selector: 'app-transaction-page',
-  imports: [HeaderComponent, MatCardModule, MatFormFieldModule, MatSelectModule, MatIconModule, UpperCasePipe],
+  imports: [HeaderComponent, MatCardModule, MatFormFieldModule, MatSelectModule, MatIconModule, MatDividerModule, MatTooltip, MatListModule, MatMenuModule, DatePipe, DecimalPipe],
   templateUrl: './transaction-page.component.html',
   styleUrl: './transaction-page.component.scss'
 })
 export class TransactionPageComponent implements OnInit{
+
+  pagination?: Pagination;
+  links!: { [key: string]: string };
 
   accounts: AccountSummary[] = [];
   categories: CategorySummary[] = [];
@@ -41,45 +55,58 @@ export class TransactionPageComponent implements OnInit{
   transactionTypes = Object.values(TransactionType);
   headerTitle: string = 'Transactions';
   createTransactionButtonTitle: string = 'Add Transaction';
-  sortDirection = 'desc';
 
   readonly dialog = inject(MatDialog);
   private accountService = inject(AccountService);
   private categoryService = inject(CategoryService);
   private transactionService = inject(TransactionService);
+  private snackBar = inject(MatSnackBar);
 
   typeOptions = [
     { value: TransactionTypeFilter.ALL, label: 'All' },
     { value: TransactionTypeFilter.INCOME, label: 'Income' },
     { value: TransactionTypeFilter.EXPENSE, label: 'Expense' }
   ];
-  selectedType = TransactionTypeFilter.ALL;
   
   modeOptions = [
     { value: TransactionModeFilter.ALL, label: 'All' },
     { value: TransactionModeFilter.REGULAR, label: 'Regular' },
     { value: TransactionModeFilter.RECURRING, label: 'Recurring' }
   ];
-  selectedMode = TransactionModeFilter.ALL;
-
+  
   dateRangeOptions = [
+    { value: TransactionDateRangeFilter.LAST_WEEK, label: 'Last week'},
     { value: TransactionDateRangeFilter.LAST_MONTH, label: 'Last month'},
     { value: TransactionDateRangeFilter.LAST_THREE_MONTHS, label: 'Last 3 months' },
-    { value: TransactionDateRangeFilter.CUSTOM_DATE_RANGE, label: 'Custom range' }
+    { value: TransactionDateRangeFilter.LAST_SIX_MONTHS, label: 'Last 6 months'}
   ];
-  selectedDateRange = TransactionDateRangeFilter.LAST_MONTH;
-
-  selectedAccount = 'ALL';
-  selectedCategory = 'ALL';
 
   sortByOptions = [
     { value: TransactionSortByFilter.DATE, label: 'Date'},
     { value: TransactionSortByFilter.AMOUNT, label: 'Amount' },
     { value: TransactionSortByFilter.CATEGORY, label: 'Category' }
   ];
-  selectedSortBy = TransactionSortByFilter.DATE;
 
+  filter: TransactionFilterParams = {
+    type: TransactionTypeFilter.ALL,
+    mode: TransactionModeFilter.ALL,
+    accountIds: undefined,
+    categoryIds: undefined,
+    since: undefined,
+    to: undefined,
+    page: 1,
+    limit: 8,
+    sortedBy: TransactionSortByFilter.DATE,
+    sortDirection: TransactionSortingDirection.DESC
+  };
+
+  selectedType = TransactionTypeFilter.ALL;
+  selectedMode = TransactionModeFilter.ALL;
+  selectedDateRange = TransactionDateRangeFilter.LAST_MONTH;
+  selectedAccount = 'ALL';
+  selectedCategory = 'ALL';
   selectedSortingDirection = TransactionSortingDirection.DESC;
+  selectedSortBy = TransactionSortByFilter.DATE;
 
   ngOnInit(): void {
     this.loadAccounts();
@@ -93,26 +120,229 @@ export class TransactionPageComponent implements OnInit{
 
   onTypeChange(event: MatSelectChange): void {
     console.log("Type changed: ", event.value);
+    this.updateFilter({type: event.value});
   }
   
   onModeChange(event: MatSelectChange): void {
     console.log("Mode change: ", event.value);
+    this.updateFilter({mode: event.value});
   }
 
   onCategoryChange(event: MatSelectChange): void {
     console.log("Category change: ", event.value);
+    
+    const value = event.value;
+
+    const categoryIds = value === 'ALL' ? undefined : [value];
+    this.updateFilter({categoryIds});
   }
 
   onAccountChange(event: MatSelectChange): void {
     console.log("Account change: ", event.value);
+
+    const value = event.value;
+    const accountIds = value === 'ALL' ? undefined : [value];
+    this.updateFilter({accountIds});
   }
 
   onDateRangeChange(event: MatSelectChange): void {
    console.log("Date range change: ", event.value); 
+
+   this.calculateDateRange(event.value);
   }
 
-  onSortDirectionChange(event: any): void {
+  onSortByChange(event: MatSelectChange): void {
+    console.log("Sort by field changed: ", event.value);
+
+    this.updateFilter({sortedBy: event.value});
+  }
+
+  onSortDirectionChange(): void {
     console.log("Sort direction changed");
+
+    const newDirection = this.selectedSortingDirection === TransactionSortingDirection.DESC 
+      ? TransactionSortingDirection.ASC 
+      : TransactionSortingDirection.DESC;
+
+    this.selectedSortingDirection = newDirection;
+    this.updateFilter({sortDirection: newDirection});
+  }
+
+  private updateFilter(changes: Partial<TransactionFilterParams>): void {
+    this.filter = {
+      ...this.filter,
+      ...changes,
+      page: 1
+    };
+
+    console.log('Nowy stan filtra:', this.filter);
+    this.loadTransactions();
+  }
+
+  private calculateDateRange(range: TransactionDateRangeFilter): void {
+
+    let since: string | undefined;
+    let to: string | undefined;
+
+    switch (range) {
+
+      case TransactionDateRangeFilter.LAST_WEEK:
+        const now = new Date();
+        const lastWeek = new Date();
+        lastWeek.setDate(now.getDate() - 7);
+
+        to = undefined;
+        since = this.formatDate(lastWeek);
+
+        break;
+
+      case TransactionDateRangeFilter.LAST_MONTH:
+        since = undefined;
+        to = undefined;
+        break;
+
+      case TransactionDateRangeFilter.LAST_THREE_MONTHS:
+        const now3 = new Date();
+        const lastThreeMonths = new Date();
+        lastThreeMonths.setMonth(now3.getMonth() - 3);
+        
+        to = undefined;
+        since = this.formatDate(lastThreeMonths);
+        break;
+      
+      case TransactionDateRangeFilter.LAST_SIX_MONTHS:
+        const now6 = new Date();
+        const lastSixMonths = new Date();
+        lastSixMonths.setMonth(now6.getMonth() - 6);
+
+        to = undefined;
+        since = this.formatDate(lastSixMonths);
+    }
+    this.updateFilter({ since, to });
+  }
+
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  onEditTransaction(id: number) {
+
+    const transactionToUpdate = this.transactions.find( (tr) => tr.id === id);
+
+    if (transactionToUpdate) {
+          const dialogRef = this.dialog.open(UpdateTransactionDialogComponent, {
+            width: '600px',
+            data: {
+              title: transactionToUpdate.title,
+              amount: transactionToUpdate.amount,
+              description: transactionToUpdate.description
+            }
+          });
+
+          dialogRef.afterClosed().subscribe( (formData) => {
+            if (formData) {
+              console.log("Updating transactions");
+
+              const updateDto: TransactionUpdateRequest = {
+                ...formData
+              };
+
+              this.transactionService.updateTransaction(id, updateDto).subscribe({
+                next: () => {
+                  console.log("Transaction updated");
+                  this.loadTransactions();
+                }
+              })
+              
+            } else {
+              console.log("Update canceled");
+            }
+          })
+    } else {
+      console.error('Error occurred');
+            this.snackBar.open('Failed to find transaction', 'Close', {
+              duration: 3000,
+              panelClass: ['error-snackbar']
+            });
+    }
+  }
+
+  onDeleteTransaction(id: number) {
+    console.log('Delete', id);
+
+    const dialogRef = this.dialog.open(ConfirmDialog, {
+      width: '400px',
+      data: {
+        title: 'Delete Transaction',
+        message: 'Are you sure you want to delete this transaction? This action cannot be undone.',
+        confirmButtonText: 'Delete',
+        confirmButtonColor: 'warn'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      
+      if (result === true) {
+      
+        this.transactionService.deleteTransaction(id).subscribe({
+          
+          next: () => {
+            this.loadTransactions();
+
+            this.snackBar.open('Transaction deleted successfully', 'Close', {
+              duration: 3000
+            });
+
+            console.log(`Transaction with id: ${id} deleted`);
+          },
+          
+          error: (err) => {
+            console.error('Error deleting transaction', err);
+            this.snackBar.open('Failed to delete transaction', 'Close', {
+              duration: 3000,
+              panelClass: ['error-snackbar']
+            });
+          }
+        });
+      }
+    });
+  }
+  
+  prevPage() {
+    if (!this.pagination) return;
+    if (this.pagination.page > 1) {
+      this.filter = {
+        ...this.filter,
+        page: this.pagination.page - 1,
+      };
+      this.loadTransactions();
+    }
+  }
+
+  nextPage() { 
+    if (!this.pagination) return;
+    if (this.pagination.page < this.pagination.totalPages) {
+      this.filter = {
+        ...this.filter,
+        page: this.pagination.page + 1,
+      };
+      this.loadTransactions();
+    }
+  }
+
+  lastPage() {
+    if (!this.pagination) return;
+    if (this.pagination.page < this.pagination.totalPages) {
+
+      this.filter = {
+        ...this.filter,
+        page: this.pagination.totalPages
+      };
+      this.loadTransactions();
+    }
   }
 
   openAddTransactionDialog(): void {
@@ -156,7 +386,7 @@ export class TransactionPageComponent implements OnInit{
                   recurringTransactionsId: 0,
 
                 }
-              this.transactions.push(transaction);
+              this.loadTransactions();
               }
               
             },
@@ -175,13 +405,18 @@ export class TransactionPageComponent implements OnInit{
   }
 
   loadTransactions(): void {
-    this.transactionService.getTransactions().subscribe({
-      next: (data) => {
-        console.log("fetching transactions first page: ", data);
-        this.transactions = data;
+    this.transactionService.getTransactions(this.filter).subscribe({
+      next: (response) => {
+        console.log("fetching transactions first page: ", response);
+        
+        this.transactions = response.data;
+
+        this.pagination = response.pagination;
+
+        this.links = response.links;
       },
       error: (error) => {
-        console.log("error occurred when fetching transactions");
+        console.log("error occurred when fetching transactions", error);
       }
     })
   }
