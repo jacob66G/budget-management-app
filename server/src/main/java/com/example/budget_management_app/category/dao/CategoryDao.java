@@ -15,7 +15,7 @@ public class CategoryDao {
     private EntityManager em;
 
     public List<Category> findByUser(Long userId, String type) {
-        return em.createQuery("SELECT c FROM Category c WHERE c.user.id = :userId AND (:type IS NULL OR LOWER(c.type) = LOWER(:type)) ", Category.class)
+        return em.createQuery("SELECT c FROM Category c WHERE c.user.id = :userId AND (:type IS NULL OR LOWER(c.type) = LOWER(cast(:type as text))) ", Category.class)
                 .setParameter("userId", userId)
                 .setParameter("type", type)
                 .getResultList();

@@ -1,0 +1,277 @@
+@use 'sass:color';
+
+// --- ZMIENNE ---
+$bg-color: #f5f7fa;
+$text-primary: #333;
+$text-secondary: #7e8299;
+$green: #10b981;
+$red: #ef4444;
+$border-color: #e0e0e0;
+
+// --- GŁÓWNY KONTENER ---
+.container {
+  // Twój zwiększony padding
+  padding: 30px 150px;
+  background-color: $bg-color;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// --- FILTRY (ZMODYFIKOWANE DLA JEDNEGO RZĘDU) ---
+.filters-card {
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  
+  // Zapobiega "rozwaleniu" layoutu przez flexa przy małej ilości miejsca
+  min-width: 0;
+
+  .filters-row {
+    display: flex;
+    flex-wrap: nowrap; // Wymusza jedną linię
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    
+    // Umożliwia scrollowanie na bardzo wąskich ekranach
+    overflow-x: auto;
+    
+    // Kluczowe dla etykiet "Floating Label":
+    // Dodatkowy padding od góry, żeby overflow ich nie ucinał
+    padding-top: 10px;
+    padding-bottom: 4px; // Miejsce na ewentualny scrollbar
+    
+    // Opcjonalnie: ukrycie paska przewijania (dla estetyki)
+    &::-webkit-scrollbar {
+      height: 0;
+      background: transparent;
+    }
+  }
+
+  // Style layoutu dla pól formularza wewnątrz filtrów
+  .dense-form-field {
+    // Elastyczność: rozciągaj się (1), kurcz się (1), baza auto
+    flex: 1 1 auto;
+    
+    // Nadpisanie sztywnej szerokości Materiala
+    width: auto !important;
+    
+    // Minimalna szerokość, żeby tekst był czytelny
+    min-width: 110px;
+    max-width: 200px;
+  }
+
+  .divider-vertical {
+    width: 1px;
+    height: 32px;
+    background-color: $border-color;
+    margin-left: auto;
+    margin-right: auto;
+    flex-shrink: 0; // Nie pozwól, by separator zniknął przy ścisku
+  }
+
+  .sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    flex-shrink: 0; // Ta sekcja NIGDY się nie zwija
+    
+    .sort-select {
+      width: 130px;
+      min-width: 130px;
+      flex: 0 0 auto; // Sztywna szerokość dla sortowania
+    }
+  }
+}
+
+// --- NADPISANIE STYLÓW MATERIAL (WEWNĘTRZNE) ---
+::ng-deep .dense-form-field {
+  // Ukrywa miejsce na błędy/hinty pod inputem (bardziej kompaktowe)
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+  // Lekkie tło inputów
+  .mat-mdc-text-field-wrapper {
+    background-color: #f9f9f9;
+  }
+}
+
+// --- LISTA TRANSAKCJI ---
+.list-card {
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+
+.list-header {
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: $text-primary;
+  }
+
+  .tx-count {
+    color: $text-secondary;
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
+.transaction-item {
+  height: auto !important;
+  padding: 16px 24px !important;
+
+  // Ikony po lewej (okrągłe tło)
+  .icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    margin-right: 16px;
+    
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    // Warianty kolorystyczne ikon (używane przez [class]="...")
+    &.icon-green { background-color: rgba($green, 0.1); color: $green; }
+    &.icon-red { background-color: rgba($red, 0.1); color: $red; }
+    &.icon-orange { background-color: rgba(255, 152, 0, 0.1); color: orange; }
+    &.icon-teal { background-color: rgba(0, 150, 136, 0.1); color: teal; }
+  }
+
+  // Tytuł i Meta
+  .tx-title {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .tx-meta {
+    color: $text-secondary;
+    font-size: 13px;
+
+    .category-badge {
+      font-weight: 500;
+      // Nowoczesna metoda przyciemniania
+      color: color.adjust($text-secondary, $lightness: -20%);
+    }
+  }
+
+  // Prawa strona (Meta)
+  .item-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .amount-date-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      min-width: 100px;
+
+      .amount {
+        font-weight: 700;
+        font-size: 16px;
+        &.positive { color: $green; }
+        &.negative { color: $red; }
+      }
+
+      .date {
+        font-size: 12px;
+        color: $text-secondary;
+        margin-top: 4px;
+      }
+    }
+
+    .clean-menu-btn {
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 50% !important;
+
+      background-color: transparent !important;
+      
+      width: 40px;
+      height: 40px;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      mat-icon {
+        color: $text-secondary;
+        pointer-events: none;
+      }
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.08) !important; // Jasny szary (8% czerni)
+      }
+      
+      // Opcjonalnie: efekt wciśnięcia (active)
+      &:active {
+        background-color: rgba(0, 0, 0, 0.12) !important; // Nieco ciemniejszy przy kliknięciu
+      }
+    }
+  }
+}
+
+// --- PAGINACJA ---
+.pagination-footer {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  border-top: 1px solid $border-color;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+
+  .page-info {
+    color: $text-secondary;
+    font-size: 14px;
+    
+    strong {
+      color: $text-primary;
+    }
+  }
+
+  .page-actions {
+    display: flex;
+    gap: 8px;
+  }
+}
+
+.amount {
+  font-weight: 700;
+  font-size: 16px;
+  
+  // Domyślny kolor (opcjonalnie)
+  color: #333; 
+
+  &.positive {
+    color: #10b981; // Zielony
+  }
+
+  &.negative {
+    color: #ef4444; // Czerwony
+  }
+
+  .currency-symbol {
+    // font-size: 0.85em; // Symbol nieco mniejszy od cyfr wygląda profesjonalniej
+    margin-left: 4px;  // Odstęp od liczby
+    font-weight: 500;  // Nieco lżejszy niż gruba kwota
+  }
+}

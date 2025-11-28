@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 public record TransactionSummary(
         Long id,
+        String title,
         BigDecimal amount,
         TransactionType type,
         String description,

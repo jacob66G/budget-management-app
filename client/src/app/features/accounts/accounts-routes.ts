@@ -3,7 +3,7 @@ import { Routes } from "@angular/router";
 export const ACCOUNTS_ROUTES: Routes = [
     {
         path: '',
-        loadComponent: () => 
+        loadComponent: () =>
             import('./pages/accounts-list/accounts-list').then((m) => m.AccountsListPage),
         title: 'Accounts'
     },
@@ -21,9 +21,9 @@ export const ACCOUNTS_ROUTES: Routes = [
     },
     {
         path: 'edit/:id',
-        loadComponent: () => 
+        loadComponent: () =>
             import('./pages/account-edit/account-edit.page').then((m) => m.AccountEditPage),
         title: 'Edit Account'
     },
-    
+
 ]

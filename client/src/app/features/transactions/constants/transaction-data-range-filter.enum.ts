@@ -1,0 +1,7 @@
+export enum TransactionDateRangeFilter {
+    LAST_WEEK = 'LAST_WEEK',
+    LAST_MONTH = 'LAST_MONTH',
+    LAST_THREE_MONTHS = 'LAST_THREE_MONTHS',
+    LAST_SIX_MONTHS = 'LAST_SIX_MONTHS',
+    CUSTOM_DATE_RANGE = 'CUSTOM_DATE_RANGE'
+}

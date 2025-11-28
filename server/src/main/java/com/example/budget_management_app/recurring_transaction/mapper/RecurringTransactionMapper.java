@@ -80,7 +80,7 @@ public class RecurringTransactionMapper {
     public TransactionSummary toTransactionView(Transaction transaction, Long recTransactionId) {
         Account account = transaction.getAccount();
         Category category = transaction.getCategory();
-        return new TransactionSummary(transaction.getId(), transaction.getAmount(), transaction.getType(), transaction.getDescription(), transaction.getTransactionDate(),
+        return new TransactionSummary(transaction.getId(), transaction.getTitle(), transaction.getAmount(), transaction.getType(), transaction.getDescription(), transaction.getTransactionDate(),
                 new AccountSummary(account.getId(), account.getName(), account.getCurrency()),
                 new CategorySummary(category.getId(), category.getName(), category.getIconKey()), recTransactionId);
     }

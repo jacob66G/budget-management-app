@@ -22,6 +22,7 @@ public class TransactionMapper {
         return tuples.stream()
                 .map( tuple -> new TransactionSummary(
                         tuple.get("transactionId", Long.class),
+                        tuple.get("title", String.class),
                         tuple.get("amount", BigDecimal.class),
                         tuple.get("type", TransactionType.class),
                         tuple.get("description", String.class),

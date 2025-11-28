@@ -1,1 +1,172 @@
-<p>transaction-page works!</p>
+<app-header
+    [title] = "headerTitle"
+    [buttonLabel]="createTransactionButtonTitle"
+    (createTransactionClick)="handleAddTransactionEvent()"
+></app-header>
+<div class="container">
+  
+  <mat-card class="filters-card">
+    <div class="filters-row">
+      
+      <mat-form-field appearance="outline" class="dense-form-field">
+        <mat-label>Frequency</mat-label>
+        <mat-select [(value)]="selectedMode" (selectionChange)="onModeChange($event)">
+          @for (mode of modeOptions; track mode.value) {
+                <mat-option [value]="mode.value">{{mode.label}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="dense-form-field">
+        <mat-label>Transaction Type</mat-label>
+        <mat-select [(value)]="selectedType" (selectionChange)="onTypeChange($event)">
+          @for (type of typeOptions; track type.value) {
+            <mat-option [value]="type.value">{{type.label}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="dense-form-field">
+        <mat-label>Category</mat-label>
+        <mat-select [(value)]="selectedCategory" (selectionChange)="onCategoryChange($event)">
+          <mat-option value="ALL">All</mat-option>
+          @for (category of categories; track category.id) {
+            <mat-option [value]="category.id">{{category.name}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="dense-form-field">
+        <mat-label>Account</mat-label>
+        <mat-select [(value)]="selectedAccount" (selectionChange)="onAccountChange($event)">
+          <mat-option value="ALL">All</mat-option>
+          @for (account of accounts; track account.id) {
+            <mat-option [value]="account.id">{{account.name}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="dense-form-field">
+        <mat-label>Date Range</mat-label>
+        <mat-select [(value)]="selectedDateRange" (selectionChange)="onDateRangeChange($event)">
+          @for (range of dateRangeOptions; track range.value) {
+            <mat-option [value]="range.value">{{range.label}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="divider-vertical"></div>
+
+      <div class="sort-controls">
+        <mat-form-field appearance="outline" class="dense-form-field sort-select">
+          <mat-label>Sort By</mat-label>
+          <mat-select [(value)]="selectedSortBy" (selectionChange)="onSortByChange($event)">
+            @for (sortField of sortByOptions; track sortField.value) {
+              <mat-option [value]="sortField.value">{{sortField.label}}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-stroked-button 
+                color="primary"
+                (click)="onSortDirectionChange()"
+                matTooltip="Change sort direction">
+
+          <mat-icon>
+            {{ selectedSortingDirection === 'DESC' ? 'arrow_upward' : 'arrow_downward' }}
+          </mat-icon>
+        </button>
+      </div>
+
+    </div>
+  </mat-card>
+
+  <mat-card class="list-card">
+    
+    <div class="list-header">
+      <h3>Recent Transactions</h3>
+      <span class="tx-count">{{ pagination?.totalCount ?? 0}} transactions found</span>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <mat-list>
+      @for (tx of transactions; track tx.id) {
+        
+        <mat-list-item class="transaction-item">
+          
+          <div matListItemIcon class="icon-wrapper">
+            <mat-icon>{{ tx.category.iconKey }}</mat-icon>
+          </div>
+
+          <div matListItemTitle class="tx-title">{{ tx.title }}</div>
+          <div matListItemLine class="tx-meta">
+            {{ tx.account.name }} • <span class="category-badge">{{ tx.category.name }}</span>
+          </div>
+
+          @if (tx.description) {
+            <div matListItemLine class="tx-desc">
+              <span>Note: </span>
+              {{tx.description}}
+            </div>
+          }
+
+          <div class="item-actions" matListItemMeta>
+            <div class="amount-date-wrapper">
+              <span class="amount" 
+                    [class.positive]="tx.type === 'INCOME'" 
+                    [class.negative]="tx.type === 'EXPENSE'">
+                
+                {{ tx.type === 'INCOME' ? '+' : '-' }}
+
+                {{ tx.amount | number:'1.2-2' }}
+                
+                <span class="currency-symbol">{{ tx.account.currency }}</span>
+                
+              </span>
+              <span class="date">{{ tx.transactionDate | date:'mediumDate' }}</span>
+            </div>
+
+            <button mat-icon-button [matMenuTriggerFor]="menu" class="clean-menu-btn">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="onEditTransaction(tx.id)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item (click)="onDeleteTransaction(tx.id)" class="delete-item">
+                <mat-icon color="warn">delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </div>
+
+        </mat-list-item>
+
+        @if (!$last) {
+          <mat-divider></mat-divider>
+        }
+
+      } @empty {
+        <div class="empty-state">
+          No transaction found.
+        </div>
+      }
+    </mat-list>
+
+    <div class="pagination-footer">
+      <div class="page-info">
+        Page <strong>{{ pagination?.page }}</strong> of <strong>{{ pagination?.totalPages }}</strong>
+        Showing <strong> {{ pagination?.size }} </strong> of <strong>{{ pagination?.totalCount }}</strong>
+      </div>
+      <div class="page-actions">
+        <button mat-button (click)="prevPage()" [disabled]="!pagination?.hasPrevious">Previous Page</button>
+        <button mat-button (click)="nextPage()" [disabled]="!pagination?.hasNext">Next Page</button>
+        <button mat-stroked-button color="primary" (click)="lastPage()" [disabled]="pagination?.page === pagination?.totalPages">Last Page</button>
+      </div>
+    </div>
+
+  </mat-card>
+  
+</div>
