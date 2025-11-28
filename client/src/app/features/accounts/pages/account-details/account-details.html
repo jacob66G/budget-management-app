@@ -1,0 +1,176 @@
+<div class="account-details-container">
+
+  @if (isLoading()) {
+  <div class="loading-container">
+    <mat-spinner [diameter]="50"></mat-spinner>
+  </div>
+  } @else if (account(); as acc) {
+
+  <header class="page-header">
+    <div class="header-content">
+      <div class="icon-wrapper">
+        @if (account()?.iconPath) {
+        <img [src]="account()?.iconPath" alt="Account Icon" class="account-img">
+        } @else {
+        <mat-icon class="default-icon">account_balance_wallet</mat-icon>
+        }
+      </div>
+
+      <div class="title-content">
+        <div class="title-group">
+          <h1 class="page-title">{{ acc.name }}</h1>
+          @if (acc.isDefault) { <span class="badge default">DEFAULT</span> }
+          <span class="badge status" [class.active]="acc.status.toUpperCase() === 'ACTIVE'">{{ acc.status }}</span>
+        </div>
+        <p class="page-subtitle">{{ acc.type }} • {{ acc.currency }}</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button mat-flat-button class="change-status-btn"
+        [color]="acc.status.toUpperCase() === 'ACTIVE' ? 'warn' : 'primary'" (click)="onStatusToggle(acc)">
+        {{ getToggleStatusText(acc.status) }}
+      </button>
+
+      <button mat-icon-button class="edit-btn" (click)="onEditClick(acc.id)">
+        <mat-icon class="edit-icon">edit_square</mat-icon>
+      </button>
+
+      @if (!acc.isDefault) {
+      <button mat-icon-button class="delete-btn" (click)="onDeleteClick(acc)">
+        <mat-icon class="delete-icon">delete</mat-icon>
+      </button>
+      }
+
+    </div>
+  </header>
+
+  <section class="kpi-grid">
+    <mat-card class="kpi-card balance">
+      <mat-card-content>
+        <div class="kpi-icon"><mat-icon>account_balance</mat-icon></div>
+        <div>
+          <div class="kpi-label">Current Balance</div>
+          <div class="kpi-value" [class.negative]="acc.balance < 0">
+            {{ acc.balance | currency: acc.currency }}
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="kpi-card income">
+      <mat-card-content>
+        <div class="kpi-icon"><mat-icon>arrow_upward</mat-icon></div>
+        <div>
+          <div class="kpi-label">Total Income</div>
+          <div class="kpi-value">{{ acc.totalIncome | currency: acc.currency }}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="kpi-card expense">
+      <mat-card-content>
+        <div class="kpi-icon"><mat-icon>arrow_downward</mat-icon></div>
+        <div>
+          <div class="kpi-label">Total Expense</div>
+          <div class="kpi-value">{{ acc.totalExpense | currency: acc.currency }}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <section class="content-grid">
+
+    <div class="main-column">
+      <mat-card class="transactions-card">
+        <div class="card-header-row">
+          <h2 class="section-title">Recent Transactions</h2>
+          <button mat-button color="primary" (click)="onViewTransactions(acc.id)">
+            show all
+          </button>
+        </div>
+        <mat-divider></mat-divider>
+
+        <div class="transactions-list">
+          <div class="empty-placeholder">
+            <mat-icon>receipt</mat-icon>
+            <p>There are no recent transactions.</p>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <div class="side-column">
+      <mat-card class="details-card">
+
+        <h2 class="section-title">Account details</h2>
+
+        <mat-divider></mat-divider>
+
+        <div class="details-list">
+          <div class="detail-row">
+            <span class="label">Budget Type</span>
+            <span class="value">{{ acc.budgetType }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Limit</span>
+            <span class="value">{{ acc.budget ? (acc.budget | currency: acc.currency) : '-' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Alert treshold</span>
+            <span class="value">{{ acc.alertThreshold ? acc.alertThreshold + '%' : '-' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Included in total balance</span>
+            <span class="value highlight" [class.yes]="acc.includeInTotalBalance">
+              {{ acc.includeInTotalBalance ? 'Yes' : 'No' }}
+            </span>
+          </div>
+        </div>
+
+        @if (acc.description) {
+        <mat-divider></mat-divider>
+        <div class="description-box">
+          <span class="label">Description</span>
+          <p>{{ acc.description }}</p>
+        </div>
+        }
+      </mat-card>
+    </div>
+
+  </section>
+
+  <section class="charts-section">
+    <mat-card class="charts-card">
+      <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms">
+
+        <mat-tab label="Balance history">
+          <div class="chart-container">
+            <div class="chart-placeholder">[ Line Chart: Balance Over Time ]</div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Expenses by Category">
+          <div class="chart-container">
+            <div class="chart-placeholder">[ Pie Chart: Expenses by Category ]</div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Icomes vs Expenses">
+          <div class="chart-container">
+            <div class="chart-placeholder">[ Bar Chart: Income vs Expense ]</div>
+          </div>
+        </mat-tab>
+
+      </mat-tab-group>
+    </mat-card>
+  </section>
+
+  } @else {
+  <div class="empty-state">
+    <mat-icon>error_outline</mat-icon>
+    <h2>Account not found.</h2>
+    <button mat-flat-button color="primary" routerLink="/app/accounts">Back to accoutns list</button>
+  </div>
+  }
+</div>

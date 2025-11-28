@@ -1,0 +1,30 @@
+import { HttpClient } from "@angular/common/http";
+import { inject, Injectable, signal } from "@angular/core";
+import { map, Observable, of, tap } from "rxjs";
+import { ReferenceData } from "../models/reference-data.model";
+
+@Injectable(
+    {
+        providedIn: "root"
+    }
+)
+export class ReferenceDataService {
+    private http = inject(HttpClient);
+    
+    data = signal<ReferenceData | null>(null);
+
+    loadData(): Observable<void> {
+    if (this.data()) return of(void 0);
+
+    return this.http.get<ReferenceData>('/api/reference-data').pipe(
+      tap(response => this.data.set(response)),
+      map(() => void 0)
+    );
+  }
+  
+  get currencies() { return this.data()?.currencies || []; }
+  get accountTypes() { return this.data()?.accountTypes || []; }
+  get budgetTypes() { return this.data()?.budgetTypes || []; }
+  get accountIcons() { return this.data()?.accountIcons || []; }
+  get categoryIcons() { return this.data()?.categoryIcons || []; }
+}

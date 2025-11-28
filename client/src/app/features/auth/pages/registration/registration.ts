@@ -21,6 +21,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import {RegistrationRequest} from '../../model/auth.model';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ApiErrorService } from '../../../../core/services/api-error.service';
 
 
 export function passwordsMatchValidator(
@@ -68,6 +69,7 @@ export class Registration {
   private authService = inject(AuthService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
+  private errorService = inject(ApiErrorService); 
 
   isLoading = signal(false);
   hidePassword = signal(true);
@@ -112,15 +114,7 @@ export class Registration {
       },
       error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);
-
-        let errorMessage = 'Registration failed. Please try again.';
-        if (err.error && err.error.message) {
-          errorMessage = err.error.message;
-        }
-        this.snackBar.open(errorMessage, 'OK', {
-          duration: 5000,
-          panelClass: 'error-snackbar',
-        });
+        this.errorService.handle(err, 'Registration failed. Please try again.');
       },
     });
   }

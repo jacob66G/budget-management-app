@@ -1,0 +1,153 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: block;
+  padding: 32px;
+  background-color: #f4f7f6;
+  min-height: 100%;
+  font-family: var(--font-family-default);
+}
+
+.edit-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+
+  .header-content {
+    .page-title {
+      font-size: 2rem;
+      font-weight: 500;
+      margin: 0 0 4px 0;
+      color: #222;
+    }
+  }
+}
+
+.edit-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 32px;
+
+  ::ng-deep .mat-mdc-card-content {
+    padding: 0;
+  }
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary-color, #3f51b5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 16px 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.full-width {
+  width: 100%;
+  display: block;
+}
+
+.spacer {
+  margin: 24px 0;
+}
+
+.options-section {
+  margin-bottom: 24px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+  
+  button {
+    min-width: 100px;
+    height: 44px;
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 60px;
+}
+
+.custom-slider-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 4px;
+  padding: 0 4px;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: -8px;
+}
+
+.slider-label {
+  color: #5f6368;
+  font-size: 1rem;
+  font-weight: 400;
+  font-family: Roboto, sans-serif;
+}
+
+.slider-value {
+  font-weight: 600;
+  color: var(--primary-color, #3f51b5);
+  font-size: 1rem;
+}
+
+mat-slider {
+  width: 100%;
+  margin: 0 -8px; 
+  width: calc(100% + 16px);
+}
+
+.slider-error {
+  color: #f44336;
+  font-size: 0.75rem;
+  margin-top: -8px;
+  margin-left: 4px;
+}
+
+.select-trigger-content,
+.option-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.option-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.option-text {
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

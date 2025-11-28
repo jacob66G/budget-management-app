@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ResponseMessage } from '../../../../core/models/response-message.model';
 import { RouterLink } from '@angular/router';
+import { ApiErrorService } from '../../../../core/services/api-error.service';
 
 @Component({
   selector: 'app-recover-password',
@@ -32,7 +33,8 @@ export class RecoverPassword {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private snackBar = inject(MatSnackBar);
-
+  private errorService = inject(ApiErrorService);
+  
   isLoading = signal(false);
   recoverPasswordForm!: FormGroup;
 
@@ -63,14 +65,7 @@ export class RecoverPassword {
         this.isLoading.set(false);
 
         let errorMessage = "An error occurred while resetting your password. Please try again later.";
-        if (err.error && err.error.message) {
-          errorMessage = err.error.message;
-        }
-        this.snackBar.open(
-          errorMessage,
-          'OK',
-          { duration: 5000, panelClass: 'error-snackbar' }
-        );
+        this.errorService.handle(err, errorMessage);
       }
     })
   }

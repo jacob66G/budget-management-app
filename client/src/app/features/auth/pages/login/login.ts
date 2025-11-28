@@ -12,6 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ApiErrorService } from '../../../../core/services/api-error.service';
 
 @Component({
   selector: 'app-login',
@@ -34,7 +35,8 @@ export class Login {
   private authService = inject(AuthService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
-
+  private errorService = inject(ApiErrorService);
+  
   isLoading = signal(false);
   hidePassword = signal(true);
   loginForm!: FormGroup;
@@ -76,17 +78,7 @@ export class Login {
         }
       }, error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);
-
-        let errorMessage = 'Log in failed. Try again.';
-        if (err.error && err.error.message) {
-          errorMessage = err.error.message;
-        } 
-        
-       this.snackBar.open(
-          errorMessage,
-          'OK',
-          { duration: 5000, panelClass: 'error-snackbar' }
-        );
+        this.errorService.handle(err, 'Log in failed. Try again.')
       }
     });
   }

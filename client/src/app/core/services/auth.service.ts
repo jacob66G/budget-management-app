@@ -3,18 +3,20 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { LoginRequest, LoginResponse, PasswordResetConfirmationRequest, RegistrationRequest, TwoFactorLoginRequest } from "../../features/auth/model/auth.model";
 import { ResponseMessage } from "../models/response-message.model";
 import { ApiPaths } from "../../constans/api-paths";
-import { Injectable, signal } from "@angular/core";
+import { inject, Injectable, signal } from "@angular/core";
 import { User } from "../models/user.model";
 import { StorageKesy } from "../../constans/storage-keys";
+import { Router } from "@angular/router";
 
 @Injectable(
   { 'providedIn': 'root' }
 )
 export class AuthService {
+  private http = inject(HttpClient);
+  private router = inject(Router)
+
   currentUser = signal<User | null>(this.getStoredUser());
   accessToken = signal<string | null>(this.getStoredToken());
-
-  constructor(private http: HttpClient) { }
 
   checkAuth(): Observable<boolean> {
     if (this.currentUser()) {
@@ -62,6 +64,7 @@ export class AuthService {
     return this.http.post<ResponseMessage>(ApiPaths.Auth.LOGOUT, { withCredentials: true }).pipe(
       tap(() => {
         this.clearAuthState();
+        this.router.navigate(['/login']);
       })
     );
   }

@@ -13,6 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ApiErrorService } from '../../../../../core/services/api-error.service';
 
 @Component({
   selector: 'app-profile-details',
@@ -34,6 +35,7 @@ export class ProfileDetails {
   private authService = inject(AuthService);
   private userService = inject(UserService);
   private snackBar = inject(MatSnackBar);
+  private errorService = inject(ApiErrorService);
 
   isLoading = signal(false);
   profileForm!: FormGroup;
@@ -62,13 +64,10 @@ export class ProfileDetails {
         this.authService.updateCurrentUser(response);
         this.snackBar.open('Data updated successfully', 'Close', { duration: 3000 });
       },
-      error: (error: HttpErrorResponse) => {
+      error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);
-        let errorMessage = 'An error occurred. Please try again.';
-        if (error.error && error.error.message) {
-          errorMessage = error.error.message;
-        }
-        this.snackBar.open(errorMessage, 'OK', { duration: 5000 });
+        this.errorService.handle(err);
+
         this.profileForm.patchValue({
           name: this.currentUser()?.name,
           surname: this.currentUser()?.surname,

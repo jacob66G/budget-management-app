@@ -1,0 +1,69 @@
+<mat-card class="account-card" (click)="accountClick.emit(account().id)">
+
+  <div class="card-header">
+    <div class="icon-wrapper">
+      @if (account().iconPath) {
+      <img [src]="account().iconPath" alt="Account Icon" class="account-img">
+      } @else {
+      <mat-icon class="default-icon">account_balance_wallet</mat-icon>
+      }
+    </div>
+
+    <div class="header-info">
+      <h3 class="account-name">{{ account().name }}</h3>
+      <span class="account-type">{{ account().type }}</span>
+    </div>
+
+    <div class="actions">
+      <button mat-icon-button class="edit-btn" (click)="editClick.emit(account().id); $event.stopPropagation()">
+        <mat-icon class="edit-icon">edit_square</mat-icon>
+      </button>
+
+      <button mat-icon-button class="delete-btn" (click)="deleteClick.emit(account()); $event.stopPropagation()">
+        <mat-icon class="delete-icon">delete</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="metrics-row">
+
+    <div class="metric-item balance-item">
+      <span class="metric-label">Balance</span>
+      <div class="metric-value-wrapper" [class.negative]="account().balance < 0">
+        <span class="symbol">{{ account().currency }}</span>
+        <span class="value">{{ account().balance | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <div class="metric-item income-item">
+      <span class="metric-label">Income</span>
+      <div class="metric-value-wrapper income-text">
+        <mat-icon class="tiny-icon">arrow_downward</mat-icon>
+        <span class="value">{{ account().totalIncome | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <div class="metric-item expense-item">
+      <span class="metric-label">Expense</span>
+      <div class="metric-value-wrapper expense-text">
+        <mat-icon class="tiny-icon">arrow_upward</mat-icon>
+        <span class="value">{{ account().totalExpense | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="card-footer">
+    <div class="date-info">
+      <mat-icon class="tiny-icon">calendar_today</mat-icon>
+      <span>{{ account().createdAt | date:'mediumDate' }}</span>
+    </div>
+
+    <div class="status-badge" [class.active]="account().status === 'ACTIVE'"
+      [class.inactive]="account().status !== 'ACTIVE'">
+      {{ account().status }}
+    </div>
+  </div>
+
+</mat-card>

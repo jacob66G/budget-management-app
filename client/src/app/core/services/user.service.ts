@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { ChangePasswordRequest, TfaQRCode, TfaVerifyRequest, UpdateUserRequest, UserSession } from "../../features/user/user-profile/model/user-profile.model";
 import { User } from "../models/user.model";
 import { Observable } from "rxjs";
@@ -12,7 +12,7 @@ import { A } from "@angular/cdk/keycodes";
 })
 export class UserService {
 
-  constructor(private http: HttpClient) { }
+  http = inject(HttpClient);
 
   updateUser(userData: UpdateUserRequest): Observable<User> {
     return this.http.patch<User>(ApiPaths.User.ME, userData);

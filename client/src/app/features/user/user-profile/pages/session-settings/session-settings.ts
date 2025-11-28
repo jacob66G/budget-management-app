@@ -11,9 +11,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserSession } from '../../model/user-profile.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
-import { MatDialog } from '@angular/material/dialog';
-import { AuthService } from '../../../../../core/services/auth.service';
-import { Router } from '@angular/router';
+import { ApiErrorService } from '../../../../../core/services/api-error.service';
 
 @Component({
   selector: 'app-session-settings',
@@ -33,10 +31,8 @@ import { Router } from '@angular/router';
 })
 export class SessionSettings {
   private userService = inject(UserService);
-  private authService = inject(AuthService);
+  private errorService = inject(ApiErrorService);
   private snackBar = inject(MatSnackBar);
-  private dialog = inject(MatDialog);
-  private router = inject(Router)
 
   sessions = signal<UserSession[]>([]);
   isRevoking = signal<number | null>(null);
@@ -50,14 +46,9 @@ export class SessionSettings {
         this.sessions.set(response.sort((a, b) => (a.isCurrent ? -1 : 1)));
         this.isLoading.set(false);
       },
-      error: (error: HttpErrorResponse) => {
-        this.isLoading.set(false)
-
-        let errorMessage = "An error occurred. Please try again."
-        if (error && error.error.message) {
-          errorMessage = error.error.message;
-        }
-        this.snackBar.open(errorMessage, 'OK', { duration: 5000 });
+      error: (err: HttpErrorResponse) => {
+        this.isLoading.set(false);
+        this.errorService.handle(err);
       }
     })
   }
@@ -72,7 +63,7 @@ export class SessionSettings {
       },
       error: (err: HttpErrorResponse) => {
         this.isRevoking.set(null);
-        this.showError(err);
+        this.errorService.handle(err);
       }
     });
   }
@@ -118,12 +109,4 @@ export class SessionSettings {
   //     }
   //   });
   // }
-
-  private showError(error: HttpErrorResponse): void {
-    let errorMessage = "An error occurred. Please try again.";
-    if (error && error.error?.message) {
-      errorMessage = error.error.message;
-    }
-    this.snackBar.open(errorMessage, 'OK', { duration: 5000, panelClass: 'error-snackbar' });
-  }
 }

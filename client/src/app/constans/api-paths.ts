@@ -3,6 +3,7 @@ export class ApiPaths {
 
     public static readonly AUTH_BASE = `${ApiPaths.API}/auth`;
     public static readonly USERS_BASE = `${ApiPaths.API}/users`;
+    public static readonly  ACCOUNT_BASE = `${ApiPaths.API}/accounts`
 
     public static readonly Auth = {
         LOGIN: `${ApiPaths.AUTH_BASE}/login`,
@@ -28,4 +29,8 @@ export class ApiPaths {
 
         SESSIONS: `${ApiPaths.USERS_BASE}/me/sessions`,
     };
+
+    public static readonly Account = {
+        ACCOUNT: `${ApiPaths.ACCOUNT_BASE}`,
+    }
 }

@@ -14,6 +14,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../../core/services/auth.service';
 import { passwordsMatchValidator } from '../registration/registration';
 import { PasswordResetConfirmationRequest } from '../../model/auth.model';
+import { ApiErrorService } from '../../../../core/services/api-error.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -38,6 +39,7 @@ export class ResetPassword {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private snackBar = inject(MatSnackBar);
+  private errorService = inject(ApiErrorService); 
 
   isLoading = signal(false);
   hidePassword = signal(true);
@@ -95,14 +97,7 @@ export class ResetPassword {
       },
       error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);
-        let errorMessage = 'An error has occurred. Please try again.';
-        if (err.error && err.error.message) {
-          errorMessage = err.error.message;
-        }
-        this.snackBar.open(errorMessage, 'OK', {
-          duration: 5000,
-          panelClass: 'error-snackbar',
-        });
+        this.errorService.handle(err);
       },
     });
   }

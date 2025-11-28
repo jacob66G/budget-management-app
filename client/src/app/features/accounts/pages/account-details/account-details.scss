@@ -1,0 +1,367 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: block;
+  padding: 32px;
+  background-color: #f4f7f6;
+  min-height: 100%;
+  font-family: var(--font-family-default);
+}
+
+.account-details-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: 500;
+      margin: 0;
+      color: #222;
+    }
+
+    .page-subtitle {
+      margin: 0;
+      color: #5f6368;
+      font-size: 1rem;
+    }
+  }
+}
+
+.header-actions {
+  display: flex;
+  gap: 4px;
+
+  button {
+    border: 1px solid transparent;
+    border-radius: 10px;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    mat-icon {
+      color: #9e9e9e;
+      transition: color 0.2s ease-in-out;
+    }
+
+    &:hover {
+      border-color: rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  .edit-btn, .delete-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .change-status-btn {
+    margin-right: 5px;
+  }
+
+  .change-status-btn:hover {
+    background-color: #ececec;
+
+    .change-status-icon {
+      color: var(--primary-color, #3f51b5);
+    }
+  }
+
+  .edit-btn:hover {
+    background-color: #dddcff;
+
+    .edit-icon {
+      color: var(--primary-color, #3f51b5);
+    }
+  }
+
+  .delete-btn:hover {
+    background-color: #ffebee;
+
+    .delete-icon {
+      color: var(--warn-color, #d93025);
+    }
+  }
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+
+  &.default {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    border: 1px solid rgba(25, 118, 210, 0.2);
+  }
+
+  &.status {
+    background-color: #eee;
+    color: #757575;
+
+    &.active {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+  }
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kpi-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+
+  mat-card-content {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .kpi-label {
+    font-size: 0.85rem;
+    color: #757575;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .kpi-value {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #333;
+  }
+
+  &.balance .kpi-value.negative {
+    color: #c62828;
+  }
+
+  &.income .kpi-value {
+    color: #2e7d32;
+  }
+
+  &.expense .kpi-value {
+    color: #c62828;
+  }
+
+  .kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  &.balance .kpi-icon {
+    background-color: #e6e6e6;
+    color: #757575;
+  }
+
+  &.income .kpi-icon {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &.expense .kpi-icon {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+}
+
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+}
+
+.transactions-card {
+  min-height: 400px;
+  border-radius: 12px;
+  padding: 0;
+
+  .transactions-list {
+    padding: 24px;
+  }
+
+  .empty-placeholder {
+    text-align: center;
+    color: #9e9e9e;
+    font-style: italic;
+    padding: 40px;
+
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      opacity: 0.5;
+      margin-bottom: 8px;
+    }
+  }
+}
+
+.details-card {
+  padding: 24px;
+  border-radius: 12px;
+
+  .section-title {
+    margin-bottom: 10px;
+  }
+
+  .details-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px 0;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+  }
+
+  .label {
+    color: #757575;
+  }
+
+  .value {
+    font-weight: 500;
+    color: #333;
+  }
+
+  .value.highlight.yes {
+    color: #2e7d32;
+  }
+
+  .description-box {
+    margin-top: 16px;
+
+    .label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    p {
+      margin: 0;
+      color: #333;
+      line-height: 1.5;
+    }
+  }
+}
+
+.charts-card {
+  border-radius: 12px;
+  min-height: 450px;
+  padding: 0; 
+
+  .chart-container {
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 350px;
+  }
+
+  .chart-placeholder {
+    width: 100%;
+    height: 300px;
+    border: 2px dashed #e0e0e0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9e9e9e;
+    font-size: 1.2rem;
+  }
+}
+
+.loading-container,
+.empty-state {
+  text-align: center;
+  padding: 60px;
+}
+
+.icon-wrapper {
+  width: 78px;
+  height: 78px;
+  border: #dddddd  solid 1px;
+  border-radius: 12px;
+  background-color: #f0f4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color, #3f51b5);
+  flex-shrink: 0;
+  padding: 10px;
+
+  .account-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+  .default-icon { font-size: 68px; width: 68px; height: 68px; }
+}

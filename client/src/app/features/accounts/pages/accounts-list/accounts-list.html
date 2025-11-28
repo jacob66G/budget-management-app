@@ -1,0 +1,133 @@
+<div class="page-container">
+  
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">Your Accounts</h1>
+      <p class="page-subtitle">Manage your financial accounts and balances.</p>
+    </div>
+
+    <button mat-flat-button color="primary" routerLink="create" class="add-btn">
+      <mat-icon>add</mat-icon>
+      Add Account
+    </button>
+  </div>
+
+  <div class="filters-section">
+    <form [formGroup]="filterForm">
+      
+      <div class="main-filters">
+        
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-icon matPrefix>search</mat-icon>
+          <mat-label>Search by name</mat-label>
+          <input matInput formControlName="name" placeholder="Ex. Main Wallet">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="sort-field">
+          <mat-label>Sort by</mat-label>
+          <mat-select formControlName="sortBy">
+            <mat-option value="createdAt">Date Created</mat-option>
+            <mat-option value="balance">Balance</mat-option>
+            <mat-option value="name">Name</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="sort-dir-field">
+          <mat-label>Order</mat-label>
+          <mat-select formControlName="sortDirection">
+            <mat-option value="ASC">Ascending</mat-option>
+            <mat-option value="DESC">Descending</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-accordion class="advanced-filters">
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>filter_list</mat-icon>
+              Advanced Filters
+            </mat-panel-title>
+            <mat-panel-description>
+              Balance range, currency, types...
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+  
+          <div class="advanced-grid">
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Currency</mat-label>
+              <mat-select formControlName="currencies" multiple>
+                @for (curr of currencies; track curr) {
+                  <mat-option [value]="curr">{{ curr }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Budget Type</mat-label>
+              <mat-select formControlName="budgetTypes" multiple>
+                @for (bt of budgetTypes; track bt) {
+                  <mat-option [value]="bt">{{ bt }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Min Balance</mat-label>
+              <input matInput type="number" min="0" formControlName="minBalance">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Max Balance</mat-label>
+              <input matInput type="number" min="0" formControlName="maxBalance">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Created After</mat-label>
+              <input matInput [matDatepicker]="picker1" formControlName="createdAfter">
+              <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+              <mat-datepicker #picker1></mat-datepicker>
+            </mat-form-field>
+
+             <div class="checkbox-wrapper">
+                <mat-checkbox formControlName="includeInTotalBalance" color="primary">Only Included in Total</mat-checkbox>
+             </div>
+          </div>
+          
+          <div class="filter-actions">
+             <button mat-button color="warn" (click)="clearFilters()">Clear Filters</button>
+          </div>
+
+        </mat-expansion-panel>
+      </mat-accordion>
+
+    </form>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner [diameter]="50"></mat-spinner>
+    </div>
+  } @else {
+    <div class="account-list-container">
+      @for (acc of accounts(); track acc.id) {
+        <app-account-card 
+          [account]="acc"
+          (accountClick)="onAccountClick($event)"
+          (editClick)="onEditClick($event)"
+          (deleteClick)="onDeleteClick($event)"
+          >
+        </app-account-card>
+      } @empty {
+        <div class="empty-state">
+          <mat-icon>account_balance_wallet</mat-icon>
+          <h3>No accounts found</h3>
+          <p>Try adjusting your filters or add a new account.</p>
+        </div>
+      }
+    </div>
+  }
+  
+</div>

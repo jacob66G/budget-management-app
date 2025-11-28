@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { ApiErrorService } from '../../../../core/services/api-error.service';
 
 
 @Component({
@@ -32,6 +33,7 @@ export class VerificationEmailSent {
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private errorService = inject(ApiErrorService); 
 
   isLoading = signal(false);
   email = signal<string | null>(null);
@@ -70,17 +72,7 @@ export class VerificationEmailSent {
       },
       error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);
-
-        let errorMessage = 'Action failed. Try again.';
-        if (err.error && err.error.message) {
-          errorMessage = err.error.message;
-        }
-
-       this.snackBar.open(
-          errorMessage,
-          'OK',
-          { duration: 5000, panelClass: 'error-snackbar' }
-        );
+        this.errorService.handle(err, 'Action failed. Try again.')
       }
     });
   }

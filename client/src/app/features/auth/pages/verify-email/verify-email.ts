@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ApiErrorService } from '../../../../core/services/api-error.service';
 
 @Component({
   selector: 'app-verify-email',
@@ -24,6 +25,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 export class VerifyEmail {
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
+  private errorService = inject(ApiErrorService); 
 
   isLoading = signal(true);
   isSuccess = signal(false);
@@ -49,7 +51,7 @@ export class VerifyEmail {
       },
       error: (err) => {
         this.isLoading.set(false);
-        this.errorMessage.set(err.error?.message || 'Verification failed. The link may have expired.');
+        this.errorService.handle(err, 'Verification failed. The link may have expired.')
       }
     });
   }

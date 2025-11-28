@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserService } from '../../../../../../../core/services/user.service';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TfaQRCode, TfaVerifyRequest } from '../../../../model/user-profile.model';
 import { CommonModule } from '@angular/common';
@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ApiErrorService } from '../../../../../../../core/services/api-error.service';
 
 @Component({
   selector: 'app-manage-tfa-dialog',
@@ -32,9 +33,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 export class ManageTfaDialog {
   private fb = inject(FormBuilder);
   private userService = inject(UserService);
-  private snackBar = inject(MatSnackBar);
   public dialogRef = inject(MatDialogRef<ManageTfaDialog>);
   public data: { isMfaEnabled: boolean } = inject(MAT_DIALOG_DATA);
+  private errorService = inject(ApiErrorService);
 
   isLoading = signal(false);
   isQrLoading = signal(false);
@@ -63,17 +64,7 @@ export class ManageTfaDialog {
       },
       error: (err: HttpErrorResponse) => {
         this.isQrLoading.set(false);
-
-        let errorMessage = "An error occured. Please try again";
-
-        if (err.error && err.error.message) {
-          errorMessage = err.error.message;
-        }
-
-        this.snackBar.open(errorMessage, 'OK', {
-          duration: 5000,
-          panelClass: 'error-snackbar',
-        });
+        this.errorService.handle(err);
         this.dialogRef.close();
       }
     });
@@ -103,16 +94,7 @@ export class ManageTfaDialog {
       },
       error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);
-        let errorMessage = "An error occured. Please try again";
-
-        if (err.error && err.error.message) {
-          errorMessage = err.error.message;
-        }
-
-        this.snackBar.open(errorMessage, 'OK', {
-          duration: 5000,
-          panelClass: 'error-snackbar',
-        });
+        this.errorService.handle(err);
       }
     });
   }
@@ -125,16 +107,7 @@ export class ManageTfaDialog {
       },
       error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);
-        let errorMessage = "An error occured. Please try again";
-
-        if (err.error && err.error.message) {
-          errorMessage = err.error.message;
-        }
-
-        this.snackBar.open(errorMessage, 'OK', {
-          duration: 5000,
-          panelClass: 'error-snackbar',
-        });
+        this.errorService.handle(err);
       }
     });
   }

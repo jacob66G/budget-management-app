@@ -46,9 +46,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
               authReq = addTokenToRequest(req, response.accessToken);
               return next(authReq);
             }
+
+            authService.logout();
             return throwError(() => error);
           }),
           catchError((refreshError) => {
+            authService.logout();
             return throwError(() => refreshError);
           })
         );

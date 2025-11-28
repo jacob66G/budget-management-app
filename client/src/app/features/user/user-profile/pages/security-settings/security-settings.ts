@@ -17,6 +17,7 @@ import { Router } from '@angular/router';
 import { ChangePasswordDialog } from './dialogs/change-password-dialog/change-password-dialog';
 import { ManageTfaDialog } from './dialogs/manage-tfa-dialog/manage-tfa-dialog';
 import { ConfirmDialog, ConfirmDialogData } from '../../../../../shared/components/dialogs/confirm-dialog/confirm-dialog';
+import { ApiErrorService } from '../../../../../core/services/api-error.service';
 
 
 @Component({
@@ -41,6 +42,7 @@ export class SecuritySettings {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar)
   private router = inject(Router)
+  private errorService = inject(ApiErrorService);
 
   currentUser = this.authService.currentUser;
   isMfaEnabled = () => this.authService.currentUser()?.mfaEnabled ?? false;
@@ -118,22 +120,11 @@ export class SecuritySettings {
           duration: 7000,
           panelClass: 'success-snackbar'
         });
-        this.authService.logout().subscribe({
-          next: () => {
-            this.router.navigate(['/login']);
-          }
-        })
+        this.authService.logout();
       },
       error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);
-        let errorMessage = 'An error has occurred. Please try again.';
-        if (err.error && err.error.message) {
-          errorMessage = err.error.message;
-        }
-        this.snackBar.open(errorMessage, 'OK', {
-          duration: 5000,
-          panelClass: 'error-snackbar',
-        });
+        this.errorService.handle(err);
       }
     });
   }

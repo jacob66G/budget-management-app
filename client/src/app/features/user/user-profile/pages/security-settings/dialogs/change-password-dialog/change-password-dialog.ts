@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserService } from '../../../../../../../core/services/user.service';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { passwordsMatchValidator } from '../../../../../../auth/pages/registration/registration';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ApiErrorService } from '../../../../../../../core/services/api-error.service';
 
 @Component({
   selector: 'app-change-password-dialog',
@@ -33,7 +34,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 export class ChangePasswordDialog {
   private fb = inject(FormBuilder);
   private userService = inject(UserService);
-  private snackBar = inject(MatSnackBar);
+  private errorService = inject(ApiErrorService)
 
   public dialogRef = inject(MatDialogRef<ChangePasswordDialog>);
 
@@ -70,16 +71,7 @@ export class ChangePasswordDialog {
       },
       error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);
-
-        let errorMessage = 'An error occured. Please try again';
-         if (err.error && err.error.message) {
-          errorMessage = err.error.message;
-        }
-
-        this.snackBar.open(errorMessage, 'OK', {
-          duration: 5000,
-          panelClass: 'error-snackbar',
-        });
+        this.errorService.handle(err);
       },
     });
   }

@@ -1,0 +1,186 @@
+<div class="edit-container">
+
+    @if (isLoading()) {
+    <div class="loading-container">
+        <mat-spinner [diameter]="50"></mat-spinner>
+    </div>
+    } @else {
+
+    <header class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">Create New Account</h1>
+        </div>
+    </header>
+
+    <mat-card class="edit-card">
+        <mat-card-content>
+            <form [formGroup]="createForm" (ngSubmit)="onSubmit()">
+
+                <h3 class="section-title">GENERAL</h3>
+                <div class="form-grid">
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Type</mat-label>
+                        <mat-select formControlName="type">
+                            @for (type of accountTypes; track type) {
+                            <mat-option [value]="type">{{ type }}</mat-option>
+                            }
+                        </mat-select>
+                        <mat-error>Type is required.</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Account Name</mat-label>
+                        <input matInput formControlName="name" placeholder="ex. Main account">
+                        @if (createForm.get('name')?.hasError('required')) {
+                        <mat-error>Name is required.</mat-error>
+                        }
+                        @if (createForm.get('name')?.hasError('minlength')) {
+                        <mat-error>Nazwa is too short.</mat-error>
+                        }
+                        @if (createForm.get('name')?.hasError('maxLength')) {
+                        <mat-error>Nazwa is too long.</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Currency</mat-label>
+                        <mat-select formControlName="currency">
+                            @for (curr of currencies; track curr) {
+                            <mat-option [value]="curr">{{ curr }}</mat-option>
+                            }
+                        </mat-select>
+                        <mat-error>Currency is required.</mat-error>
+                    </mat-form-field>
+
+                </div>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Description (optional)</mat-label>
+                    <textarea matInput formControlName="description" rows="2"
+                        placeholder="A brief description of the purpose of the account..."></textarea>
+                    @if (createForm.get('description')?.hasError('maxlength')) {
+                    <mat-error>Description is too long.</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-divider class="spacer"></mat-divider>
+
+                <h3 class="section-title">Balance</h3>
+                <div class="form-grid">
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Initial balance</mat-label>
+                        <input matInput type="number" min="0" formControlName="initialBalance">
+                        <span matTextPrefix>{{createForm.get("currency")?.value}} &nbsp;</span>
+                        @if (createForm.get('initialBalance')?.hasError('min')) {
+                        <mat-error>Balance must be positive</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+                <mat-divider class="spacer"></mat-divider>
+
+                <h3 class="section-title">Icon</h3>
+                <div class="form-grid">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Icon</mat-label>
+                        <mat-select formControlName="iconPath">
+                            <mat-select-trigger>
+                                @if (createForm.get('iconPath')?.value; as selectedIcon) {
+                                <div class="select-trigger-content">
+                                    <img [src]="selectedIcon" alt="Selected Icon" class="option-icon">
+                                    <span>{{ getIconName(selectedIcon) }}</span>
+                                </div>
+                                }
+                            </mat-select-trigger>
+
+
+                            @for (icon of accountIcons; track icon) {
+                            <mat-option [value]="icon">
+                                <div class="option-content">
+                                    <img [src]="icon" alt="icon" class="option-icon">
+                                    <span class="option-text">{{ getIconName(icon) }}</span>
+                                </div>
+                            </mat-option>
+                            }
+                        </mat-select>
+                        <mat-icon matSuffix>image</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <mat-divider class="spacer"></mat-divider>
+
+                <h3 class="section-title">Budget</h3>
+                <div class="form-grid">
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Budget type</mat-label>
+                        <mat-select formControlName="budgetType">
+                            @for (type of budgetTypes; track type) {
+                            <mat-option [value]="type">{{ type }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+
+                    @if (createForm.get('budgetType')?.value !== 'NONE') {
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>limit</mat-label>
+                        <input matInput type="number" min="0" formControlName="budget">
+                        <span matTextPrefix>{{createForm.get("currency")?.value}} &nbsp;</span>
+                        @if (createForm.get('budget')?.hasError('min')) {
+                        <mat-error>The value must be positive.</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <div class="custom-slider-container">
+
+                        <div class="slider-header">
+                            <label class="slider-label">Alert threshold(%)</label>
+                            <span class="slider-value">
+                                {{ createForm.get('alertThreshold')?.value || 0 }}%
+                            </span>
+                        </div>
+
+                        <mat-slider min="0" max="100" step="10" showTickMarks discrete>
+
+
+                            <input matSliderThumb formControlName="alertThreshold">
+                        </mat-slider>
+
+                        @if (createForm.get('alertThreshold')?.invalid && createForm.get('alertThreshold')?.touched) {
+                        <div class="slider-error">
+                            The value must be between 0 and 100.
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+
+                <mat-divider class="spacer"></mat-divider>
+
+                <div class="options-section">
+                    <mat-checkbox formControlName="includeInTotalBalance" color="primary">
+                        Include this account is total balance (Net Worth)
+                    </mat-checkbox>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" mat-button (click)="onCancel()">Cancel</button>
+                    <button mat-flat-button color="primary" type="submit"
+                        [disabled]="createForm.invalid || isLoading() || !createForm.dirty">
+
+                        @if (isLoading()) {
+                        <mat-spinner [diameter]="24"></mat-spinner>
+                        } @else {
+                        <span>Create</span>
+                        }
+                    </button>
+                </div>
+
+            </form>
+        </mat-card-content>
+    </mat-card>
+    }
+</div>

@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ApiErrorService } from '../../../../core/services/api-error.service';
 
 @Component({
   selector: 'app-login2fa',
@@ -31,6 +32,7 @@ export class Login2fa {
   private authService = inject(AuthService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
+  private errorService = inject(ApiErrorService);
 
   isLoading = signal(false);
   tfaForm!: FormGroup;
@@ -82,7 +84,7 @@ export class Login2fa {
             errorMessage = 'Incorrect code.';
         }
 
-        this.snackBar.open(errorMessage, 'OK', { duration: 5000, panelClass: 'error-snackbar' });
+        this.errorService.handle(err, errorMessage);
       }
     });
   }
