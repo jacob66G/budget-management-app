@@ -4,7 +4,10 @@ import com.example.budget_management_app.account.service.AccountService;
 import com.example.budget_management_app.auth.dto.RegistrationRequestDto;
 import com.example.budget_management_app.category.service.CategoryService;
 import com.example.budget_management_app.common.dto.ResponseMessageDto;
-import com.example.budget_management_app.common.exception.*;
+import com.example.budget_management_app.common.exception.ErrorCode;
+import com.example.budget_management_app.common.exception.NotFoundException;
+import com.example.budget_management_app.common.exception.UserStatusException;
+import com.example.budget_management_app.common.exception.ValidationException;
 import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.security.service.TwoFactorAuthenticationService;
 import com.example.budget_management_app.transaction.service.TransactionService;
@@ -55,9 +58,9 @@ class UserServiceTest {
     @Mock
     private AccountService accountService;
     @Mock
-    private TransactionService transactionService;
-    @Mock
     private RecurringTransactionService recurringTransactionService;
+    @Mock
+    private TransactionService transactionService;
     @Mock
     private UserMapper mapper;
 
@@ -560,7 +563,7 @@ class UserServiceTest {
             when(tfaService.isOptValid(tempSecret, invalidCode)).thenReturn(false);
 
             //when & then
-            assertThrows(TfaException.class,
+            assertThrows(ValidationException.class,
                     () -> userService.verifyTfaSetup(userId, invalidCode));
 
             verify(userDao, never()).update(any());
@@ -622,7 +625,7 @@ class UserServiceTest {
             when(tfaService.isOptValid(mainSecret, invalidCode)).thenReturn(false);
 
             //when & then
-            assertThrows(TfaException.class,
+            assertThrows(ValidationException.class,
                     () -> userService.tfaDisable(userId, invalidCode));
 
             verify(userDao, never()).update(any());
@@ -665,6 +668,12 @@ class UserServiceTest {
             userService.deleteUsersPendingDeletion();
 
             //then
+            verify(recurringTransactionService, times(1)).deleteAllByUser(1L);
+            verify(recurringTransactionService, times(1)).deleteAllByUser(2L);
+
+            verify(transactionService, times(1)).deleteAllByUser(1L);
+            verify(transactionService, times(1)).deleteAllByUser(2L);
+
             verify(accountService, times(1)).deleteAllByUser(1L);
             verify(accountService, times(1)).deleteAllByUser(2L);
 
@@ -710,10 +719,14 @@ class UserServiceTest {
             userService.deleteUsersPendingDeletion();
 
             //then
+            verify(recurringTransactionService, never()).deleteAllByUser(1L);
+            verify(transactionService, never()).deleteAllByUser(1L);
             verify(accountService, never()).deleteAllByUser(1L);
             verify(categoryService, never()).deleteAllByUser(1L);
             verify(userDao, never()).delete(user1);
 
+            verify(recurringTransactionService, times(1)).deleteAllByUser(2L);
+            verify(transactionService, times(1)).deleteAllByUser(2L);
             verify(accountService, times(1)).deleteAllByUser(2L);
             verify(categoryService, times(1)).deleteAllByUser(2L);
             verify(userDao, times(1)).delete(user2);

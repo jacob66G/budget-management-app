@@ -32,16 +32,22 @@ public class S3IconInitializer {
         ACCOUNTS, CATEGORIES
     }
 
-//    @PostConstruct
-//    public void init() {
-//        log.info("Start loading icons from s3 bucket");
-//        loadKeysByPrefix(ACCOUNT_PREFIX, IconType.ACCOUNTS);
-//        loadKeysByPrefix(CATEGORY_PREFIX, IconType.CATEGORIES);
-//        log.info("Successfully loaded icons. CATEGORIES:  {},  ACCOUNTS:  {}",
-//                iconConfig.getCategories().size(),
-//                iconConfig.getAccounts().size()
-//        );
-//    }
+    @PostConstruct
+    public void init() {
+        try {
+            log.info("Start loading icons from s3 bucket: '{}'", bucketName);
+            log.info("Start loading icons from s3 bucket");
+            loadKeysByPrefix(ACCOUNT_PREFIX, IconType.ACCOUNTS);
+            loadKeysByPrefix(CATEGORY_PREFIX, IconType.CATEGORIES);
+            log.info("Successfully loaded icons. CATEGORIES:  {},  ACCOUNTS:  {}",
+                    iconConfig.getCategories().size(),
+                    iconConfig.getAccounts().size()
+            );
+        } catch (Exception e) {
+            log.error("CRITICAL S3 ERROR: Nie udało się pobrać ikon.", e);
+        }
+
+    }
 
     private void loadKeysByPrefix(String prefix, IconType type) {
         ListObjectsV2Request request = ListObjectsV2Request.builder()

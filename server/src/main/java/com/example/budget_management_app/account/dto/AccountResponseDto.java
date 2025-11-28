@@ -12,7 +12,7 @@ public record AccountResponseDto(
         BigDecimal totalExpense,
         String currency,
         Boolean isDefault,
-        String iconKey,
+        String iconPath,
         Boolean includeInTotalBalance,
         Instant createdAt,
         String status

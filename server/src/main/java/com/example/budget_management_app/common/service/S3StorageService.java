@@ -12,6 +12,8 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -109,6 +111,34 @@ public class S3StorageService implements StorageService {
         }
 
         return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, key);
+    }
+
+    @Override
+    public String extractKey(String publicUrl) {
+        if (publicUrl == null || publicUrl.isBlank()) {
+            return null;
+        }
+
+        try {
+            URL url = new URI(publicUrl).toURL();
+            String host = url.getHost();
+            String path = url.getPath();
+
+            String expectedHost = String.format("%s.s3.%s.amazonaws.com", bucketName, region);
+
+            if (!expectedHost.equalsIgnoreCase(host)) {
+                throw new StorageException("URL host mismatch. Expected: " + expectedHost, ErrorCode.STORAGE_VALIDATION_ERROR);
+            }
+
+            if (path.startsWith("/")) {
+                return path.substring(1);
+            }
+
+            throw new StorageException("Invalid S3 path format.", ErrorCode.STORAGE_VALIDATION_ERROR);
+
+        } catch (Exception e) {
+            throw new StorageException("Invalid icon URL format: " + publicUrl, ErrorCode.STORAGE_VALIDATION_ERROR, e);
+        }
     }
 
     @Override

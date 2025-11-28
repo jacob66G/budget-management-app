@@ -9,6 +9,6 @@ public record CategoryCreateRequestDto(
         String name,
         @NotBlank(message = "Type is required")
         String type,
-        String iconKey
+        String iconPath
 ) {
 }

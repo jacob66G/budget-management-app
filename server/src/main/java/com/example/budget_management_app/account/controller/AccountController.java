@@ -63,20 +63,20 @@ public class AccountController {
     }
 
     @PostMapping("/{id}/activate")
-    public ResponseEntity<Void> activateAccount(
+    public ResponseEntity<AccountDetailsResponseDto> activateAccount(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        accountService.activateAccount(userDetails.getId(), id);
-        return ResponseEntity.ok().build();
+        AccountDetailsResponseDto response = accountService.activateAccount(userDetails.getId(), id);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{id}/deactivate")
-    public ResponseEntity<Void> deactivateAccount(
+    public ResponseEntity<AccountDetailsResponseDto> deactivateAccount(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        accountService.deactivateAccount(userDetails.getId(), id);
-        return ResponseEntity.ok().build();
+        AccountDetailsResponseDto response = accountService.deactivateAccount(userDetails.getId(), id);
+        return ResponseEntity.ok(response);
     }
 }

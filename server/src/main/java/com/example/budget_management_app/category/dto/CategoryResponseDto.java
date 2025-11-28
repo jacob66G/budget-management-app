@@ -7,6 +7,6 @@ public record CategoryResponseDto(
         String name,
         CategoryType type,
         Boolean isDefault,
-        String iconKey
+        String iconPath
 ) {
 }

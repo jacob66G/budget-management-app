@@ -130,8 +130,12 @@ public class AccountServiceTest {
                     iconKey,
                     true,
                     savedAccount.getCreatedAt(),
-                    "ACTIVE"
+                    "ACTIVE",
+                    false
             );
+
+            lenient().when(transactionService.existsByAccountAndUser(any(), any())).thenReturn(false);
+            lenient().when(storageService.extractKey(anyString())).thenReturn(iconKey);
         }
 
         @Test
@@ -140,9 +144,8 @@ public class AccountServiceTest {
             when(userService.getUserById(userId)).thenReturn(user);
             when(accountDao.existsByNameAndUser(accountName, userId, null)).thenReturn(false);
             when(iconKeyValidator.isValidAccountIconKey(iconKey)).thenReturn(true);
-            when(storageService.exists(iconKey)).thenReturn(true);
             when(accountDao.save(any(Account.class))).thenReturn(savedAccount);
-            when(mapper.toDetailsResponseDto(savedAccount)).thenReturn(expectedResult);
+            when(mapper.toDetailsResponseDto(savedAccount, false)).thenReturn(expectedResult);
 
             //When
             AccountDetailsResponseDto result = accountService.createAccount(userId, requestDto);
@@ -155,8 +158,7 @@ public class AccountServiceTest {
             verify(userService, times(1)).getUserById(userId);
             verify(accountDao, times(1)).existsByNameAndUser(accountName, userId, null);
             verify(iconKeyValidator, times(1)).isValidAccountIconKey(iconKey);
-            verify(storageService, times(1)).exists(iconKey);
-            verify(mapper, times(1)).toDetailsResponseDto(savedAccount);
+            verify(mapper, times(1)).toDetailsResponseDto(savedAccount, false);
 
             verify(accountDao, times(1)).save(accountCaptor.capture());
             Account accountSentToDao = accountCaptor.getValue();
@@ -166,7 +168,7 @@ public class AccountServiceTest {
             assertThat(accountSentToDao.getBalance()).isEqualTo(requestDto.initialBalance());
             assertThat(accountSentToDao.getCurrency().name()).isEqualTo(requestDto.currency());
             assertThat(accountSentToDao.getBudgetType().name()).isEqualTo(requestDto.budgetType());
-            assertThat(accountSentToDao.getIconKey()).isEqualTo(requestDto.iconKey());
+            assertThat(accountSentToDao.getIconKey()).isEqualTo(requestDto.iconPath());
             assertThat(accountSentToDao.getUser()).isEqualTo(user);
 
             assertThat(accountSentToDao.getAccountStatus()).isEqualTo(AccountStatus.ACTIVE);
@@ -257,8 +259,6 @@ public class AccountServiceTest {
             //given
             when(userService.getUserById(userId)).thenReturn(user);
             when(accountDao.existsByNameAndUser(accountName, userId, null)).thenReturn(true);
-            when(iconKeyValidator.isValidAccountIconKey(iconKey)).thenReturn(true);
-            when(storageService.exists(iconKey)).thenReturn(true);
 
             //when + then
             ValidationException exception = assertThrows(ValidationException.class,
@@ -269,8 +269,6 @@ public class AccountServiceTest {
 
             verify(userService, times(1)).getUserById(userId);
             verify(accountDao, times(1)).existsByNameAndUser(accountName, userId, null);
-            verify(iconKeyValidator, times(1)).isValidAccountIconKey(iconKey);
-            verify(storageService, times(1)).exists(iconKey);
         }
 
         @Test
@@ -393,23 +391,6 @@ public class AccountServiceTest {
             verify(iconKeyValidator, times(1)).isValidAccountIconKey(iconKey);
         }
 
-        @Test
-        void should_throw_notFoundException_when_icon_path_no_exists() {
-            //given
-            when(userService.getUserById(userId)).thenReturn(user);
-            when(iconKeyValidator.isValidAccountIconKey(iconKey)).thenReturn(true);
-            when(storageService.exists(iconKey)).thenReturn(false);
-
-            //when + then
-            NotFoundException exception = assertThrows(NotFoundException.class,
-                    () -> accountService.createAccount(userId, requestDto));
-
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
-
-            verify(userService, times(1)).getUserById(userId);
-            verify(iconKeyValidator, times(1)).isValidAccountIconKey(iconKey);
-            verify(storageService, times(1)).exists(iconKey);
-        }
     }
 
     @Nested
@@ -436,7 +417,8 @@ public class AccountServiceTest {
             existingAccount.setAlertThreshold(null);
             existingAccount.setUser(user);
 
-            when(accountDao.findByIdAndUser(userId, accountId)).thenReturn(Optional.of(existingAccount));
+            lenient().when(accountDao.findByIdAndUser(userId, accountId)).thenReturn(Optional.of(existingAccount));
+            lenient().when(transactionService.existsByAccountAndUser(any(), any())).thenReturn(false);
         }
 
         @Test
@@ -458,19 +440,19 @@ public class AccountServiceTest {
                     newIcon
             );
 
+            when(storageService.extractKey(anyString())).thenReturn(newIcon);
             when(accountDao.existsByNameAndUser(newName, userId, accountId)).thenReturn(false);
             when(iconKeyValidator.isValidAccountIconKey(newIcon)).thenReturn(true);
-            when(storageService.exists(newIcon)).thenReturn(true);
 
             when(accountDao.update(any(Account.class))).thenReturn(existingAccount);
-            when(mapper.toDetailsResponseDto(existingAccount)).thenReturn(mock(AccountDetailsResponseDto.class));
+            when(mapper.toDetailsResponseDto(existingAccount, false)).thenReturn(mock(AccountDetailsResponseDto.class));
 
             //when
             accountService.updateAccount(userId, accountId, dto);
 
             //then
             verify(accountDao, times(1)).update(accountCaptor.capture());
-            verify(mapper, times(1)).toDetailsResponseDto(existingAccount);
+            verify(mapper, times(1)).toDetailsResponseDto(existingAccount, false);
 
             Account updatedAccount = accountCaptor.getValue();
             assertThat(updatedAccount.getName()).isEqualTo(newName);
@@ -503,7 +485,7 @@ public class AccountServiceTest {
             assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.INACTIVE_ACCOUNT);
 
             verify(accountDao, never()).update(any());
-            verify(mapper, never()).toDetailsResponseDto(any());
+            verify(mapper, never()).toDetailsResponseDto(any(), eq(false));
         }
 
         @Test
@@ -531,7 +513,7 @@ public class AccountServiceTest {
             //then
             assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NAME_ALREADY_USED);
             verify(accountDao, never()).update(any());
-            verify(mapper, never()).toDetailsResponseDto(any());
+            verify(mapper, never()).toDetailsResponseDto(any(), eq(false));
         }
 
         @Test
@@ -551,7 +533,6 @@ public class AccountServiceTest {
             );
 
             when(accountDao.update(any(Account.class))).thenReturn(existingAccount);
-            when(mapper.toDetailsResponseDto(existingAccount)).thenReturn(mock(AccountDetailsResponseDto.class));
 
             //when
             accountService.updateAccount(userId, accountId, dto);
@@ -579,14 +560,14 @@ public class AccountServiceTest {
             );
 
             when(accountDao.update(any(Account.class))).thenReturn(existingAccount);
-            when(mapper.toDetailsResponseDto(existingAccount)).thenReturn(mock(AccountDetailsResponseDto.class));
+            when(mapper.toDetailsResponseDto(existingAccount, false)).thenReturn(mock(AccountDetailsResponseDto.class));
             when(transactionService.existsByAccountAndUser(accountId, userId)).thenReturn(false);
 
             //when
             accountService.updateAccount(userId, accountId, dto);
 
             //then
-            verify(transactionService, times(1)).existsByAccountAndUser(accountId, userId);
+            verify(transactionService, times(2)).existsByAccountAndUser(accountId, userId);
             verify(accountDao, times(1)).update(accountCaptor.capture());
             Account updatedAccount = accountCaptor.getValue();
             assertThat(updatedAccount.getBalance()).isEqualByComparingTo(newBalance);
@@ -615,7 +596,7 @@ public class AccountServiceTest {
 
             assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.MODIFY_BUDGET_WITH_TRANSACTIONS);
             verify(accountDao, never()).update(any());
-            verify(mapper, never()).toDetailsResponseDto(any());
+            verify(mapper, never()).toDetailsResponseDto(any(), eq(false));
         }
 
 
@@ -641,7 +622,7 @@ public class AccountServiceTest {
             );
 
             when(accountDao.update(any(Account.class))).thenReturn(existingAccount);
-            when(mapper.toDetailsResponseDto(existingAccount)).thenReturn(mock(AccountDetailsResponseDto.class));
+            when(mapper.toDetailsResponseDto(existingAccount, false)).thenReturn(mock(AccountDetailsResponseDto.class));
 
             //when
             accountService.updateAccount(userId, accountId, dto);
@@ -724,7 +705,7 @@ public class AccountServiceTest {
             );
 
             when(accountDao.update(any(Account.class))).thenReturn(existingAccount);
-            when(mapper.toDetailsResponseDto(existingAccount)).thenReturn(mock(AccountDetailsResponseDto.class));
+            when(mapper.toDetailsResponseDto(existingAccount, false)).thenReturn(mock(AccountDetailsResponseDto.class));
 
             //when
             accountService.updateAccount(userId, accountId, dto);
@@ -759,7 +740,7 @@ public class AccountServiceTest {
             );
 
             when(accountDao.update(any(Account.class))).thenReturn(existingAccount);
-            when(mapper.toDetailsResponseDto(existingAccount)).thenReturn(mock(AccountDetailsResponseDto.class));
+            when(mapper.toDetailsResponseDto(existingAccount, false)).thenReturn(mock(AccountDetailsResponseDto.class));
 
             //when
             accountService.updateAccount(userId, accountId, dto);
@@ -791,6 +772,8 @@ public class AccountServiceTest {
             account.setUser(user);
             account.setAccountStatus(AccountStatus.INACTIVE);
             account.setIncludeInTotalBalance(false);
+
+            lenient().when(transactionService.existsByAccountAndUser(any(), any())).thenReturn(false);
         }
 
         @Test
@@ -855,6 +838,8 @@ public class AccountServiceTest {
             account.setUser(user);
             account.setAccountStatus(AccountStatus.ACTIVE);
             account.setIncludeInTotalBalance(true);
+
+            lenient().when(transactionService.existsByAccountAndUser(any(), any())).thenReturn(false);
         }
 
         @Test
@@ -920,6 +905,8 @@ public class AccountServiceTest {
             account.setUser(user);
             account.setAccountStatus(AccountStatus.INACTIVE);
             account.setDefault(false);
+
+            lenient().when(transactionService.existsByAccountAndUser(any(), any())).thenReturn(false);
         }
 
         @Test

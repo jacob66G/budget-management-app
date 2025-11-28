@@ -7,6 +7,8 @@ import java.util.List;
 public interface StorageService {
     String getPublicUrl(String key);
 
+    String extractKey(String publicUrl);
+
     String upload(String pathPrefix, Long resourceId, MultipartFile file);
 
     void delete(String key);

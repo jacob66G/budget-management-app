@@ -45,7 +45,9 @@ public class AccountServiceImpl implements AccountService {
     public AccountDetailsResponseDto getAccount(Long userId, Long accountId) {
         Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
-        return mapper.toDetailsResponseDto(account);
+
+        boolean hasTx =  transactionService.existsByAccountAndUser(accountId, userId);
+        return mapper.toDetailsResponseDto(account, hasTx);
     }
 
     @Transactional(readOnly = true)
@@ -74,14 +76,18 @@ public class AccountServiceImpl implements AccountService {
         account.setAlertThreshold(dto.alertThreshold());
         account.setCreatedAt(Instant.now());
         account.setIncludeInTotalBalance(dto.includeInTotalBalance());
-        account.setIconKey(dto.iconKey());
+
+        String iconKey = storageService.extractKey(dto.iconPath());
+        validateIconKey(iconKey);
+        account.setIconKey(iconKey);
+
         account.setAccountStatus(AccountStatus.ACTIVE);
 
         user.addAccount(account);
         Account savedAccount = accountDao.save(account);
 
         log.info("User: {} created new account: {}.", userId, savedAccount.getId());
-        return mapper.toDetailsResponseDto(savedAccount);
+        return mapper.toDetailsResponseDto(savedAccount, false);
     }
 
     @Transactional
@@ -110,15 +116,18 @@ public class AccountServiceImpl implements AccountService {
         if (dto.includeInTotalBalance() != null) {
             account.setIncludeInTotalBalance(dto.includeInTotalBalance());
         }
-        if (dto.iconKey() != null) {
-            validateIcon(dto.iconKey());
-            account.setIconKey(dto.iconKey());
+        if (dto.iconPath() != null) {
+            String iconKey = storageService.extractKey(dto.iconPath());
+            validateIconKey(iconKey);
+            account.setIconKey(iconKey);
         }
 
         changeBudget(account, dto);
+        boolean hasTx = transactionService.existsByAccountAndUser(accountId, userId);
 
         log.info("User: {} modified account: {}.", userId, accountId);
-        return mapper.toDetailsResponseDto(accountDao.update(account));
+
+        return mapper.toDetailsResponseDto(accountDao.update(account), hasTx);
     }
 
     @Override
@@ -138,12 +147,14 @@ public class AccountServiceImpl implements AccountService {
 
     @Transactional
     @Override
-    public void activateAccount(Long userId, Long accountId) {
+    public AccountDetailsResponseDto activateAccount(Long userId, Long accountId) {
         Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
+        boolean hasTx = transactionService.existsByAccountAndUser(accountId, userId);
 
         if (AccountStatus.ACTIVE.equals(account.getAccountStatus())) {
-            return;
+            log.info("User: {} attempted to activate account: {} which is already active.", userId, accountId);
+            return mapper.toDetailsResponseDto(account, hasTx);
         }
 
         account.setAccountStatus(AccountStatus.ACTIVE);
@@ -151,18 +162,20 @@ public class AccountServiceImpl implements AccountService {
 
         recurringTransactionService.activateAllByAccount(accountId, userId);
 
-        accountDao.update(account);
         log.info("User: {} activated account: {}.", userId, accountId);
+        return mapper.toDetailsResponseDto(accountDao.update(account), hasTx);
     }
 
     @Transactional
     @Override
-    public void deactivateAccount(Long userId, Long accountId) {
+    public AccountDetailsResponseDto deactivateAccount(Long userId, Long accountId) {
         Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
+        boolean hasTx = transactionService.existsByAccountAndUser(accountId, userId);
 
         if (AccountStatus.INACTIVE.equals(account.getAccountStatus())) {
-            return;
+            log.info("User: {} attempted to deactivate account: {} which is already deactivated", userId, accountId);
+            return mapper.toDetailsResponseDto(account, hasTx);
         }
 
         account.setAccountStatus(AccountStatus.INACTIVE);
@@ -170,8 +183,8 @@ public class AccountServiceImpl implements AccountService {
 
         recurringTransactionService.deactivateAllByAccount(accountId, userId);
 
-        accountDao.update(account);
         log.info("User: {} deactivated account: {}.", userId, accountId);
+        return mapper.toDetailsResponseDto(accountDao.update(account), hasTx);
     }
 
     @Transactional
@@ -275,7 +288,6 @@ public class AccountServiceImpl implements AccountService {
 
         BudgetType budgetType = BudgetType.valueOf(dto.budgetType().toUpperCase());
         validateBudgetAlertRelation(budgetType, dto.budget(), dto.alertThreshold());
-        validateIcon(dto.iconKey());
         validateNameUniqueness(userId, dto.name(), null);
     }
 
@@ -312,18 +324,14 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private void validateIcon(String path) {
-        if (path == null) {
+    private void validateIconKey(String key) {
+        if (key == null) {
             return;
         }
 
-        if (!iconKeyValidator.isValidAccountIconKey(path)) {
-            log.warn("Invalid icon key: {}.", path);
+        if (!iconKeyValidator.isValidAccountIconKey(key)) {
+            log.warn("Invalid icon key: {}.", key);
             throw new ValidationException("Selected icon is not valid.", ErrorCode.INVALID_RESOURCE_PATH);
-        }
-        if (!storageService.exists(path)) {
-            log.warn("Resource with path: {} does not exists in storage", path);
-            throw new NotFoundException("This image does not exist", ErrorCode.NOT_FOUND);
         }
     }
 

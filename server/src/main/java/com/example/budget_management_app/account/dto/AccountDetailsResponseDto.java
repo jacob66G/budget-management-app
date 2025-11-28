@@ -16,9 +16,10 @@ public record AccountDetailsResponseDto(
         String budgetType,
         BigDecimal budget,
         Double alertThreshold,
-        String iconKey,
+        String iconPath,
         Boolean includeInTotalBalance,
         Instant createdAt,
-        String status
+        String status,
+        boolean hasTransactions
 ) {
 }

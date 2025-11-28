@@ -62,7 +62,10 @@ public class CategoryServiceImpl implements CategoryService {
         category.setName(dto.name());
         category.setType(CategoryType.valueOf(dto.type().toUpperCase()));
         category.setDefault(false);
-        category.setIconKey(dto.iconKey());
+
+        String iconKey = storageService.extractKey(dto.iconPath());
+        validateIcon(iconKey);
+        category.setIconKey(iconKey);
 
         user.addCategory(category);
 
@@ -87,9 +90,10 @@ public class CategoryServiceImpl implements CategoryService {
             validateCategoryTypeChange(categoryId, userId);
             category.setType(CategoryType.valueOf(dto.type().toUpperCase()));
         }
-        if (StringUtils.hasText(dto.iconKey()) && !category.getIconKey().equals(dto.iconKey())) {
-            validateIcon(dto.iconKey());
-            category.setIconKey(dto.iconKey());
+        if (StringUtils.hasText(dto.iconPath()) && !category.getIconKey().equals(dto.iconPath())) {
+            String iconKey = storageService.extractKey(dto.iconPath());
+            validateIcon(iconKey);
+            category.setIconKey(iconKey);
         }
 
         log.info("User: {} has updated category: {}", userId, categoryId);
@@ -194,7 +198,6 @@ public class CategoryServiceImpl implements CategoryService {
     private void validateCategory(CategoryCreateRequestDto categoryRequest, Long userId) {
         validateNameUniqueness(userId, categoryRequest.name(), null);
         validateType(categoryRequest.type());
-        validateIcon(categoryRequest.iconKey());
     }
 
     private void validateNameUniqueness(Long userId, String name, Long existingCategoryId) {
@@ -220,11 +223,6 @@ public class CategoryServiceImpl implements CategoryService {
         if (!iconKeyValidator.isValidCategoryIconKey(key)) {
             log.warn("Invalid icon key: {}", key);
             throw new ValidationException("Selected icon is not valid.", ErrorCode.INVALID_RESOURCE_PATH);
-        }
-
-        if (!storageService.exists(key)) {
-            log.warn("Resource with path: {} does not exists in storage", key);
-            throw new NotFoundException("This image does not exist", ErrorCode.NOT_FOUND);
         }
     }
 

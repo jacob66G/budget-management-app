@@ -30,7 +30,7 @@ public class AccountMapper {
         );
     }
 
-    public AccountDetailsResponseDto toDetailsResponseDto(Account account) {
+    public AccountDetailsResponseDto toDetailsResponseDto(Account account, boolean hasTransactions) {
         return new AccountDetailsResponseDto(
                 account.getId(),
                 account.getAccountType().name(),
@@ -47,7 +47,8 @@ public class AccountMapper {
                 storageService.getPublicUrl(account.getIconKey()),
                 account.isIncludeInTotalBalance(),
                 account.getCreatedAt(),
-                account.getAccountStatus().name()
+                account.getAccountStatus().name(),
+                hasTransactions
         );
     }
 }

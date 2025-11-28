@@ -6,5 +6,5 @@ public record CategoryUpdateRequestDto(
     @Size(min = 2, max = 30, message = "Name must be between 2 and 30 characters")
     String name,
     String type,
-    String iconKey
+    String iconPath
 ) {}

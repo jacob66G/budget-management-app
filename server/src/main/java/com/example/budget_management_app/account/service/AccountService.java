@@ -17,9 +17,9 @@ public interface AccountService {
 
     void createDefaultAccount(User user);
 
-    void activateAccount(Long userId, Long accountId);
+    AccountDetailsResponseDto activateAccount(Long userId, Long accountId);
 
-    void deactivateAccount(Long userId, Long accountId);
+    AccountDetailsResponseDto deactivateAccount(Long userId, Long accountId);
 
     void activateAllByUser(Long userId);
 

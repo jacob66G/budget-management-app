@@ -14,6 +14,7 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import org.junit.jupiter.api.Disabled;
@@ -32,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Sql("/sql/transactions-test-data.sql")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("RecurringTransactionService Integration Tests")
+@ActiveProfiles("test")
 @Disabled
 public class RecurringTransactionsServiceIntegrationTest {
 
