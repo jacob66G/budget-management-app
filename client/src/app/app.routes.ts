@@ -35,7 +35,10 @@ export const routes: Routes = [
        {
         path: 'transactions',
         loadChildren: () => import('./features/transactions/transactions-routes').then(m => m.TRANSACTIONS_ROUTES)
-      },
+      },{
+        path: 'chat',
+        loadChildren: () => import('./features/assistant/chat-routes').then(m => m.CHATS_ROUTES)
+      }
     ]
   }
 ];
