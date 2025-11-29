@@ -1,0 +1,191 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(245, 245, 248);
+    height: 85vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+.chat-container {
+    background-color: rgb(255, 255, 255);
+    width: 80%;
+    height: 95%;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    background-color: rgb(255, 255, 255);
+    height: 50px;
+    border-bottom: 1px rgb(185, 185, 185) solid;
+    padding: 15px 30px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-shrink: 0;
+}
+
+.chat-header mat-icon {
+    color: white;
+    background: linear-gradient(135deg, #4a6fa5, #6db3b3);
+    width: 48px;
+    height: 48px;
+    font-size: 28px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header-title {
+    display: flex;
+    flex-direction: column;
+}
+
+.header-title h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.2;
+}
+
+.header-title span {
+    font-size: 15px;
+    color: #888;
+    margin-top: 4px;
+}
+
+.chat-message-panel {
+    background-color: rgb(243, 243, 247);
+    border-bottom: 1px rgb(185, 185, 185) solid;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+}
+
+.chat-input-panel {
+    padding: 25px 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background-color: white;
+    flex-shrink: 0;
+}
+
+.message-input {
+    flex: 1;
+    font-size: 14;
+}
+
+::ng-deep .rounded-input .mdc-notched-outline__leading,
+::ng-deep .rounded-input .mdc-notched-outline__notch,
+::ng-deep .rounded-input .mdc-notched-outline__trailing {
+    border-color: #e0e0e0 !important;
+    border-width: 1px !important;
+}
+
+::ng-deep .rounded-input .mdc-notched-outline__leading {
+    border-top-left-radius: 50px !important;
+    border-bottom-left-radius: 50px !important;
+    width: 20px !important;
+}
+
+::ng-deep .rounded-input .mdc-notched-outline__trailing {
+    border-top-right-radius: 50px !important;
+    border-bottom-right-radius: 50px !important;
+}
+
+::ng-deep .rounded-input.mat-focused .mdc-notched-outline__leading,
+::ng-deep .rounded-input.mat-focused .mdc-notched-outline__notch,
+::ng-deep .rounded-input.mat-focused .mdc-notched-outline__trailing {
+    border-width: 1px !important; 
+    border-color: #4a6fa5 !important;
+}
+
+::ng-deep .message-input .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+}
+
+::ng-deep .message-input .mdc-text-field--outlined .mat-mdc-form-field-infix {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    display: flex;
+    align-items: center;
+}
+
+.send-button {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: background-color 0.2s;
+    margin: 0;
+}
+
+.send-button:hover {
+    background-color: #689acd !important;
+}
+
+.send-button mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    margin-left: 2px;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message-bubble {
+    max-width: 500px;
+    padding: 0px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.4;
+    position: relative;
+
+    &.assistant {
+        align-self: flex-start;
+        background-color: #ffffff;
+        color: #333;
+        border-bottom-left-radius: 4px;
+    }
+
+    &.user {
+        align-self: flex-end;
+        background-color: var(--primary-color) !important;
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+}
+
+.loading-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #666;
+      font-style: italic;
+      
+      mat-icon {
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+    }

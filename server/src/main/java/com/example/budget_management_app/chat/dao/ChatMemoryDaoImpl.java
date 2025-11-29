@@ -53,7 +53,7 @@ public class ChatMemoryDaoImpl implements ChatMemoryDao{
      */
     @Override
     public List<ChatMessage> getChatMessages(String id) {
-        String query = "SELECT content, type FROM spring_ai_chat_memory WHERE conversation_id = ? ORDER BY timestamp DESC";
+        String query = "SELECT content, type FROM spring_ai_chat_memory WHERE conversation_id = ? ORDER BY timestamp ASC";
         return jdbcTemplate.query(query, (rs, rowNum) ->
                 new ChatMessage(rs.getString("content"), rs.getString("type")), id);
     }

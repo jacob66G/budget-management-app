@@ -1,1 +1,69 @@
-<p>chat-page works!</p>
+<div class="container">
+    <mat-card class="chat-container">
+
+        <mat-card-header class="chat-header">
+
+            <mat-icon>
+                smart_toy
+            </mat-icon>
+
+            <div class="header-title">
+                <h3>Finance Assistant</h3>
+                <span>Online &bull; Ready to help you with your finances</span>
+            </div>
+
+        </mat-card-header>
+
+        <mat-card-content class="chat-message-panel">
+            
+            <div class="chat-messages" #chat>
+                @for (msg of messages(); track $index) {
+                    <div class="message-bubble"
+                        [class.user]="msg.type === 'USER'"
+                        [class.assistant]="msg.type === 'ASSISTANT'">
+                        <div class="message-content" [innerHTML]="msg.content | markdownToHtml"></div>
+                    </div>
+                }
+
+                @if (isLoading) {
+                    <div class="loading-indicator">
+                        <mat-icon>psychology</mat-icon>
+                        <span>thinking...</span>
+                    </div>
+                }
+            </div>
+
+        </mat-card-content>
+
+        <mat-card-actions class="chat-input-panel">
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="message-input rounded-input">
+                <textarea 
+                matInput
+                placeholder="Ask about your finances ..."
+                [(ngModel)] = "userInput"
+                [disabled]="isLoading"
+                (keydown.enter)="onEnterPressed($event)"
+                rows="1"
+                style="resize: none; overflow: hidden;"
+                >
+                </textarea>
+            </mat-form-field>
+
+            <button 
+            mat-icon-button 
+            matTooltip="Send message to chat"
+            class="send-button"
+            (click)="onSendPressed()"
+            [disabled]="isUserInputEmpty() || isLoading"
+            matTooltipPosition="after"
+            matTooltipShowDelay="1000"
+            >
+                <mat-icon>send</mat-icon>
+            </button>
+
+        </mat-card-actions>
+
+    </mat-card>
+</div>
+
