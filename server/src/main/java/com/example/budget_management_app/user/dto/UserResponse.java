@@ -2,7 +2,7 @@ package com.example.budget_management_app.user.dto;
 
 import java.time.Instant;
 
-public record UserResponseDto(
+public record UserResponse(
         Long id,
         String name,
         String surname,

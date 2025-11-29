@@ -1,6 +1,6 @@
 package com.example.budget_management_app.user.controller;
 
-import com.example.budget_management_app.common.dto.ResponseMessageDto;
+import com.example.budget_management_app.common.dto.ResponseMessage;
 import com.example.budget_management_app.security.service.CustomUserDetails;
 import com.example.budget_management_app.user.dto.*;
 import com.example.budget_management_app.user.service.UserService;
@@ -20,12 +20,12 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDto> getUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<UserResponse> getUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.getUser(userDetails.getId()));
     }
 
     @GetMapping("/me/sessions")
-    public ResponseEntity<List<UserSessionResponseDto>> getUserSessions(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<List<UserSessionResponse>> getUserSessions(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long currentSessionId = userDetails.getSessionId();
         return ResponseEntity.ok(userService.getUserSessions(userDetails.getId(), currentSessionId));
     }
@@ -39,26 +39,26 @@ public class UserController {
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<UserResponseDto> updateUser(
-            @Valid @RequestBody UpdateUserRequestDto requestDto,
+    public ResponseEntity<UserResponse> updateUser(
+            @Valid @RequestBody UpdateUserRequest requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        UserResponseDto response = userService.updateUser(userDetails.getId(), requestDto);
+        UserResponse response = userService.updateUser(userDetails.getId(), requestDto);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/me/change-password")
     public ResponseEntity<Void> changePassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody ChangePasswordRequestDto requestDto
+            @Valid @RequestBody ChangePasswordRequest requestDto
     ) {
         userService.changePassword(userDetails.getId(), requestDto);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/me/close-account")
-    public ResponseEntity<ResponseMessageDto> closeUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        ResponseMessageDto response = userService.closeUser(userDetails.getId());
+    public ResponseEntity<ResponseMessage> closeUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        ResponseMessage response = userService.closeUser(userDetails.getId());
         return ResponseEntity.ok(response);
     }
 

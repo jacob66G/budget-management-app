@@ -2,15 +2,15 @@ package com.example.budget_management_app.user.mapper;
 
 import com.example.budget_management_app.session.domain.UserSession;
 import com.example.budget_management_app.user.domain.User;
-import com.example.budget_management_app.user.dto.UserResponseDto;
-import com.example.budget_management_app.user.dto.UserSessionResponseDto;
+import com.example.budget_management_app.user.dto.UserResponse;
+import com.example.budget_management_app.user.dto.UserSessionResponse;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserMapper {
 
-    public UserResponseDto toUserResponseDto (User user) {
-        return new UserResponseDto(
+    public UserResponse toUserResponse(User user) {
+        return new UserResponse(
                 user.getId(),
                 user.getName(),
                 user.getSurname(),
@@ -21,10 +21,10 @@ public class UserMapper {
         );
     }
 
-    public UserSessionResponseDto toUserSessionResponseDto (UserSession session, Long currentSessionId) {
+    public UserSessionResponse toUserSessionResponse(UserSession session, Long currentSessionId) {
         boolean isCurrent = session.getId().equals(currentSessionId);
 
-        return new UserSessionResponseDto(
+        return new UserSessionResponse(
                 session.getId(),
                 session.getIpAddress(),
                 session.getDeviceInfo(),

@@ -1,8 +1,8 @@
 package com.example.budget_management_app.account.mapper;
 
 import com.example.budget_management_app.account.domain.Account;
-import com.example.budget_management_app.account.dto.AccountDetailsResponseDto;
-import com.example.budget_management_app.account.dto.AccountResponseDto;
+import com.example.budget_management_app.account.dto.AccountDetailsResponse;
+import com.example.budget_management_app.account.dto.AccountResponse;
 import com.example.budget_management_app.common.service.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,8 +13,8 @@ public class AccountMapper {
 
     private final StorageService storageService;
 
-    public AccountResponseDto toResponseDto(Account account) {
-        return new AccountResponseDto(
+    public AccountResponse toResponse(Account account) {
+        return new AccountResponse(
                 account.getId(),
                 account.getAccountType().name(),
                 account.getName(),
@@ -30,8 +30,8 @@ public class AccountMapper {
         );
     }
 
-    public AccountDetailsResponseDto toDetailsResponseDto(Account account, boolean hasTransactions) {
-        return new AccountDetailsResponseDto(
+    public AccountDetailsResponse toDetailsResponse(Account account, boolean hasTransactions) {
+        return new AccountDetailsResponse(
                 account.getId(),
                 account.getAccountType().name(),
                 account.getName(),

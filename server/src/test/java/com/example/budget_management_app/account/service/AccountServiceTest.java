@@ -5,9 +5,9 @@ import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.account.domain.AccountStatus;
 import com.example.budget_management_app.account.domain.AccountType;
 import com.example.budget_management_app.account.domain.BudgetType;
-import com.example.budget_management_app.account.dto.AccountCreateRequestDto;
-import com.example.budget_management_app.account.dto.AccountDetailsResponseDto;
-import com.example.budget_management_app.account.dto.AccountUpdateRequestDto;
+import com.example.budget_management_app.account.dto.AccountCreateRequest;
+import com.example.budget_management_app.account.dto.AccountDetailsResponse;
+import com.example.budget_management_app.account.dto.AccountUpdateRequest;
 import com.example.budget_management_app.account.mapper.AccountMapper;
 import com.example.budget_management_app.common.enums.SupportedCurrency;
 import com.example.budget_management_app.common.exception.ErrorCode;
@@ -66,9 +66,9 @@ public class AccountServiceTest {
     class CreateAccountTests {
 
         private User user;
-        private AccountCreateRequestDto requestDto;
+        private AccountCreateRequest requestDto;
         private Account savedAccount;
-        private AccountDetailsResponseDto expectedResult;
+        private AccountDetailsResponse expectedResult;
         private Long userId = 1L;
         private String accountName = "main";
         private String iconKey = "/accounts/test.png";
@@ -82,7 +82,7 @@ public class AccountServiceTest {
             user = new User();
             user.setId(userId);
 
-            requestDto = new AccountCreateRequestDto(
+            requestDto = new AccountCreateRequest(
                     "PERSONAL",
                     accountName,
                     "PLN",
@@ -114,7 +114,7 @@ public class AccountServiceTest {
             savedAccount.setIncludeInTotalBalance(true);
             savedAccount.setUser(user);
 
-            expectedResult = new AccountDetailsResponseDto(
+            expectedResult = new AccountDetailsResponse(
                     1L,
                     "PERSONAL",
                     accountName,
@@ -145,10 +145,10 @@ public class AccountServiceTest {
             when(accountDao.existsByNameAndUser(accountName, userId, null)).thenReturn(false);
             when(iconKeyValidator.isValidAccountIconKey(iconKey)).thenReturn(true);
             when(accountDao.save(any(Account.class))).thenReturn(savedAccount);
-            when(mapper.toDetailsResponseDto(savedAccount, false)).thenReturn(expectedResult);
+            when(mapper.toDetailsResponse(savedAccount, false)).thenReturn(expectedResult);
 
             //When
-            AccountDetailsResponseDto result = accountService.createAccount(userId, requestDto);
+            AccountDetailsResponse result = accountService.createAccount(userId, requestDto);
 
             //then
             assertThat(result).isNotNull();
@@ -158,7 +158,7 @@ public class AccountServiceTest {
             verify(userService, times(1)).getUserById(userId);
             verify(accountDao, times(1)).existsByNameAndUser(accountName, userId, null);
             verify(iconKeyValidator, times(1)).isValidAccountIconKey(iconKey);
-            verify(mapper, times(1)).toDetailsResponseDto(savedAccount, false);
+            verify(mapper, times(1)).toDetailsResponse(savedAccount, false);
 
             verify(accountDao, times(1)).save(accountCaptor.capture());
             Account accountSentToDao = accountCaptor.getValue();
@@ -180,7 +180,7 @@ public class AccountServiceTest {
         void should_throw_validationException_when_incorrect_account_type() {
             //given
             String accountWrongType = "no existent type";
-            AccountCreateRequestDto requestWithWrongType = new AccountCreateRequestDto(
+            AccountCreateRequest requestWithWrongType = new AccountCreateRequest(
                     accountWrongType,
                     accountName,
                     "PLN",
@@ -206,7 +206,7 @@ public class AccountServiceTest {
         void should_throw_validationException_when_incorrect_currency() {
             //given
             String wrongCurrency = "no existent currency";
-            AccountCreateRequestDto requestWithWrongCurrency = new AccountCreateRequestDto(
+            AccountCreateRequest requestWithWrongCurrency = new AccountCreateRequest(
                     "PERSONAL",
                     accountName,
                     wrongCurrency,
@@ -232,7 +232,7 @@ public class AccountServiceTest {
         void should_throw_validationException_when_incorrect_budget_type() {
             //given
             String budgetWrongType = "no existent budget type";
-            AccountCreateRequestDto requestWithWrongBudgetType = new AccountCreateRequestDto(
+            AccountCreateRequest requestWithWrongBudgetType = new AccountCreateRequest(
                     "PERSONAL",
                     accountName,
                     "PLN",
@@ -274,7 +274,7 @@ public class AccountServiceTest {
         @Test
         void should_throw_validationException_when_budget_type_is_none_and_budget_is_not_null() {
             //given
-            AccountCreateRequestDto requestWithBudget = new AccountCreateRequestDto(
+            AccountCreateRequest requestWithBudget = new AccountCreateRequest(
                     "PERSONAL",
                     accountName,
                     "PLN",
@@ -300,7 +300,7 @@ public class AccountServiceTest {
         @Test
         void should_throw_validationException_when_budget_type_is_none_and_alertThreshold_is_not_null() {
             //given
-            AccountCreateRequestDto requestWithBudget = new AccountCreateRequestDto(
+            AccountCreateRequest requestWithBudget = new AccountCreateRequest(
                     "PERSONAL",
                     accountName,
                     "PLN",
@@ -326,7 +326,7 @@ public class AccountServiceTest {
         @Test
         void should_throw_validationException_when_budget_type_is_not_none_and_budget_is_null() {
             //given
-            AccountCreateRequestDto requestWithBudget = new AccountCreateRequestDto(
+            AccountCreateRequest requestWithBudget = new AccountCreateRequest(
                     "PERSONAL",
                     accountName,
                     "PLN",
@@ -352,7 +352,7 @@ public class AccountServiceTest {
         @Test
         void should_throw_validationException_when_budget_type_is_not_none_and_alertThreshold_is_null() {
             //given
-            AccountCreateRequestDto requestWithBudget = new AccountCreateRequestDto(
+            AccountCreateRequest requestWithBudget = new AccountCreateRequest(
                     "PERSONAL",
                     accountName,
                     "PLN",
@@ -428,7 +428,7 @@ public class AccountServiceTest {
             String newDesc = "new des";
             String newIcon = "https://new.path/icon.png";
 
-            AccountUpdateRequestDto dto = new AccountUpdateRequestDto(
+            AccountUpdateRequest dto = new AccountUpdateRequest(
                     newName,
                     null,
                     newDesc,
@@ -445,14 +445,14 @@ public class AccountServiceTest {
             when(iconKeyValidator.isValidAccountIconKey(newIcon)).thenReturn(true);
 
             when(accountDao.update(any(Account.class))).thenReturn(existingAccount);
-            when(mapper.toDetailsResponseDto(existingAccount, false)).thenReturn(mock(AccountDetailsResponseDto.class));
+            when(mapper.toDetailsResponse(existingAccount, false)).thenReturn(mock(AccountDetailsResponse.class));
 
             //when
             accountService.updateAccount(userId, accountId, dto);
 
             //then
             verify(accountDao, times(1)).update(accountCaptor.capture());
-            verify(mapper, times(1)).toDetailsResponseDto(existingAccount, false);
+            verify(mapper, times(1)).toDetailsResponse(existingAccount, false);
 
             Account updatedAccount = accountCaptor.getValue();
             assertThat(updatedAccount.getName()).isEqualTo(newName);
@@ -465,7 +465,7 @@ public class AccountServiceTest {
         void should_throw_ValidationException_when_updating_inactive_account() {
             //given
             existingAccount.setAccountStatus(AccountStatus.INACTIVE);
-            AccountUpdateRequestDto dto = new AccountUpdateRequestDto(
+            AccountUpdateRequest dto = new AccountUpdateRequest(
                     null,
                     null,
                     null,
@@ -485,14 +485,14 @@ public class AccountServiceTest {
             assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.INACTIVE_ACCOUNT);
 
             verify(accountDao, never()).update(any());
-            verify(mapper, never()).toDetailsResponseDto(any(), eq(false));
+            verify(mapper, never()).toDetailsResponse(any(), eq(false));
         }
 
         @Test
         void should_throw_ValidationException_when_new_name_is_already_used() {
             //given
             String newName = "existing name";
-            AccountUpdateRequestDto dto = new AccountUpdateRequestDto(
+            AccountUpdateRequest dto = new AccountUpdateRequest(
                     newName,
                     null,
                     null,
@@ -513,14 +513,14 @@ public class AccountServiceTest {
             //then
             assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NAME_ALREADY_USED);
             verify(accountDao, never()).update(any());
-            verify(mapper, never()).toDetailsResponseDto(any(), eq(false));
+            verify(mapper, never()).toDetailsResponse(any(), eq(false));
         }
 
         @Test
         void should_update_currency() {
             //given
             String newCurrency = "USD";
-            AccountUpdateRequestDto dto = new AccountUpdateRequestDto(
+            AccountUpdateRequest dto = new AccountUpdateRequest(
                     null,
                     newCurrency,
                     null,
@@ -547,7 +547,7 @@ public class AccountServiceTest {
         void should_update_initialBalance() {
             //given
             BigDecimal newBalance = BigDecimal.valueOf(999.00);
-            AccountUpdateRequestDto dto = new AccountUpdateRequestDto(
+            AccountUpdateRequest dto = new AccountUpdateRequest(
                     null,
                     null,
                     null,
@@ -560,7 +560,7 @@ public class AccountServiceTest {
             );
 
             when(accountDao.update(any(Account.class))).thenReturn(existingAccount);
-            when(mapper.toDetailsResponseDto(existingAccount, false)).thenReturn(mock(AccountDetailsResponseDto.class));
+            when(mapper.toDetailsResponse(existingAccount, false)).thenReturn(mock(AccountDetailsResponse.class));
             when(transactionService.existsByAccountAndUser(accountId, userId)).thenReturn(false);
 
             //when
@@ -577,7 +577,7 @@ public class AccountServiceTest {
         void should_throw_ValidationException_when_change_initial_balance_when_transactions_exists() {
             //given
             BigDecimal newBalance = BigDecimal.valueOf(999.00);
-            AccountUpdateRequestDto dto = new AccountUpdateRequestDto(
+            AccountUpdateRequest dto = new AccountUpdateRequest(
                     null,
                     null,
                     null,
@@ -596,7 +596,7 @@ public class AccountServiceTest {
 
             assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.MODIFY_BUDGET_WITH_TRANSACTIONS);
             verify(accountDao, never()).update(any());
-            verify(mapper, never()).toDetailsResponseDto(any(), eq(false));
+            verify(mapper, never()).toDetailsResponse(any(), eq(false));
         }
 
 
@@ -609,7 +609,7 @@ public class AccountServiceTest {
             existingAccount.setBudget(BigDecimal.valueOf(1000));
             existingAccount.setAlertThreshold(50.0);
 
-            AccountUpdateRequestDto dto = new AccountUpdateRequestDto(
+            AccountUpdateRequest dto = new AccountUpdateRequest(
                     null,
                     null,
                     null,
@@ -622,7 +622,7 @@ public class AccountServiceTest {
             );
 
             when(accountDao.update(any(Account.class))).thenReturn(existingAccount);
-            when(mapper.toDetailsResponseDto(existingAccount, false)).thenReturn(mock(AccountDetailsResponseDto.class));
+            when(mapper.toDetailsResponse(existingAccount, false)).thenReturn(mock(AccountDetailsResponse.class));
 
             //when
             accountService.updateAccount(userId, accountId, dto);
@@ -640,7 +640,7 @@ public class AccountServiceTest {
         void changeBudget_should_throw_when_enabling_budget_without_budget_value() {
             //given
             //existingAccount has BudgetType.NONE by default
-            AccountUpdateRequestDto dto = new AccountUpdateRequestDto(
+            AccountUpdateRequest dto = new AccountUpdateRequest(
                     null,
                     null,
                     null,
@@ -665,7 +665,7 @@ public class AccountServiceTest {
         void changeBudget_should_throw_when_enabling_budget_without_alertThreshold() {
             //given
             //existingAccount has BudgetType.NONE by default
-            AccountUpdateRequestDto dto = new AccountUpdateRequestDto(
+            AccountUpdateRequest dto = new AccountUpdateRequest(
                     null,
                     null,
                     null,
@@ -692,7 +692,7 @@ public class AccountServiceTest {
             //existingAccount has BudgetType.NONE by default
             BigDecimal newBudget = BigDecimal.valueOf(1000);
             Double newAlert = 50.0;
-            AccountUpdateRequestDto dto = new AccountUpdateRequestDto(
+            AccountUpdateRequest dto = new AccountUpdateRequest(
                     null,
                     null,
                     null,
@@ -705,7 +705,7 @@ public class AccountServiceTest {
             );
 
             when(accountDao.update(any(Account.class))).thenReturn(existingAccount);
-            when(mapper.toDetailsResponseDto(existingAccount, false)).thenReturn(mock(AccountDetailsResponseDto.class));
+            when(mapper.toDetailsResponse(existingAccount, false)).thenReturn(mock(AccountDetailsResponse.class));
 
             //when
             accountService.updateAccount(userId, accountId, dto);
@@ -727,7 +727,7 @@ public class AccountServiceTest {
             existingAccount.setAlertThreshold(50.0);
 
             BigDecimal updatedBudget = BigDecimal.valueOf(1500);
-            AccountUpdateRequestDto dto = new AccountUpdateRequestDto(
+            AccountUpdateRequest dto = new AccountUpdateRequest(
                     null,
                     null,
                     null,
@@ -740,7 +740,7 @@ public class AccountServiceTest {
             );
 
             when(accountDao.update(any(Account.class))).thenReturn(existingAccount);
-            when(mapper.toDetailsResponseDto(existingAccount, false)).thenReturn(mock(AccountDetailsResponseDto.class));
+            when(mapper.toDetailsResponse(existingAccount, false)).thenReturn(mock(AccountDetailsResponse.class));
 
             //when
             accountService.updateAccount(userId, accountId, dto);

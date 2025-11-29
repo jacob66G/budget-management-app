@@ -1,23 +1,23 @@
 package com.example.budget_management_app.auth.service;
 
 import com.example.budget_management_app.auth.dto.*;
-import com.example.budget_management_app.common.dto.ResponseMessageDto;
+import com.example.budget_management_app.common.dto.ResponseMessage;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface AuthService {
 
-    ResponseMessageDto registerUser(RegistrationRequestDto dto);
+    ResponseMessage registerUser(RegistrationRequest dto);
 
-    LoginResult authenticateUser(LoginRequestDto dto, HttpServletRequest request, String oldRefreshToken);
+    LoginResult authenticateUser(LoginRequest dto, HttpServletRequest request, String oldRefreshToken);
 
     LoginResult authenticateWith2fa(TwoFactorLoginRequest dto, HttpServletRequest request, String oldRefreshToken);
 
     void verifyUser(String code);
 
-    ResponseMessageDto resendVerification(String email);
+    ResponseMessage resendVerification(String email);
 
-    void resetPasswordConfirm(PasswordResetConfirmationDto dto);
+    void resetPasswordConfirm(PasswordResetConfirmation dto);
 
-    ResponseMessageDto resetPassword(PasswordResetRequestDto dto);
+    ResponseMessage resetPassword(PasswordResetRequest dto);
 
 }

@@ -1,7 +1,7 @@
 package com.example.budget_management_app.user.service;
 
-import com.example.budget_management_app.auth.dto.RegistrationRequestDto;
-import com.example.budget_management_app.common.dto.ResponseMessageDto;
+import com.example.budget_management_app.auth.dto.RegistrationRequest;
+import com.example.budget_management_app.common.dto.ResponseMessage;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.dto.*;
 
@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface UserService {
 
-    UserResponseDto getUser(Long id);
+    UserResponse getUser(Long id);
 
     User getUserById(Long id);
 
@@ -18,17 +18,17 @@ public interface UserService {
 
     Optional<User> findUserByEmail(String email);
 
-    User createUser(RegistrationRequestDto dto);
+    User createUser(RegistrationRequest dto);
 
-    UserResponseDto updateUser(Long userId, UpdateUserRequestDto dto);
+    UserResponse updateUser(Long userId, UpdateUserRequest dto);
 
     void activateUser(String email);
 
-    ResponseMessageDto closeUser(Long userId);
+    ResponseMessage closeUser(Long userId);
 
     void deleteUsersPendingDeletion();
 
-    void changePassword(Long userId, ChangePasswordRequestDto dto);
+    void changePassword(Long userId, ChangePasswordRequest dto);
 
     void updateUserPassword(Long userId, String newPassword);
 
@@ -38,7 +38,7 @@ public interface UserService {
 
     void tfaDisable(Long userId, String code);
 
-    List<UserSessionResponseDto> getUserSessions(Long userId, Long currentSessionId);
+    List<UserSessionResponse> getUserSessions(Long userId, Long currentSessionId);
 
     void logoutSession(Long userId, Long sessionId);
 }

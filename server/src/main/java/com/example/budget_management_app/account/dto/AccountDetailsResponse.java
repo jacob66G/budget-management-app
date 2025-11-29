@@ -3,7 +3,7 @@ package com.example.budget_management_app.account.dto;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-public record AccountResponseDto(
+public record AccountDetailsResponse(
         Long id,
         String type,
         String name,
@@ -12,9 +12,14 @@ public record AccountResponseDto(
         BigDecimal totalExpense,
         String currency,
         Boolean isDefault,
+        String description,
+        String budgetType,
+        BigDecimal budget,
+        Double alertThreshold,
         String iconPath,
         Boolean includeInTotalBalance,
         Instant createdAt,
-        String status
+        String status,
+        boolean hasTransactions
 ) {
 }

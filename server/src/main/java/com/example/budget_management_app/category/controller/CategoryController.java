@@ -1,9 +1,9 @@
 package com.example.budget_management_app.category.controller;
 
-import com.example.budget_management_app.category.dto.CategoryCreateRequestDto;
-import com.example.budget_management_app.category.dto.CategoryResponseDto;
-import com.example.budget_management_app.category.dto.CategoryUpdateRequestDto;
-import com.example.budget_management_app.category.dto.ReassignTransactionsRequestDto;
+import com.example.budget_management_app.category.dto.CategoryCreateRequest;
+import com.example.budget_management_app.category.dto.CategoryResponse;
+import com.example.budget_management_app.category.dto.CategoryUpdateRequest;
+import com.example.budget_management_app.category.dto.ReassignTransactionsRequest;
 import com.example.budget_management_app.category.service.CategoryService;
 import com.example.budget_management_app.constants.ApiPaths;
 import com.example.budget_management_app.security.service.CustomUserDetails;
@@ -24,7 +24,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponseDto>> getCategories(
+    public ResponseEntity<List<CategoryResponse>> getCategories(
             @RequestParam(required = false) String type,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
@@ -33,7 +33,7 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponseDto> getCategory(
+    public ResponseEntity<CategoryResponse> getCategory(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
@@ -42,11 +42,11 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<CategoryResponseDto> addCategory(
-            @Valid @RequestBody CategoryCreateRequestDto requestDto,
+    public ResponseEntity<CategoryResponse> addCategory(
+            @Valid @RequestBody CategoryCreateRequest requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        CategoryResponseDto response = categoryService.createCategory(userDetails.getId(), requestDto);
+        CategoryResponse response = categoryService.createCategory(userDetails.getId(), requestDto);
         return ResponseEntity.created(UriComponentsBuilder.fromPath(ApiPaths.BASE_API)
                         .pathSegment(ApiPaths.CATEGORIES)
                         .pathSegment(String.valueOf(response.id()))
@@ -56,19 +56,19 @@ public class CategoryController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<CategoryResponseDto> updateCategory(
+    public ResponseEntity<CategoryResponse> updateCategory(
             @PathVariable Long id,
-            @Valid @RequestBody CategoryUpdateRequestDto requestDto,
+            @Valid @RequestBody CategoryUpdateRequest requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        CategoryResponseDto response = categoryService.updateCategory(userDetails.getId(), id, requestDto);
+        CategoryResponse response = categoryService.updateCategory(userDetails.getId(), id, requestDto);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{oldCategoryId}/reassign")
     public ResponseEntity<Void> reassignTransactions(
             @PathVariable Long oldCategoryId,
-            @Valid @RequestBody ReassignTransactionsRequestDto dto,
+            @Valid @RequestBody ReassignTransactionsRequest dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         categoryService.reassignTransactions(

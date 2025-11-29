@@ -4,9 +4,9 @@ import com.example.budget_management_app.category.dao.CategoryDao;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.category.domain.CategoryType;
 import com.example.budget_management_app.category.domain.InitialCategory;
-import com.example.budget_management_app.category.dto.CategoryCreateRequestDto;
-import com.example.budget_management_app.category.dto.CategoryResponseDto;
-import com.example.budget_management_app.category.dto.CategoryUpdateRequestDto;
+import com.example.budget_management_app.category.dto.CategoryCreateRequest;
+import com.example.budget_management_app.category.dto.CategoryResponse;
+import com.example.budget_management_app.category.dto.CategoryUpdateRequest;
 import com.example.budget_management_app.category.mapper.CategoryMapper;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
@@ -40,21 +40,21 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<CategoryResponseDto> getCategories(Long userId, String type) {
-        return categoryDao.findByUser(userId, type).stream().map(mapper::toCategoryResponseDto).toList();
+    public List<CategoryResponse> getCategories(Long userId, String type) {
+        return categoryDao.findByUser(userId, type).stream().map(mapper::toCategoryResponse).toList();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public CategoryResponseDto getCategory(Long userId, Long categoryId) {
+    public CategoryResponse getCategory(Long userId, Long categoryId) {
         Category category = categoryDao.findByIdAndUser(categoryId, userId)
                 .orElseThrow(() -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
-        return mapper.toCategoryResponseDto(category);
+        return mapper.toCategoryResponse(category);
     }
 
     @Transactional
     @Override
-    public CategoryResponseDto createCategory(Long userId, CategoryCreateRequestDto dto) {
+    public CategoryResponse createCategory(Long userId, CategoryCreateRequest dto) {
         User user = userService.getUserById(userId);
         validateCategory(dto, user.getId());
 
@@ -70,12 +70,12 @@ public class CategoryServiceImpl implements CategoryService {
         user.addCategory(category);
 
         log.info("User: {} has created new category: {}", userId, dto.name());
-        return mapper.toCategoryResponseDto(categoryDao.save(category));
+        return mapper.toCategoryResponse(categoryDao.save(category));
     }
 
     @Transactional
     @Override
-    public CategoryResponseDto updateCategory(Long userId, Long categoryId, CategoryUpdateRequestDto dto) {
+    public CategoryResponse updateCategory(Long userId, Long categoryId, CategoryUpdateRequest dto) {
         Category category = categoryDao.findByIdAndUser(categoryId, userId)
                 .orElseThrow(() -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
 
@@ -97,7 +97,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         log.info("User: {} has updated category: {}", userId, categoryId);
-        return mapper.toCategoryResponseDto(categoryDao.update(category));
+        return mapper.toCategoryResponse(categoryDao.update(category));
     }
 
     @Transactional
@@ -195,7 +195,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    private void validateCategory(CategoryCreateRequestDto categoryRequest, Long userId) {
+    private void validateCategory(CategoryCreateRequest categoryRequest, Long userId) {
         validateNameUniqueness(userId, categoryRequest.name(), null);
         validateType(categoryRequest.type());
     }

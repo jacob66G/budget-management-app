@@ -21,12 +21,12 @@ public class AccountController {
     private final AccountService accountService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<AccountDetailsResponseDto> getAccount(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<AccountDetailsResponse> getAccount(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(accountService.getAccount(userDetails.getId(), id));
     }
 
     @GetMapping
-    public ResponseEntity<List<AccountResponseDto>> getAccounts(
+    public ResponseEntity<List<AccountResponse>> getAccounts(
             SearchCriteria criteria,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
@@ -34,11 +34,11 @@ public class AccountController {
     }
 
     @PostMapping
-    public ResponseEntity<AccountDetailsResponseDto> addAccount(
-            @Valid @RequestBody AccountCreateRequestDto dto,
+    public ResponseEntity<AccountDetailsResponse> addAccount(
+            @Valid @RequestBody AccountCreateRequest dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        AccountDetailsResponseDto response = accountService.createAccount(userDetails.getId(), dto);
+        AccountDetailsResponse response = accountService.createAccount(userDetails.getId(), dto);
         return ResponseEntity.created(UriComponentsBuilder.fromPath(ApiPaths.BASE_API)
                         .pathSegment(ApiPaths.ACCOUNTS)
                         .pathSegment(String.valueOf(response.id()))
@@ -48,9 +48,9 @@ public class AccountController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<AccountDetailsResponseDto> updateAccount(
+    public ResponseEntity<AccountDetailsResponse> updateAccount(
             @PathVariable Long id,
-            @Valid @RequestBody AccountUpdateRequestDto dto,
+            @Valid @RequestBody AccountUpdateRequest dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ResponseEntity.ok(accountService.updateAccount(userDetails.getId(), id, dto));
@@ -63,20 +63,20 @@ public class AccountController {
     }
 
     @PostMapping("/{id}/activate")
-    public ResponseEntity<AccountDetailsResponseDto> activateAccount(
+    public ResponseEntity<AccountDetailsResponse> activateAccount(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        AccountDetailsResponseDto response = accountService.activateAccount(userDetails.getId(), id);
+        AccountDetailsResponse response = accountService.activateAccount(userDetails.getId(), id);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{id}/deactivate")
-    public ResponseEntity<AccountDetailsResponseDto> deactivateAccount(
+    public ResponseEntity<AccountDetailsResponse> deactivateAccount(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        AccountDetailsResponseDto response = accountService.deactivateAccount(userDetails.getId(), id);
+        AccountDetailsResponse response = accountService.deactivateAccount(userDetails.getId(), id);
         return ResponseEntity.ok(response);
     }
 }

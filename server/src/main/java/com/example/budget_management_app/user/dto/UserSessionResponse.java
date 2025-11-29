@@ -2,7 +2,7 @@ package com.example.budget_management_app.user.dto;
 
 import java.time.Instant;
 
-public record UserSessionResponseDto(
+public record UserSessionResponse(
         Long id,
         String ipAddress,
         String deviceInfo,

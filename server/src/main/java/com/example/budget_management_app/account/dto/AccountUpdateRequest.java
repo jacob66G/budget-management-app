@@ -4,7 +4,7 @@ import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 
-public record AccountUpdateRequestDto(
+public record AccountUpdateRequest(
         @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
         String name,
         @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be a valid")

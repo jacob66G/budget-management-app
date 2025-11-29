@@ -1,9 +1,9 @@
 package com.example.budget_management_app.user;
 
 import com.example.budget_management_app.account.service.AccountService;
-import com.example.budget_management_app.auth.dto.RegistrationRequestDto;
+import com.example.budget_management_app.auth.dto.RegistrationRequest;
 import com.example.budget_management_app.category.service.CategoryService;
-import com.example.budget_management_app.common.dto.ResponseMessageDto;
+import com.example.budget_management_app.common.dto.ResponseMessage;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.UserStatusException;
@@ -14,10 +14,10 @@ import com.example.budget_management_app.transaction.service.TransactionService;
 import com.example.budget_management_app.user.dao.UserDao;
 import com.example.budget_management_app.user.domain.User;
 import com.example.budget_management_app.user.domain.UserStatus;
-import com.example.budget_management_app.user.dto.ChangePasswordRequestDto;
+import com.example.budget_management_app.user.dto.ChangePasswordRequest;
 import com.example.budget_management_app.user.dto.TfaQRCode;
-import com.example.budget_management_app.user.dto.UpdateUserRequestDto;
-import com.example.budget_management_app.user.dto.UserResponseDto;
+import com.example.budget_management_app.user.dto.UpdateUserRequest;
+import com.example.budget_management_app.user.dto.UserResponse;
 import com.example.budget_management_app.user.mapper.UserMapper;
 import com.example.budget_management_app.user.service.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,13 +84,13 @@ class UserServiceTest {
     @Nested
     class CreateUserTests {
 
-        private RegistrationRequestDto dto;
+        private RegistrationRequest dto;
         private User savedUser;
         private final String rawPassword = "rawPassword123";
 
         @BeforeEach
         void setUp() {
-            dto = new RegistrationRequestDto(
+            dto = new RegistrationRequest(
                     "Jan",
                     "Kowalski",
                     "jan.kowalski@example.com",
@@ -159,7 +159,7 @@ class UserServiceTest {
 
         private Long userId = 1L;
         private User existingUser;
-        private UserResponseDto responseDto;
+        private UserResponse responseDto;
 
         @BeforeEach
         void setUp() {
@@ -170,18 +170,18 @@ class UserServiceTest {
             existingUser.setEmail("test@example.com");
             existingUser.setStatus(UserStatus.ACTIVE);
 
-            responseDto = mock(UserResponseDto.class);
+            responseDto = mock(UserResponse.class);
 
             lenient().when(userDao.findById(userId)).thenReturn(Optional.of(existingUser));
             lenient().when(userDao.update(any(User.class))).thenReturn(existingUser);
-            lenient().when(mapper.toUserResponseDto(existingUser)).thenReturn(responseDto);
+            lenient().when(mapper.toUserResponse(existingUser)).thenReturn(responseDto);
         }
 
         @Test
         void should_throw_NotFoundException_when_user_not_found() {
             //given
             when(userDao.findById(userId)).thenReturn(Optional.empty());
-            UpdateUserRequestDto dto = new UpdateUserRequestDto("new name", "new surname");
+            UpdateUserRequest dto = new UpdateUserRequest("new name", "new surname");
 
             //when
             NotFoundException exception = assertThrows(NotFoundException.class,
@@ -191,14 +191,14 @@ class UserServiceTest {
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
             verify(userDao, times(1)).findById(userId);
             verify(userDao, never()).update(any());
-            verify(mapper, never()).toUserResponseDto(any());
+            verify(mapper, never()).toUserResponse(any());
         }
 
         @Test
         void should_throw_UserStatusException_when_user_is_not_active() {
             //given
             existingUser.setStatus(UserStatus.PENDING_CONFIRMATION);
-            UpdateUserRequestDto dto = new UpdateUserRequestDto("new name", "new surname");
+            UpdateUserRequest dto = new UpdateUserRequest("new name", "new surname");
 
             //when
             UserStatusException exception = assertThrows(UserStatusException.class,
@@ -208,23 +208,23 @@ class UserServiceTest {
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_ACTIVE);
             verify(userDao, times(1)).findById(userId);
             verify(userDao, never()).update(any());
-            verify(mapper, never()).toUserResponseDto(any());
+            verify(mapper, never()).toUserResponse(any());
         }
 
         @Test
         void should_update_user_name_and_surname_successfully() {
             //given
-            UpdateUserRequestDto dto = new UpdateUserRequestDto("new name", "new surname");
+            UpdateUserRequest dto = new UpdateUserRequest("new name", "new surname");
 
             //when
-            UserResponseDto result = userService.updateUser(userId, dto);
+            UserResponse result = userService.updateUser(userId, dto);
 
             //then
             assertThat(result).isEqualTo(responseDto);
 
             verify(userDao, times(1)).findById(userId);
             verify(userDao, times(1)).update(userCaptor.capture());
-            verify(mapper, times(1)).toUserResponseDto(existingUser);
+            verify(mapper, times(1)).toUserResponse(existingUser);
 
             User updatedUser = userCaptor.getValue();
             assertThat(updatedUser.getName()).isEqualTo("new name");
@@ -234,10 +234,10 @@ class UserServiceTest {
         @Test
         void should_not_update_fields_when_dto_fields_are_null_or_blank() {
             //given
-            UpdateUserRequestDto dto = new UpdateUserRequestDto(null, "   ");
+            UpdateUserRequest dto = new UpdateUserRequest(null, "   ");
 
             //when
-            UserResponseDto result = userService.updateUser(userId, dto);
+            UserResponse result = userService.updateUser(userId, dto);
 
             //then
             assertThat(result).isEqualTo(responseDto);
@@ -341,7 +341,7 @@ class UserServiceTest {
             doNothing().when(recurringTransactionService).deactivateAllByUser(userId);
 
             //when
-            ResponseMessageDto response = userService.closeUser(userId);
+            ResponseMessage response = userService.closeUser(userId);
 
             //then
             assertThat(response).isNotNull();
@@ -414,7 +414,7 @@ class UserServiceTest {
         @Test
         void should_change_password_successfully() {
             //given
-            ChangePasswordRequestDto dto = new ChangePasswordRequestDto("oldPassword123", newPasswordRaw, newPasswordRaw);
+            ChangePasswordRequest dto = new ChangePasswordRequest("oldPassword123", newPasswordRaw, newPasswordRaw);
             when(encoder.matches(dto.oldPassword(), oldPasswordHashed)).thenReturn(true);
 
             //when
@@ -431,7 +431,7 @@ class UserServiceTest {
         void should_throw_UserStatusException_when_user_not_active() {
             //given
             user.setStatus(UserStatus.PENDING_CONFIRMATION);
-            ChangePasswordRequestDto dto = new ChangePasswordRequestDto("old", "new", "new");
+            ChangePasswordRequest dto = new ChangePasswordRequest("old", "new", "new");
 
             //when & then
             assertThrows(UserStatusException.class,
@@ -443,7 +443,7 @@ class UserServiceTest {
         @Test
         void should_throw_ValidationException_when_old_password_is_incorrect() {
             //given
-            ChangePasswordRequestDto dto = new ChangePasswordRequestDto("wrongOldPassword", newPasswordRaw, newPasswordRaw);
+            ChangePasswordRequest dto = new ChangePasswordRequest("wrongOldPassword", newPasswordRaw, newPasswordRaw);
             when(encoder.matches(dto.oldPassword(), oldPasswordHashed)).thenReturn(false);
 
             //when & then
@@ -457,7 +457,7 @@ class UserServiceTest {
         @Test
         void should_throw_ValidationException_when_new_passwords_do_not_match() {
             //given
-            ChangePasswordRequestDto dto = new ChangePasswordRequestDto("oldPassword123", newPasswordRaw, "differentPassword");
+            ChangePasswordRequest dto = new ChangePasswordRequest("oldPassword123", newPasswordRaw, "differentPassword");
 
             when(encoder.matches(dto.oldPassword(), oldPasswordHashed)).thenReturn(true);
 

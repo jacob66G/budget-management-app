@@ -1,6 +1,6 @@
 package com.example.budget_management_app.session.service;
 
-import com.example.budget_management_app.auth.dto.LoginResponseDto;
+import com.example.budget_management_app.auth.dto.LoginResponse;
 import com.example.budget_management_app.auth.mapper.AuthMapper;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.InternalException;
@@ -54,7 +54,7 @@ public class UserSessionServiceImpl implements UserSessionService {
         String newRefreshTokenValue = rotateRefreshToken(userSession, token);
 
         ResponseCookie cookie = generateResponseCookie(newRefreshTokenValue);
-        LoginResponseDto loginResponse = authMapper.toLoginResponseDto(user, accessToken, false);
+        LoginResponse loginResponse = authMapper.toLoginResponse(user, accessToken, false);
 
         log.info("User email={} has refreshed token", user.getEmail());
         return new RefreshTokenResult(loginResponse, cookie.toString());

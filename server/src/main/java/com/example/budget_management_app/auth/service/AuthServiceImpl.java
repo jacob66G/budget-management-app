@@ -2,7 +2,7 @@ package com.example.budget_management_app.auth.service;
 
 import com.example.budget_management_app.auth.dto.*;
 import com.example.budget_management_app.auth.mapper.AuthMapper;
-import com.example.budget_management_app.common.dto.ResponseMessageDto;
+import com.example.budget_management_app.common.dto.ResponseMessage;
 import com.example.budget_management_app.common.event.model.PasswordResetEvent;
 import com.example.budget_management_app.common.event.model.VerificationEvent;
 import com.example.budget_management_app.common.event.publisher.EventPublisher;
@@ -57,18 +57,18 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
-    public ResponseMessageDto registerUser(RegistrationRequestDto dto) {
+    public ResponseMessage registerUser(RegistrationRequest dto) {
         User savedUser = userService.createUser(dto);
 
         sendVerification(savedUser, false);
 
         log.info("New user registration: email={}", savedUser.getEmail());
-        return new ResponseMessageDto("Registration successful. Please check your email to activate your account.");
+        return new ResponseMessage("Registration successful. Please check your email to activate your account.");
     }
 
     @Transactional
     @Override
-    public LoginResult authenticateUser(LoginRequestDto loginRequest, HttpServletRequest request, String oldRefreshToken) {
+    public LoginResult authenticateUser(LoginRequest loginRequest, HttpServletRequest request, String oldRefreshToken) {
         UsernamePasswordAuthenticationToken authentication =
                 UsernamePasswordAuthenticationToken.unauthenticated(loginRequest.email(), loginRequest.password());
         try {
@@ -87,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
         verifyUserStatus(user);
 
         if (user.isMfaEnabled()) {
-            return LoginResult.mfaRequired(new LoginResponseDto(user.getId(), true));
+            return LoginResult.mfaRequired(new LoginResponse(user.getId(), true));
         }
 
         LoginResult result = finalizeLogin(user, request, oldRefreshToken);
@@ -134,8 +134,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseMessageDto resendVerification(String email) {
-        ResponseMessageDto defaultResponse = new ResponseMessageDto("If an account with this email exists, a verification link has been sent.");
+    public ResponseMessage resendVerification(String email) {
+        ResponseMessage defaultResponse = new ResponseMessage("If an account with this email exists, a verification link has been sent.");
         Optional<User> optionalUser = userService.findUserByEmail(email);
         if (optionalUser.isEmpty()) {
             log.warn("User has tried resend verification with no exists email: {}", email);
@@ -149,7 +149,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (isRateLimited(email, RedisServiceImpl.KeyPrefix.VERIFICATION_LAST_SENT, verificationRetryTime)) {
-            return new ResponseMessageDto("You can request a new verification link later.");
+            return new ResponseMessage("You can request a new verification link later.");
         }
 
         sendVerification(user, true);
@@ -160,7 +160,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
-    public void resetPasswordConfirm(PasswordResetConfirmationDto dto) {
+    public void resetPasswordConfirm(PasswordResetConfirmation dto) {
         if (!dto.newPassword().equals(dto.confirmedNewPassword())) {
             throw new ValidationException("The provided passwords are different", ErrorCode.PASSWORDS_NOT_MATCH);
         }
@@ -185,8 +185,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
-    public ResponseMessageDto resetPassword(PasswordResetRequestDto dto) {
-        ResponseMessageDto defaultResponse = new ResponseMessageDto("If an account with this email exists, a reset password link has been sent.");
+    public ResponseMessage resetPassword(PasswordResetRequest dto) {
+        ResponseMessage defaultResponse = new ResponseMessage("If an account with this email exists, a reset password link has been sent.");
         Optional<User> optionalUser = userService.findUserByEmail(dto.email());
 
         if (optionalUser.isEmpty()) {
@@ -202,7 +202,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (isRateLimited(user.getEmail(), RedisServiceImpl.KeyPrefix.RESET_PASSWORD_LAST_SENT, resetPasswordRetryTime)) {
-            return new ResponseMessageDto("You can reset password later.");
+            return new ResponseMessage("You can reset password later.");
         }
 
         sendResetPasswordToken(user);
@@ -217,7 +217,7 @@ public class AuthServiceImpl implements AuthService {
 
         String accessToken = jwtService.generateToken(user.getEmail(), session.getId());
 
-        LoginResponseDto response = mapper.toLoginResponseDto(user, accessToken, false);
+        LoginResponse response = mapper.toLoginResponse(user, accessToken, false);
         return new LoginResult(response, cookie);
     }
 

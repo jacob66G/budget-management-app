@@ -7,19 +7,19 @@ import java.util.List;
 
 public interface AccountService {
 
-    AccountDetailsResponseDto getAccount(Long userId, Long accountId);
+    AccountDetailsResponse getAccount(Long userId, Long accountId);
 
-    List<AccountResponseDto> getAccounts(Long userId, SearchCriteria criteria);
+    List<AccountResponse> getAccounts(Long userId, SearchCriteria criteria);
 
-    AccountDetailsResponseDto createAccount(Long userId, AccountCreateRequestDto dto);
+    AccountDetailsResponse createAccount(Long userId, AccountCreateRequest dto);
 
-    AccountDetailsResponseDto updateAccount(Long userId, Long accountId, AccountUpdateRequestDto dto);
+    AccountDetailsResponse updateAccount(Long userId, Long accountId, AccountUpdateRequest dto);
 
     void createDefaultAccount(User user);
 
-    AccountDetailsResponseDto activateAccount(Long userId, Long accountId);
+    AccountDetailsResponse activateAccount(Long userId, Long accountId);
 
-    AccountDetailsResponseDto deactivateAccount(Long userId, Long accountId);
+    AccountDetailsResponse deactivateAccount(Long userId, Long accountId);
 
     void activateAllByUser(Long userId);
 

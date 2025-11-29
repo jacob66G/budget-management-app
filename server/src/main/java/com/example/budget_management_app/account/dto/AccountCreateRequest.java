@@ -4,7 +4,7 @@ import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 
-public record AccountCreateRequestDto(
+public record AccountCreateRequest(
         @NotBlank(message = "Type cannot be empty")
         String type,
         @NotBlank(message = "Name cannot be empty")

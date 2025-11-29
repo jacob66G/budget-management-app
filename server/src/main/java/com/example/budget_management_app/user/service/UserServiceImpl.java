@@ -1,9 +1,9 @@
 package com.example.budget_management_app.user.service;
 
 import com.example.budget_management_app.account.service.AccountService;
-import com.example.budget_management_app.auth.dto.RegistrationRequestDto;
+import com.example.budget_management_app.auth.dto.RegistrationRequest;
 import com.example.budget_management_app.category.service.CategoryService;
-import com.example.budget_management_app.common.dto.ResponseMessageDto;
+import com.example.budget_management_app.common.dto.ResponseMessage;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.UserStatusException;
@@ -70,11 +70,11 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public UserResponseDto getUser(Long id) {
+    public UserResponse getUser(Long id) {
         User user = userDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("User with id: " + id + " not found", ErrorCode.NOT_FOUND));
 
-        return mapper.toUserResponseDto(user);
+        return mapper.toUserResponse(user);
     }
 
     @Transactional(readOnly = true)
@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User createUser(RegistrationRequestDto dto) {
+    public User createUser(RegistrationRequest dto) {
         passwordsComparison(null, dto.password(), dto.passwordConfirmation());
         validateEmailUniqueness(dto.email());
 
@@ -117,7 +117,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public UserResponseDto updateUser(Long userId, UpdateUserRequestDto dto) {
+    public UserResponse updateUser(Long userId, UpdateUserRequest dto) {
         User user = self.getUserById(userId);
 
         validateUserIsActive(user);
@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
         }
 
         log.info("The user: {} has modified their data", userId);
-        return mapper.toUserResponseDto(userDao.update(user));
+        return mapper.toUserResponse(userDao.update(user));
     }
 
     @Transactional
@@ -158,7 +158,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public ResponseMessageDto closeUser(Long userId) {
+    public ResponseMessage closeUser(Long userId) {
         User user = self.getUserById(userId);
 
         validateUserIsActive(user);
@@ -171,7 +171,7 @@ public class UserServiceImpl implements UserService {
         userDao.update(user);
 
         log.info("The user: {} has closed the account", userId);
-        return new ResponseMessageDto(
+        return new ResponseMessage(
                 "Your account will be closed within 30 days. " +
                         "If you change your mind and want to stop the process of deleting your account, " +
                         "simply log in to your account before the 30 days are up."
@@ -204,7 +204,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void changePassword(Long userId, ChangePasswordRequestDto dto) {
+    public void changePassword(Long userId, ChangePasswordRequest dto) {
         User user = self.getUserById(userId);
 
         validateUserIsActive(user);
@@ -279,9 +279,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserSessionResponseDto> getUserSessions(Long userId, Long currentSessionId) {
+    public List<UserSessionResponse> getUserSessions(Long userId, Long currentSessionId) {
         List<UserSession> sessions = userSessionService.findSessionsByUser(userId);
-        return sessions.stream().map(session -> mapper.toUserSessionResponseDto(session, currentSessionId)).toList();
+        return sessions.stream().map(session -> mapper.toUserSessionResponse(session, currentSessionId)).toList();
     }
 
     @Override

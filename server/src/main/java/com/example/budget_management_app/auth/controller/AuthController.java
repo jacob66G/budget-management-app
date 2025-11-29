@@ -2,7 +2,7 @@ package com.example.budget_management_app.auth.controller;
 
 import com.example.budget_management_app.auth.dto.*;
 import com.example.budget_management_app.auth.service.AuthService;
-import com.example.budget_management_app.common.dto.ResponseMessageDto;
+import com.example.budget_management_app.common.dto.ResponseMessage;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.UserSessionException;
 import com.example.budget_management_app.constants.ApiConstants;
@@ -29,18 +29,18 @@ public class AuthController {
     private final UserSessionService userSessionService;
 
     @PostMapping("/register")
-    public ResponseEntity<ResponseMessageDto> registerUser(@Valid @RequestBody RegistrationRequestDto registrationRequestDto) {
-        ResponseMessageDto response = this.authService.registerUser(registrationRequestDto);
+    public ResponseEntity<ResponseMessage> registerUser(@Valid @RequestBody RegistrationRequest registrationRequest) {
+        ResponseMessage response = this.authService.registerUser(registrationRequest);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> authenticate(
-            @Valid @RequestBody LoginRequestDto loginRequestDto,
+    public ResponseEntity<LoginResponse> authenticate(
+            @Valid @RequestBody LoginRequest loginRequest,
             HttpServletRequest request,
             @CookieValue(name = ApiConstants.REFRESH_TOKEN_COOKIE, required = false) String oldRefreshToken
     ) {
-        LoginResult result = authService.authenticateUser(loginRequestDto, request, oldRefreshToken);
+        LoginResult result = authService.authenticateUser(loginRequest, request, oldRefreshToken);
 
         if (result.response().getIsMfaRequired()) {
             return ResponseEntity.ok(result.response());
@@ -52,7 +52,7 @@ public class AuthController {
     }
 
     @PostMapping("/login/2fa")
-    public ResponseEntity<LoginResponseDto> verifyTfa(
+    public ResponseEntity<LoginResponse> verifyTfa(
             @Valid @RequestBody TwoFactorLoginRequest loginRequestDto,
             HttpServletRequest request,
             @CookieValue(name = ApiConstants.REFRESH_TOKEN_COOKIE, required = false) String oldRefreshToken
@@ -65,7 +65,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<LoginResponseDto> refreshToken(
+    public ResponseEntity<LoginResponse> refreshToken(
             HttpServletRequest request,
             @CookieValue(name = ApiConstants.REFRESH_TOKEN_COOKIE, required = false) String refreshToken
     ) {
@@ -81,7 +81,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ResponseMessageDto> logout(
+    public ResponseEntity<ResponseMessage> logout(
             @CookieValue(name = ApiConstants.REFRESH_TOKEN_COOKIE, required = false) String refreshToken
     ) {
         if (StringUtils.hasText(refreshToken)) {
@@ -92,7 +92,7 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, clearCookie.toString())
-                .body(new ResponseMessageDto("You have been logged out successfully."));
+                .body(new ResponseMessage("You have been logged out successfully."));
     }
 
     @GetMapping("/verify")
@@ -102,19 +102,19 @@ public class AuthController {
     }
 
     @PostMapping("/resend-verification")
-    public ResponseEntity<ResponseMessageDto> resendVerification(@Valid @RequestBody ResendVerificationRequestDto requestDto) {
+    public ResponseEntity<ResponseMessage> resendVerification(@Valid @RequestBody ResendVerificationRequest requestDto) {
         return ResponseEntity
                 .ok(authService.resendVerification(requestDto.email()));
     }
 
     @PostMapping("/password-reset-confirm")
-    public ResponseEntity<ResponseMessageDto> passwordResetConfirm(@Valid @RequestBody PasswordResetConfirmationDto resetConfirmDto) {
+    public ResponseEntity<ResponseMessage> passwordResetConfirm(@Valid @RequestBody PasswordResetConfirmation resetConfirmDto) {
         authService.resetPasswordConfirm(resetConfirmDto);
-        return ResponseEntity.ok(new ResponseMessageDto("Your password has been reset."));
+        return ResponseEntity.ok(new ResponseMessage("Your password has been reset."));
     }
 
     @PostMapping("/password-reset-request")
-    public ResponseEntity<ResponseMessageDto> passwordResetRequest(@Valid @RequestBody PasswordResetRequestDto requestDto) {
+    public ResponseEntity<ResponseMessage> passwordResetRequest(@Valid @RequestBody PasswordResetRequest requestDto) {
         return ResponseEntity
                 .ok(authService.resetPassword(requestDto));
     }

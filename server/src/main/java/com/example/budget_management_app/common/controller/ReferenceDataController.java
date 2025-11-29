@@ -28,8 +28,8 @@ public class ReferenceDataController {
     private final StorageService storageService;
 
     @GetMapping
-    public ResponseEntity<ReferenceDataDto> getReferenceData() {
-        return ResponseEntity.ok(new ReferenceDataDto(
+    public ResponseEntity<ReferenceDataResponse> getReferenceData() {
+        return ResponseEntity.ok(new ReferenceDataResponse(
                 Arrays.stream(AccountType.values()).map(Enum::name).toList(),
                 Arrays.stream(BudgetType.values()).map(Enum::name).toList(),
                 Arrays.stream(SupportedCurrency.values()).map(Enum::name).toList(),
@@ -47,7 +47,7 @@ public class ReferenceDataController {
         ));
     }
 
-    public record ReferenceDataDto(
+    public record ReferenceDataResponse(
             List<String> accountTypes,
             List<String> budgetTypes,
             List<String> currencies,

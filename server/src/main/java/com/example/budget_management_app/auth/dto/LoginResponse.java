@@ -11,7 +11,7 @@ import java.time.Instant;
 @Getter
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class LoginResponseDto {
+public class LoginResponse {
         private Long userId;
         private String name;
         private String surname;
@@ -22,7 +22,7 @@ public class LoginResponseDto {
         private String accessToken;
         private Boolean isMfaRequired;
 
-    public LoginResponseDto(Long userId, Boolean isMfaRequired) {
+    public LoginResponse(Long userId, Boolean isMfaRequired) {
         this.userId = userId;
         this.isMfaRequired = isMfaRequired;
     }

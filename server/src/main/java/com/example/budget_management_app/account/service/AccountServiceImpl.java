@@ -42,24 +42,24 @@ public class AccountServiceImpl implements AccountService {
 
     @Transactional(readOnly = true)
     @Override
-    public AccountDetailsResponseDto getAccount(Long userId, Long accountId) {
+    public AccountDetailsResponse getAccount(Long userId, Long accountId) {
         Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
 
         boolean hasTx =  transactionService.existsByAccountAndUser(accountId, userId);
-        return mapper.toDetailsResponseDto(account, hasTx);
+        return mapper.toDetailsResponse(account, hasTx);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<AccountResponseDto> getAccounts(Long userId, SearchCriteria criteria) {
+    public List<AccountResponse> getAccounts(Long userId, SearchCriteria criteria) {
         List<Account> accounts = accountDao.findByUserAndCriteria(userId, criteria);
-        return accounts.stream().map(mapper::toResponseDto).toList();
+        return accounts.stream().map(mapper::toResponse).toList();
     }
 
     @Transactional
     @Override
-    public AccountDetailsResponseDto createAccount(Long userId, AccountCreateRequestDto dto) {
+    public AccountDetailsResponse createAccount(Long userId, AccountCreateRequest dto) {
         User user = userService.getUserById(userId);
         validateAccount(userId, dto);
 
@@ -87,12 +87,12 @@ public class AccountServiceImpl implements AccountService {
         Account savedAccount = accountDao.save(account);
 
         log.info("User: {} created new account: {}.", userId, savedAccount.getId());
-        return mapper.toDetailsResponseDto(savedAccount, false);
+        return mapper.toDetailsResponse(savedAccount, false);
     }
 
     @Transactional
     @Override
-    public AccountDetailsResponseDto updateAccount(Long userId, Long accountId, AccountUpdateRequestDto dto) {
+    public AccountDetailsResponse updateAccount(Long userId, Long accountId, AccountUpdateRequest dto) {
         Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
 
@@ -127,7 +127,7 @@ public class AccountServiceImpl implements AccountService {
 
         log.info("User: {} modified account: {}.", userId, accountId);
 
-        return mapper.toDetailsResponseDto(accountDao.update(account), hasTx);
+        return mapper.toDetailsResponse(accountDao.update(account), hasTx);
     }
 
     @Override
@@ -147,14 +147,14 @@ public class AccountServiceImpl implements AccountService {
 
     @Transactional
     @Override
-    public AccountDetailsResponseDto activateAccount(Long userId, Long accountId) {
+    public AccountDetailsResponse activateAccount(Long userId, Long accountId) {
         Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
         boolean hasTx = transactionService.existsByAccountAndUser(accountId, userId);
 
         if (AccountStatus.ACTIVE.equals(account.getAccountStatus())) {
             log.info("User: {} attempted to activate account: {} which is already active.", userId, accountId);
-            return mapper.toDetailsResponseDto(account, hasTx);
+            return mapper.toDetailsResponse(account, hasTx);
         }
 
         account.setAccountStatus(AccountStatus.ACTIVE);
@@ -163,19 +163,19 @@ public class AccountServiceImpl implements AccountService {
         recurringTransactionService.activateAllByAccount(accountId, userId);
 
         log.info("User: {} activated account: {}.", userId, accountId);
-        return mapper.toDetailsResponseDto(accountDao.update(account), hasTx);
+        return mapper.toDetailsResponse(accountDao.update(account), hasTx);
     }
 
     @Transactional
     @Override
-    public AccountDetailsResponseDto deactivateAccount(Long userId, Long accountId) {
+    public AccountDetailsResponse deactivateAccount(Long userId, Long accountId) {
         Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
         boolean hasTx = transactionService.existsByAccountAndUser(accountId, userId);
 
         if (AccountStatus.INACTIVE.equals(account.getAccountStatus())) {
             log.info("User: {} attempted to deactivate account: {} which is already deactivated", userId, accountId);
-            return mapper.toDetailsResponseDto(account, hasTx);
+            return mapper.toDetailsResponse(account, hasTx);
         }
 
         account.setAccountStatus(AccountStatus.INACTIVE);
@@ -184,7 +184,7 @@ public class AccountServiceImpl implements AccountService {
         recurringTransactionService.deactivateAllByAccount(accountId, userId);
 
         log.info("User: {} deactivated account: {}.", userId, accountId);
-        return mapper.toDetailsResponseDto(accountDao.update(account), hasTx);
+        return mapper.toDetailsResponse(accountDao.update(account), hasTx);
     }
 
     @Transactional
@@ -221,7 +221,7 @@ public class AccountServiceImpl implements AccountService {
         accountDao.deleteAll(userId);
     }
 
-    private void changeBudget(Account account, AccountUpdateRequestDto dto) {
+    private void changeBudget(Account account, AccountUpdateRequest dto) {
         BudgetType currentType = account.getBudgetType() == null ? BudgetType.NONE : account.getBudgetType();
 
         BudgetType newType = null;
@@ -281,7 +281,7 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private void validateAccount(Long userId, AccountCreateRequestDto dto) {
+    private void validateAccount(Long userId, AccountCreateRequest dto) {
         validateAccountType(dto.type());
         validateCurrency(dto.currency());
         validateBudgetType(dto.budgetType());
