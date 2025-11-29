@@ -1,6 +1,7 @@
 package com.example.budget_management_app.transaction.mapper;
 
 import com.example.budget_management_app.common.enums.SupportedCurrency;
+import com.example.budget_management_app.common.service.StorageService;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import com.example.budget_management_app.transaction_common.dto.AccountSummary;
@@ -8,6 +9,7 @@ import com.example.budget_management_app.transaction_common.dto.CategorySummary;
 import com.example.budget_management_app.transaction.dto.TransactionCreateRequest;
 import com.example.budget_management_app.transaction.dto.TransactionSummary;
 import jakarta.persistence.Tuple;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -15,7 +17,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class TransactionMapper {
+
+    private final StorageService storageService;
 
     public List<TransactionSummary> toDto(List<Tuple> tuples) {
 
@@ -35,7 +40,7 @@ public class TransactionMapper {
                         new CategorySummary(
                                 tuple.get("categoryId", Long.class),
                                 tuple.get("categoryName", String.class),
-                                tuple.get("iconKey", String.class)
+                                storageService.getPublicUrl(tuple.get("iconKey", String.class))
                         ),
                         tuple.get("recId", Long.class)
                 ))
