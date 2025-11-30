@@ -14,8 +14,6 @@ public interface UserService {
 
     User getUserById(Long id);
 
-    Optional<User> findUserById(Long id);
-
     Optional<User> findUserByEmail(String email);
 
     User createUser(RegistrationRequest dto);

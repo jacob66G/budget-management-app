@@ -13,8 +13,8 @@ import com.example.budget_management_app.security.service.JwtService;
 import com.example.budget_management_app.session.dao.UserSessionDao;
 import com.example.budget_management_app.session.domain.UserSession;
 import com.example.budget_management_app.session.dto.RefreshTokenResult;
+import com.example.budget_management_app.user.dao.UserDao;
 import com.example.budget_management_app.user.domain.User;
-import com.example.budget_management_app.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class UserSessionServiceImpl implements UserSessionService {
     @Value("${config.session.max-sessions}")
     private long maxSessions;
     private final UserSessionDao userSessionDao;
-    private final UserService userService;
+    private final UserDao userDao;
     private final JwtService jwtService;
     private final CacheService cacheService;
     private final AuthMapper authMapper;
@@ -63,7 +63,7 @@ public class UserSessionServiceImpl implements UserSessionService {
     @Transactional
     @Override
     public UserSession createUserSession(Long userId, HttpServletRequest request, String oldRefreshToken) {
-        User user = userService.findUserById(userId)
+        User user = userDao.findById(userId)
                 .orElseThrow(() -> new NotFoundException(User.class.getSimpleName(), userId, ErrorCode.USER_NOT_FOUND));
 
         ClientInfoService.ClientMetadata metadata = clientInfoService.extract(request);
