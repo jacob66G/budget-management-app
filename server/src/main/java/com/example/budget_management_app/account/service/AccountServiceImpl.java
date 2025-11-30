@@ -15,8 +15,8 @@ import com.example.budget_management_app.common.service.IconKeyValidator;
 import com.example.budget_management_app.common.service.StorageService;
 import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.transaction.service.TransactionService;
+import com.example.budget_management_app.user.dao.UserDao;
 import com.example.budget_management_app.user.domain.User;
-import com.example.budget_management_app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountDao accountDao;
     private final AccountMapper mapper;
-    private final UserService userService;
+    private final UserDao userDao;
     private final StorageService storageService;
     private final IconKeyValidator iconKeyValidator;
     private final TransactionService transactionService;
@@ -46,7 +46,7 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
 
-        boolean hasTx =  transactionService.existsByAccountAndUser(accountId, userId);
+        boolean hasTx = transactionService.existsByAccountAndUser(accountId, userId);
         return mapper.toDetailsResponse(account, hasTx);
     }
 
@@ -60,7 +60,8 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     @Override
     public AccountDetailsResponse createAccount(Long userId, AccountCreateRequest dto) {
-        User user = userService.getUserById(userId);
+        User user = userDao.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User with id: " + userId + " not found", ErrorCode.NOT_FOUND));
         validateAccount(userId, dto);
 
         Account account = new Account();
@@ -256,7 +257,7 @@ public class AccountServiceImpl implements AccountService {
             }
         }
 
-        // Update the budget value if provided
+        // Update the budget amount if provided
         if (dto.budget() != null) {
             account.setBudget(dto.budget());
         }
@@ -271,7 +272,7 @@ public class AccountServiceImpl implements AccountService {
             account.setBudgetType(newType);
         }
 
-        // Validate the consistency of budget type, budget value, and alert threshold
+        // Validate the consistency of budget type, budget amount, and alert threshold
         validateBudgetAlertRelation(account.getBudgetType(), account.getBudget(), account.getAlertThreshold());
 
         // If the final budget type is NONE, ensure all related values are cleared

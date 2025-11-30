@@ -15,8 +15,8 @@ import com.example.budget_management_app.common.service.IconKeyValidator;
 import com.example.budget_management_app.common.service.StorageService;
 import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.transaction.service.TransactionService;
+import com.example.budget_management_app.user.dao.UserDao;
 import com.example.budget_management_app.user.domain.User;
-import com.example.budget_management_app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryDao categoryDao;
-    private final UserService userService;
+    private final UserDao userDao;
     private final StorageService storageService;
     private final CategoryMapper mapper;
     private final IconKeyValidator iconKeyValidator;
@@ -55,7 +55,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     @Override
     public CategoryResponse createCategory(Long userId, CategoryCreateRequest dto) {
-        User user = userService.getUserById(userId);
+        User user = userDao.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User with id: " + userId + " not found", ErrorCode.NOT_FOUND));
         validateCategory(dto, user.getId());
 
         Category category = new Category();

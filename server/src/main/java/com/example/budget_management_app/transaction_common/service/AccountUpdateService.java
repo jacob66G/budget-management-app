@@ -35,7 +35,7 @@ public class AccountUpdateService {
     public void calculateBalanceAfterTransactionUpdate(Account account, BigDecimal newAmount, BigDecimal currentAmount, TransactionType type) {
         BigDecimal currentBalance = account.getBalance();
         BigDecimal absoluteDifference = newAmount.subtract(currentAmount).abs();
-        if (newAmount.compareTo(currentAmount) < 0) {  // new value is lower
+        if (newAmount.compareTo(currentAmount) < 0) {  // new amount is lower
             if (type.equals(TransactionType.INCOME)) {
                 account.setBalance(currentBalance.subtract(absoluteDifference));
                 account.setTotalIncome(account.getTotalIncome().subtract(absoluteDifference));
@@ -43,7 +43,7 @@ public class AccountUpdateService {
                 account.setBalance(currentBalance.add(absoluteDifference));
                 account.setTotalExpense(account.getTotalExpense().subtract(absoluteDifference));
             }
-        } else {    // new value is greater
+        } else {    // new amount is greater
             if (type.equals(TransactionType.INCOME)) {
                 account.setBalance(currentBalance.add(absoluteDifference));
                 account.setTotalIncome(account.getTotalIncome().add(absoluteDifference));

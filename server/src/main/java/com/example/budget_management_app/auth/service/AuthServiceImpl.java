@@ -99,8 +99,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     @Override
     public LoginResult authenticateWith2fa(TwoFactorLoginRequest loginRequest, HttpServletRequest request, String oldRefreshToken) {
-        User user = userService.findUserById(loginRequest.userId())
-                .orElseThrow(() -> new UsernameNotFoundException("User with id: " + loginRequest.userId() + " not found."));
+        User user = userService.getUserById(loginRequest.userId());
 
         if (!user.isMfaEnabled()) {
             throw new TfaException("Multi-factor authentication (MFA) has not been configured.", ErrorCode.MFA_CONFIGURATION);
