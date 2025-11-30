@@ -1,17 +1,4 @@
 export class ApiPaths {
-    public static readonly BASE_URL = 'http://localhost:4200';
-    public static readonly BASE_API = '/api';
-    public static readonly AUTH = '/api/auth';
-    public static readonly REGISTER = '/api/auth/register';
-    public static readonly LOGIN = '/api/auth/login';
-    public static readonly LOGIN_2FA = '/api/auth/login/2fa';
-    public static readonly REFRESH_TOKEN = '/api/auth/refresh';
-    public static readonly LOGOUT = '/api/auth/logout';
-    public static readonly VERIFY_EMAIL = '/api/auth/verify';
-    public static readonly RESEND_VERIFICATION_EMAIL = '/api/auth/resend-verification';
-    public static readonly RESET_PASSWORD = '/api/auth/password-reset-request';
-    public static readonly REST_PASSWORD_CONFIRM = '/api/auth/password-reset-confirm';
-
     // accounts
     public static readonly ACCOUNTS = '/api/accounts';
 
@@ -25,7 +12,9 @@ export class ApiPaths {
 
     public static readonly AUTH_BASE = `${ApiPaths.API}/auth`;
     public static readonly USERS_BASE = `${ApiPaths.API}/users`;
-    public static readonly  ACCOUNT_BASE = `${ApiPaths.API}/accounts`
+    public static readonly ACCOUNT_BASE = `${ApiPaths.API}/accounts`;
+    public static readonly ANALYTICS_BASE = `${ApiPaths.API}/analytics`
+    public static readonly REFERENCE_DATA_BASE = `${ApiPaths.API}/reference-data`
 
     public static readonly Auth = {
         LOGIN: `${ApiPaths.AUTH_BASE}/login`,
@@ -54,5 +43,16 @@ export class ApiPaths {
 
     public static readonly Account = {
         ACCOUNT: `${ApiPaths.ACCOUNT_BASE}`,
+    }
+
+    public static readonly Analytics = {
+        ANALYTICS: `${ApiPaths.ACCOUNT_BASE}`,
+        BALANCE_HISTORY: `${ApiPaths.ANALYTICS_BASE}/balance-history`,
+        CATEGORY_SUMS: `${ApiPaths.ANALYTICS_BASE}/categories`,
+        CASH_FLOW: `${ApiPaths.ANALYTICS_BASE}/cash-flow`
+    }
+
+    public static readonly ReferenceData = {
+        REFERENCE_DATA: `${ApiPaths.REFERENCE_DATA_BASE}`
     }
 }

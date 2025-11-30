@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { AccountService } from '../../../../core/services/account.service';
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { of, switchMap } from 'rxjs';
+import { forkJoin, of, switchMap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,6 +19,16 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { AccountDetails } from '../../models/account.model';
 import { AccountActionService } from '../../services/account-actions.service';
 import { ApiErrorService } from '../../../../core/services/api-error.service';
+import { TransactionService } from '../../../transactions/services/transaction.service';
+import { TransactionSummary } from '../../../transactions/model/transaction-summary.model';
+import { AnalyticsService } from '../../../../core/services/analytics.service';
+import { CashFlowChartPoint, CategoryChartPoint, ChartPoint } from '../../../../core/models/analytics.model';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { BalanceChartComponent } from '../../components/balance-chart/balance-chart.component';
+import { MatDatepickerModule } from "@angular/material/datepicker";
+import { MatNativeDateModule } from '@angular/material/core';
+import { CategorySumChartComponent } from "../../components/category-sum-chart/category-sum-chart.component";
+import { CashFlowChartComponent } from "../../components/cash-flow-chart/cash-flow-chart.component";
 
 @Component({
   selector: 'app-account-details',
@@ -37,8 +47,14 @@ import { ApiErrorService } from '../../../../core/services/api-error.service';
     MatTabsModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule
-  ],
+    MatSelectModule,
+    BalanceChartComponent,
+    ReactiveFormsModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    CategorySumChartComponent,
+    CashFlowChartComponent
+],
   templateUrl: './account-details.html',
   styleUrl: './account-details.scss'
 })
@@ -49,9 +65,24 @@ export class AccountDetailsPage {
   private route = inject(ActivatedRoute);
   private snackBar = inject(MatSnackBar);
   private errorService = inject(ApiErrorService)
+  private transactionService = inject(TransactionService);
+  private analyticsService = inject(AnalyticsService);
 
   account = signal<AccountDetails | null>(null);
+  lastTransactions = signal<TransactionSummary[] | null>(null)
   isLoading = signal(true);
+
+  balanceChartData = signal<ChartPoint[]>([]);
+  categoryChartData = signal<CategoryChartPoint[]>([]);
+  cashFlowChartData = signal<CashFlowChartPoint[]>([]);
+
+  categoryType = signal<'EXPENSE' | 'INCOME'>('EXPENSE');
+  isChartLoading = signal(false);
+
+  dateRange = new FormGroup({
+    start: new FormControl<Date | null>(null),
+    end: new FormControl<Date | null>(null),
+  });
 
   ngOnInit(): void {
     this.route.paramMap.pipe(
@@ -66,11 +97,26 @@ export class AccountDetailsPage {
 
         const accountId = Number(idString);
 
-        return this.accountService.getAccount(accountId);
+        const accountRequest$ = this.accountService.getAccount(accountId);
+
+        const transactionsRequest$ = this.transactionService.getTransactions({
+          accountIds: [accountId],
+          size: 10
+        });
+
+        return forkJoin({
+          account: accountRequest$,
+          transactions: transactionsRequest$
+        })
       })
     ).subscribe({
-      next: (accountData: AccountDetails | null) => {
-        this.account.set(accountData);
+      next: (result) => {
+        if (!result) return;
+
+        this.account.set(result.account);
+        this.lastTransactions.set(result.transactions.data);
+        this.initDefaultDateRange();
+        this.loadAllCharts();
         this.isLoading.set(false);
       },
       error: (err: HttpErrorResponse) => {
@@ -82,7 +128,8 @@ export class AccountDetailsPage {
   }
 
   onEditClick(id: number): void {
-    this.router.navigate(['/app/accounts/edit', id], {state: 
+    this.router.navigate(['/app/accounts/edit', id], {
+      state:
       {
         accountData: this.account(),
         returnUrl: this.router.url
@@ -128,4 +175,62 @@ export class AccountDetailsPage {
     return status === 'ACTIVE' ? 'Deactivate' : 'Activate';
   }
 
+  private initDefaultDateRange(): void {
+    this.setRange('month');
+  }
+
+  onDateChange(): void {
+    if (this.dateRange.value.start && this.dateRange.value.end) {
+      this.loadAllCharts();
+    }
+  }
+
+  setRange(range: 'week' | 'month' | 'year'): void {
+    const now = new Date();
+    let start = new Date();
+    const end = new Date();
+
+    if (range === 'year') {
+      start.setMonth(0, 1);
+    } else if (range === 'week') {
+      const day = now.getDay() || 7;
+      if (day !== 1) start.setHours(-24 * (day - 1));
+    } else if (range === 'month') {
+      start.setDate(1);
+    }
+
+    this.dateRange.patchValue({ start, end });
+    this.loadAllCharts();
+  }
+
+  setCategoryType(type: 'EXPENSE' | 'INCOME'): void {
+    this.categoryType.set(type);
+    this.loadAllCharts();
+  }
+
+  loadAllCharts(): void {
+    const acc = this.account();
+    const { start, end } = this.dateRange.value;
+
+    if (!acc || !start || !end) return;
+
+    this.isChartLoading.set(true);
+
+    forkJoin({
+      balance: this.analyticsService.getBalanceHistory(acc.id, start, end),
+      category: this.analyticsService.getCategoryBreakdown(acc.id, start, end, this.categoryType()),
+      cashFlow: this.analyticsService.getCashFlow(acc.id, start, end)
+    }).subscribe({
+      next: (results) => {
+        this.balanceChartData.set(results.balance);
+        this.categoryChartData.set(results.category);
+        this.cashFlowChartData.set(results.cashFlow);
+        this.isChartLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Chart error', err);
+        this.isChartLoading.set(false);
+      }
+    });
+  }
 }

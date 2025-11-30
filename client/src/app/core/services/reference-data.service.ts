@@ -2,6 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { inject, Injectable, signal } from "@angular/core";
 import { map, Observable, of, tap } from "rxjs";
 import { ReferenceData } from "../models/reference-data.model";
+import { ApiPaths } from "../../constans/api-paths";
 
 @Injectable(
     {
@@ -16,7 +17,7 @@ export class ReferenceDataService {
     loadData(): Observable<void> {
     if (this.data()) return of(void 0);
 
-    return this.http.get<ReferenceData>('/api/reference-data').pipe(
+    return this.http.get<ReferenceData>(ApiPaths.ReferenceData.REFERENCE_DATA).pipe(
       tap(response => this.data.set(response)),
       map(() => void 0)
     );

@@ -17,8 +17,8 @@ import com.example.budget_management_app.common.service.IconKeyValidator;
 import com.example.budget_management_app.common.service.StorageService;
 import com.example.budget_management_app.recurring_transaction.service.RecurringTransactionService;
 import com.example.budget_management_app.transaction.service.TransactionService;
+import com.example.budget_management_app.user.dao.UserDao;
 import com.example.budget_management_app.user.domain.User;
-import com.example.budget_management_app.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ public class AccountServiceTest {
     @Mock
     private AccountMapper mapper;
     @Mock
-    private UserService userService;
+    private UserDao userDao;
     @Mock
     private StorageService storageService;
     @Mock
@@ -141,7 +141,7 @@ public class AccountServiceTest {
         @Test
         void should_create_new_account() {
             //given
-            when(userService.getUserById(userId)).thenReturn(user);
+            when(userDao.findById(userId)).thenReturn(Optional.of(user));
             when(accountDao.existsByNameAndUser(accountName, userId, null)).thenReturn(false);
             when(iconKeyValidator.isValidAccountIconKey(iconKey)).thenReturn(true);
             when(accountDao.save(any(Account.class))).thenReturn(savedAccount);
@@ -155,7 +155,7 @@ public class AccountServiceTest {
             assertThat(result).isEqualTo(expectedResult);
             assertThat(result.name()).isEqualTo(accountName);
 
-            verify(userService, times(1)).getUserById(userId);
+            verify(userDao, times(1)).findById(userId);
             verify(accountDao, times(1)).existsByNameAndUser(accountName, userId, null);
             verify(iconKeyValidator, times(1)).isValidAccountIconKey(iconKey);
             verify(mapper, times(1)).toDetailsResponse(savedAccount, false);
@@ -192,6 +192,7 @@ public class AccountServiceTest {
                     true,
                     iconKey
             );
+            when(userDao.findById(userId)).thenReturn(Optional.of(user));
 
             //when + then
             ValidationException exception = assertThrows(ValidationException.class,
@@ -199,7 +200,7 @@ public class AccountServiceTest {
 
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WRONG_TYPE);
             assertThat(exception.getMessage()).contains(accountWrongType);
-            verify(userService, times(1)).getUserById(userId);
+            verify(userDao, times(1)).findById(userId);
         }
 
         @Test
@@ -218,6 +219,7 @@ public class AccountServiceTest {
                     true,
                     iconKey
             );
+            when(userDao.findById(userId)).thenReturn(Optional.of(user));
 
             //when + then
             ValidationException exception = assertThrows(ValidationException.class,
@@ -225,7 +227,7 @@ public class AccountServiceTest {
 
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WRONG_CURRENCY);
             assertThat(exception.getMessage()).contains(wrongCurrency);
-            verify(userService, times(1)).getUserById(userId);
+            verify(userDao, times(1)).findById(userId);
         }
 
         @Test
@@ -244,6 +246,7 @@ public class AccountServiceTest {
                     true,
                     iconKey
             );
+            when(userDao.findById(userId)).thenReturn(Optional.of(user));
 
             //when + then
             ValidationException exception = assertThrows(ValidationException.class,
@@ -251,13 +254,13 @@ public class AccountServiceTest {
 
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WRONG_BUDGET_TYPE);
             assertThat(exception.getMessage()).contains(budgetWrongType);
-            verify(userService, times(1)).getUserById(userId);
+            verify(userDao, times(1)).findById(userId);
         }
 
         @Test
         void should_throw_validationException_when_user_have_account_with_the_same_name() {
             //given
-            when(userService.getUserById(userId)).thenReturn(user);
+            when(userDao.findById(userId)).thenReturn(Optional.of(user));
             when(accountDao.existsByNameAndUser(accountName, userId, null)).thenReturn(true);
 
             //when + then
@@ -267,7 +270,7 @@ public class AccountServiceTest {
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NAME_ALREADY_USED);
             assertThat(exception.getMessage()).contains(accountName);
 
-            verify(userService, times(1)).getUserById(userId);
+            verify(userDao, times(1)).findById(userId);
             verify(accountDao, times(1)).existsByNameAndUser(accountName, userId, null);
         }
 
@@ -286,7 +289,7 @@ public class AccountServiceTest {
                     true,
                     iconKey
             );
-            when(userService.getUserById(userId)).thenReturn(user);
+            when(userDao.findById(userId)).thenReturn(Optional.of(user));
 
             //when + then
             ValidationException exception = assertThrows(ValidationException.class,
@@ -294,7 +297,7 @@ public class AccountServiceTest {
 
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_BUDGET_ALERT_RELATION);
 
-            verify(userService, times(1)).getUserById(userId);
+            verify(userDao, times(1)).findById(userId);
         }
 
         @Test
@@ -312,7 +315,7 @@ public class AccountServiceTest {
                     true,
                     iconKey
             );
-            when(userService.getUserById(userId)).thenReturn(user);
+            when(userDao.findById(userId)).thenReturn(Optional.of(user));
 
             //when + then
             ValidationException exception = assertThrows(ValidationException.class,
@@ -320,7 +323,7 @@ public class AccountServiceTest {
 
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_BUDGET_ALERT_RELATION);
 
-            verify(userService, times(1)).getUserById(userId);
+            verify(userDao, times(1)).findById(userId);
         }
 
         @Test
@@ -338,7 +341,7 @@ public class AccountServiceTest {
                     true,
                     iconKey
             );
-            when(userService.getUserById(userId)).thenReturn(user);
+            when(userDao.findById(userId)).thenReturn(Optional.of(user));
 
             //when + then
             ValidationException exception = assertThrows(ValidationException.class,
@@ -346,7 +349,7 @@ public class AccountServiceTest {
 
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_BUDGET_ALERT_RELATION);
 
-            verify(userService, times(1)).getUserById(userId);
+            verify(userDao, times(1)).findById(userId);
         }
 
         @Test
@@ -364,7 +367,7 @@ public class AccountServiceTest {
                     true,
                     iconKey
             );
-            when(userService.getUserById(userId)).thenReturn(user);
+            when(userDao.findById(userId)).thenReturn(Optional.of(user));
 
             //when + then
             ValidationException exception = assertThrows(ValidationException.class,
@@ -372,13 +375,13 @@ public class AccountServiceTest {
 
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_BUDGET_ALERT_RELATION);
 
-            verify(userService, times(1)).getUserById(userId);
+            verify(userDao, times(1)).findById(userId);
         }
 
         @Test
         void should_throw_validationException_when_icon_path_is_invalid() {
             //given
-            when(userService.getUserById(userId)).thenReturn(user);
+            when(userDao.findById(userId)).thenReturn(Optional.of(user));
             when(iconKeyValidator.isValidAccountIconKey(iconKey)).thenReturn(false);
 
             //when + then
@@ -387,7 +390,7 @@ public class AccountServiceTest {
 
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_RESOURCE_PATH);
 
-            verify(userService, times(1)).getUserById(userId);
+            verify(userDao, times(1)).findById(userId);
             verify(iconKeyValidator, times(1)).isValidAccountIconKey(iconKey);
         }
 

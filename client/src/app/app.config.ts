@@ -6,6 +6,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 import { errorInterceptor } from './core/interceptors/error-interceptor';
 import { ReferenceDataService } from './core/services/reference-data.service';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,6 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => {
       const refService = inject(ReferenceDataService);
       return refService.loadData();
-    })
+    }),
+    provideCharts(withDefaultRegisterables())
   ]
 };

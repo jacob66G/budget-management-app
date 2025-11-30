@@ -62,7 +62,7 @@ export interface SearchCriteria {
   minBudget?: number;
   maxBudget?: number;
 
-  includedInTotalBalance?: boolean;
+  includedInTotalBalance?: boolean | null;
 
   createdAfter?: string;
   createdBefore?: string;

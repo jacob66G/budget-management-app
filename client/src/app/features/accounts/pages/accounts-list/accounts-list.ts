@@ -79,7 +79,7 @@ export class AccountsListPage {
       budgetTypes: [[]],
       minBalance: [null],
       maxBalance: [null],
-      includeInTotalBalance: [null],
+      includedInTotalBalance: [null],
       createdAfter: [null],
       createdBefore: [null]
     });
@@ -90,6 +90,10 @@ export class AccountsListPage {
 
     const criteria: SearchCriteria = this.filterForm.getRawValue();
 
+    if (criteria.includedInTotalBalance === false) {
+      criteria.includedInTotalBalance = null;
+    }
+    
     this.accountService.getAccounts(criteria).subscribe({
       next: (data) => {
         this.accounts.set(data);
@@ -107,7 +111,7 @@ export class AccountsListPage {
   }
 
   onEditClick(id: number): void {
-    this.router.navigate(['/app/accounts/edit', id], {state:  {returnUrl: this.router.url}});
+    this.router.navigate(['/app/accounts/edit', id], { state: { returnUrl: this.router.url } });
   }
 
   onDeleteClick(account: Account): void {
