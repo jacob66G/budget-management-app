@@ -1,277 +1,183 @@
-@use 'sass:color';
-
-// --- ZMIENNE ---
-$bg-color: #f5f7fa;
-$text-primary: #333;
-$text-secondary: #7e8299;
-$green: #10b981;
-$red: #ef4444;
-$border-color: #e0e0e0;
-
-// --- GŁÓWNY KONTENER ---
-.container {
-  // Twój zwiększony padding
-  padding: 30px 150px;
-  background-color: $bg-color;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+.page-container {
+  padding: 24px;
+  font-family: 'Inter', sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-// --- FILTRY (ZMODYFIKOWANE DLA JEDNEGO RZĘDU) ---
-.filters-card {
-  padding: 16px 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-  
-  // Zapobiega "rozwaleniu" layoutu przez flexa przy małej ilości miejsca
-  min-width: 0;
-
-  .filters-row {
-    display: flex;
-    flex-wrap: nowrap; // Wymusza jedną linię
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    
-    // Umożliwia scrollowanie na bardzo wąskich ekranach
-    overflow-x: auto;
-    
-    // Kluczowe dla etykiet "Floating Label":
-    // Dodatkowy padding od góry, żeby overflow ich nie ucinał
-    padding-top: 10px;
-    padding-bottom: 4px; // Miejsce na ewentualny scrollbar
-    
-    // Opcjonalnie: ukrycie paska przewijania (dla estetyki)
-    &::-webkit-scrollbar {
-      height: 0;
-      background: transparent;
-    }
-  }
-
-  // Style layoutu dla pól formularza wewnątrz filtrów
-  .dense-form-field {
-    // Elastyczność: rozciągaj się (1), kurcz się (1), baza auto
-    flex: 1 1 auto;
-    
-    // Nadpisanie sztywnej szerokości Materiala
-    width: auto !important;
-    
-    // Minimalna szerokość, żeby tekst był czytelny
-    min-width: 110px;
-    max-width: 200px;
-  }
-
-  .divider-vertical {
-    width: 1px;
-    height: 32px;
-    background-color: $border-color;
-    margin-left: auto;
-    margin-right: auto;
-    flex-shrink: 0; // Nie pozwól, by separator zniknął przy ścisku
-  }
-
-  .sort-controls {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    
-    flex-shrink: 0; // Ta sekcja NIGDY się nie zwija
-    
-    .sort-select {
-      width: 130px;
-      min-width: 130px;
-      flex: 0 0 auto; // Sztywna szerokość dla sortowania
-    }
-  }
-}
-
-// --- NADPISANIE STYLÓW MATERIAL (WEWNĘTRZNE) ---
-::ng-deep .dense-form-field {
-  // Ukrywa miejsce na błędy/hinty pod inputem (bardziej kompaktowe)
-  .mat-mdc-form-field-subscript-wrapper {
-    display: none;
-  }
-  // Lekkie tło inputów
-  .mat-mdc-text-field-wrapper {
-    background-color: #f9f9f9;
-  }
-}
-
-// --- LISTA TRANSAKCJI ---
-.list-card {
-  border-radius: 12px;
-  padding: 0;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-}
-
-.list-header {
-  padding: 20px 24px;
+.header-section {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  margin-bottom: 24px;
 
-  h3 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: $text-primary;
+  .header-text {
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+      color: #111;
+    }
+
+    p {
+      color: #666;
+      font-size: 16px;
+      margin: 0;
+    }
   }
 
-  .tx-count {
-    color: $text-secondary;
+  .add-btn {
+    background-color: #2563eb;
+    color: white;
+    border-radius: 8px;
+    padding: 20px 24px;
     font-size: 14px;
     font-weight: 500;
   }
 }
 
-.transaction-item {
-  height: auto !important;
-  padding: 16px 24px !important;
+.filters-panel {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 
-  // Ikony po lewej (okrągłe tło)
-  .icon-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    margin-right: 16px;
-    
-    mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-    }
-
-    // Warianty kolorystyczne ikon (używane przez [class]="...")
-    &.icon-green { background-color: rgba($green, 0.1); color: $green; }
-    &.icon-red { background-color: rgba($red, 0.1); color: $red; }
-    &.icon-orange { background-color: rgba(255, 152, 0, 0.1); color: orange; }
-    &.icon-teal { background-color: rgba(0, 150, 136, 0.1); color: teal; }
-  }
-
-  // Tytuł i Meta
-  .tx-title {
+  h3 {
+    font-size: 18px;
     font-weight: 600;
-    font-size: 16px;
-    margin-bottom: 4px;
-  }
-
-  .tx-meta {
-    color: $text-secondary;
-    font-size: 13px;
-
-    .category-badge {
-      font-weight: 500;
-      // Nowoczesna metoda przyciemniania
-      color: color.adjust($text-secondary, $lightness: -20%);
-    }
-  }
-
-  // Prawa strona (Meta)
-  .item-actions {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-
-    .amount-date-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      min-width: 100px;
-
-      .amount {
-        font-weight: 700;
-        font-size: 16px;
-        &.positive { color: $green; }
-        &.negative { color: $red; }
-      }
-
-      .date {
-        font-size: 12px;
-        color: $text-secondary;
-        margin-top: 4px;
-      }
-    }
-
-    .clean-menu-btn {
-      border: none !important;
-      box-shadow: none !important;
-      border-radius: 50% !important;
-
-      background-color: transparent !important;
-      
-      width: 40px;
-      height: 40px;
-
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      mat-icon {
-        color: $text-secondary;
-        pointer-events: none;
-      }
-
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.08) !important; // Jasny szary (8% czerni)
-      }
-      
-      // Opcjonalnie: efekt wciśnięcia (active)
-      &:active {
-        background-color: rgba(0, 0, 0, 0.12) !important; // Nieco ciemniejszy przy kliknięciu
-      }
-    }
+    margin: 0 0 20px 0;
+    color: #111;
   }
 }
 
-// --- PAGINACJA ---
-.pagination-footer {
-  padding: 16px 24px;
+.filters-grid {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
   align-items: center;
-  background-color: #fff;
-  border-top: 1px solid $border-color;
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
+}
 
-  .page-info {
-    color: $text-secondary;
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.field-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  white-space: nowrap;
+}
+
+.type-buttons {
+  display: flex;
+  gap: 8px;
+  background: #fff;
+  
+  .pill-btn {
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #374151;
+    padding: 6px 16px;
+    border-radius: 6px;
     font-size: 14px;
-    
-    strong {
-      color: $text-primary;
-    }
-  }
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
 
-  .page-actions {
-    display: flex;
-    gap: 8px;
+    &:hover {
+      background-color: #f9fafb;
+    }
+
+    &.active {
+      background-color: #111;
+      color: #fff;
+      border-color: #111;
+    }
   }
 }
 
-.amount {
-  font-weight: 700;
-  font-size: 16px;
+.date-picker-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  min-width: 200px;
+  justify-content: space-between;
   
-  // Domyślny kolor (opcjonalnie)
-  color: #333; 
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #4b5563;
+  }
+}
 
-  &.positive {
-    color: #10b981; // Zielony
+::ng-deep {
+  .small-select {
+    width: 140px;
+    
+    .mat-mdc-text-field-wrapper {
+      height: 40px;
+      padding: 0;
+    }
+    
+    .mat-mdc-form-field-flex {
+      height: 40px;
+      align-items: center;
+      padding: 0 12px;
+    }
+
+    .mat-mdc-form-field-infix {
+      padding: 0 !important;
+      min-height: unset !important;
+      border-top: 0 !important;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #e5e7eb !important;
+      border-width: 1px !important;
+    }
+
+    .mdc-notched-outline {
+        border-radius: 6px; 
+    }
+  }
+}
+
+// Używamy ::ng-deep, ponieważ menu renderuje się poza widokiem komponentu
+::ng-deep .custom-date-menu {
+  // 1. Zdejmujemy ograniczenia szerokości, żeby zmieściło się Twoje 300px + marginesy
+  min-width: auto !important;
+  max-width: none !important;
+  
+  // 2. Usuwamy domyślny padding Materiala, 
+  // bo Ty masz już padding 16px w swoim komponencie (.filter-box)
+  .mat-mdc-menu-content {
+    padding: 0 !important;
   }
 
-  &.negative {
-    color: #ef4444; // Czerwony
-  }
-
-  .currency-symbol {
-    // font-size: 0.85em; // Symbol nieco mniejszy od cyfr wygląda profesjonalniej
-    margin-left: 4px;  // Odstęp od liczby
-    font-weight: 500;  // Nieco lżejszy niż gruba kwota
-  }
+  // 3. Opcjonalnie: zaokrąglenie rogów całego menu
+  border-radius: 12px !important;
+  overflow: hidden; // Żeby rogi nie wystawały
 }

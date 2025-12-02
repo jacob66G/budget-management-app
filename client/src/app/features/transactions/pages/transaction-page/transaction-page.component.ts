@@ -1,10 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { AccountService } from '../../../accounts/services/account.service';
+import { CategoryService } from '../../../categories/services/category.service';
 import { AccountSummary } from '../../model/account-summary.model';
 import { CategorySummary } from '../../model/category-summary.model';
 import { map } from 'rxjs';
 import { CategoryMapper } from '../../mappers/category.mapper';
 import { AccountMapper } from '../../mappers/account.mapper';
-import { HeaderComponent } from '../../components/header/header.component';
 import { MatDialog } from '@angular/material/dialog';
 import { AddTransactionDialogComponent } from '../../components/add-transaction-dialog/add-transaction-dialog.component';
 import { TransactionType } from '../../constants/transaction-type.enum';
@@ -16,34 +17,60 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
-import { TransactionTypeFilter } from '../../constants/transaction-type-filter.enum'; 
+import { TransactionTypeFilter } from '../../constants/transaction-type-filter.enum';
 import { TransactionModeFilter } from '../../constants/transaction-mode-filter.enum';
 import { TransactionDateRangeFilter } from '../../constants/transaction-data-range-filter.enum';
 import { TransactionSortingDirection } from '../../constants/transaction-sorting-direction.enum';
 import { TransactionSortByFilter } from '../../constants/transaction-sort-by-filter.enum';
 import { TransactionFilterParams } from '../../model/transaction-filter-params.model';
-import { MatTooltip } from "@angular/material/tooltip";
 import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
-import { DatePipe } from '@angular/common';
 import { Pagination } from '../../model/pagination.model';
-import { DecimalPipe } from '@angular/common';
 import { ConfirmDialog } from '../../../../shared/components/dialogs/confirm-dialog/confirm-dialog';
 import { MatSnackBar} from '@angular/material/snack-bar';
 import { UpdateTransactionDialogComponent } from '../../components/update-transaction-dialog/update-transaction-dialog.component';
-import { TransactionUpdateData } from '../../model/transaction-update-data.model';
 import { TransactionUpdateRequest } from '../../model/transaction-update-request.model';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatInputModule } from '@angular/material/input';
+import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DateFilterComponent, DateRange } from "../../components/date-filter/date-filter.component";
+import { DateFilterPresets } from '../../constants/date-filter-presets.enum';
 import { CategoryService } from '../../../../core/services/category.service';
 import { AccountService } from '../../../../core/services/account.service';
 
 @Component({
   selector: 'app-transaction-page',
-  imports: [HeaderComponent, MatCardModule, MatFormFieldModule, MatSelectModule, MatIconModule, MatDividerModule, MatTooltip, MatListModule, MatMenuModule, DatePipe, DecimalPipe],
+  standalone: true,
+  imports: [
+    MatCardModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatIconModule,
+    MatDividerModule,
+    MatListModule,
+    MatMenuModule,
+    MatButtonModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatInputModule,
+    CommonModule,
+    FormsModule,
+    DateFilterComponent
+],
+  providers: [DatePipe],
   templateUrl: './transaction-page.component.html',
   styleUrl: './transaction-page.component.scss'
 })
 export class TransactionPageComponent implements OnInit{
+
+  selectedType = signal<TransactionTypeFilter>(TransactionTypeFilter.ALL);
+  selectedPeriod = signal<string>(DateFilterPresets.LAST_30_DAYS);
+
+  private readonly datePipe = inject(DatePipe);
 
   pagination?: Pagination;
   links!: { [key: string]: string };
@@ -62,23 +89,10 @@ export class TransactionPageComponent implements OnInit{
   private transactionService = inject(TransactionService);
   private snackBar = inject(MatSnackBar);
 
-  typeOptions = [
-    { value: TransactionTypeFilter.ALL, label: 'All' },
-    { value: TransactionTypeFilter.INCOME, label: 'Income' },
-    { value: TransactionTypeFilter.EXPENSE, label: 'Expense' }
-  ];
-  
   modeOptions = [
     { value: TransactionModeFilter.ALL, label: 'All' },
     { value: TransactionModeFilter.REGULAR, label: 'Regular' },
     { value: TransactionModeFilter.RECURRING, label: 'Recurring' }
-  ];
-  
-  dateRangeOptions = [
-    { value: TransactionDateRangeFilter.LAST_WEEK, label: 'Last week'},
-    { value: TransactionDateRangeFilter.LAST_MONTH, label: 'Last month'},
-    { value: TransactionDateRangeFilter.LAST_THREE_MONTHS, label: 'Last 3 months' },
-    { value: TransactionDateRangeFilter.LAST_SIX_MONTHS, label: 'Last 6 months'}
   ];
 
   sortByOptions = [
@@ -95,14 +109,12 @@ export class TransactionPageComponent implements OnInit{
     since: undefined,
     to: undefined,
     page: 1,
-    limit: 8,
+    limit: 5,
     sortedBy: TransactionSortByFilter.DATE,
     sortDirection: TransactionSortingDirection.DESC
   };
 
-  selectedType = TransactionTypeFilter.ALL;
   selectedMode = TransactionModeFilter.ALL;
-  selectedDateRange = TransactionDateRangeFilter.LAST_MONTH;
   selectedAccount = 'ALL';
   selectedCategory = 'ALL';
   selectedSortingDirection = TransactionSortingDirection.DESC;
@@ -122,7 +134,7 @@ export class TransactionPageComponent implements OnInit{
     console.log("Type changed: ", event.value);
     this.updateFilter({type: event.value});
   }
-  
+
   onModeChange(event: MatSelectChange): void {
     console.log("Mode change: ", event.value);
     this.updateFilter({mode: event.value});
@@ -130,7 +142,6 @@ export class TransactionPageComponent implements OnInit{
 
   onCategoryChange(event: MatSelectChange): void {
     console.log("Category change: ", event.value);
-    
     const value = event.value;
 
     const categoryIds = value === 'ALL' ? undefined : [value];
@@ -145,12 +156,6 @@ export class TransactionPageComponent implements OnInit{
     this.updateFilter({accountIds});
   }
 
-  onDateRangeChange(event: MatSelectChange): void {
-   console.log("Date range change: ", event.value); 
-
-   this.calculateDateRange(event.value);
-  }
-
   onSortByChange(event: MatSelectChange): void {
     console.log("Sort by field changed: ", event.value);
 
@@ -160,12 +165,50 @@ export class TransactionPageComponent implements OnInit{
   onSortDirectionChange(): void {
     console.log("Sort direction changed");
 
-    const newDirection = this.selectedSortingDirection === TransactionSortingDirection.DESC 
-      ? TransactionSortingDirection.ASC 
-      : TransactionSortingDirection.DESC;
+    const newDirection = this.selectedSortingDirection === TransactionSortingDirection.DESC
+      ? TransactionSortingDirection.DESC
+      : TransactionSortingDirection.ASC;
+
+      console.log("New direction: ", newDirection);
 
     this.selectedSortingDirection = newDirection;
     this.updateFilter({sortDirection: newDirection});
+  }
+
+  setType(type: string) {
+    let newValue;
+    switch (type) {
+      case TransactionTypeFilter.EXPENSE:
+        newValue = TransactionTypeFilter.EXPENSE;
+        break;
+      case TransactionTypeFilter.INCOME:
+        newValue = TransactionTypeFilter.INCOME;
+        break;
+      default:
+        newValue = TransactionTypeFilter.ALL;
+    }
+    console.log("Type changed: ", newValue);
+    this.selectedType.set(newValue);
+    this.updateFilter({type: newValue});
+  }
+
+  onDateSelect(range: DateRange) {
+    console.log("Selected range: ", range);
+
+    this.selectedPeriod.set(this.formatDateRangeToString(range));
+
+    if (range.start !== null && range.end !== null) {
+      const start = this.formatDate(range.start);
+      const end = this.formatDate(range.end);
+      this.updateFilter({since: start, to: end});
+    }
+
+  }
+
+  formatDateRangeToString(range: DateRange): string {
+    const start = this.datePipe.transform(range.start, 'dd.MM.yyyy');
+    const end = this.datePipe.transform(range.end, 'dd.MM.yyyy');
+    return `${start} - ${end}`;
   }
 
   private updateFilter(changes: Partial<TransactionFilterParams>): void {
@@ -205,11 +248,11 @@ export class TransactionPageComponent implements OnInit{
         const now3 = new Date();
         const lastThreeMonths = new Date();
         lastThreeMonths.setMonth(now3.getMonth() - 3);
-        
+
         to = undefined;
         since = this.formatDate(lastThreeMonths);
         break;
-      
+
       case TransactionDateRangeFilter.LAST_SIX_MONTHS:
         const now6 = new Date();
         const lastSixMonths = new Date();
@@ -256,7 +299,7 @@ export class TransactionPageComponent implements OnInit{
                   this.loadTransactions();
                 }
               })
-              
+
             } else {
               console.log("Update canceled");
             }
@@ -284,11 +327,11 @@ export class TransactionPageComponent implements OnInit{
     });
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
-      
+
       if (result === true) {
-      
+
         this.transactionService.deleteTransaction(id).subscribe({
-          
+
           next: () => {
             this.loadTransactions();
 
@@ -298,7 +341,7 @@ export class TransactionPageComponent implements OnInit{
 
             console.log(`Transaction with id: ${id} deleted`);
           },
-          
+
           error: (err) => {
             console.error('Error deleting transaction', err);
             this.snackBar.open('Failed to delete transaction', 'Close', {
@@ -310,7 +353,7 @@ export class TransactionPageComponent implements OnInit{
       }
     });
   }
-  
+
   prevPage() {
     if (!this.pagination) return;
     if (this.pagination.page > 1) {
@@ -322,7 +365,7 @@ export class TransactionPageComponent implements OnInit{
     }
   }
 
-  nextPage() { 
+  nextPage() {
     if (!this.pagination) return;
     if (this.pagination.page < this.pagination.totalPages) {
       this.filter = {
@@ -388,7 +431,7 @@ export class TransactionPageComponent implements OnInit{
                 }
               this.loadTransactions();
               }
-              
+
             },
             error: (error) => {
               console.log("error occurred when creating transaction");
@@ -408,7 +451,7 @@ export class TransactionPageComponent implements OnInit{
     this.transactionService.getTransactions(this.filter).subscribe({
       next: (response) => {
         console.log("fetching transactions first page: ", response);
-        
+
         this.transactions = response.data;
 
         this.pagination = response.pagination;

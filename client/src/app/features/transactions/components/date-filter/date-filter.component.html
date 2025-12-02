@@ -1,0 +1,44 @@
+<div class="filter-box">
+      <label class="section-title">Quick Presets:</label>
+      <div class="presets-grid">
+        @for (pre of presetsOptions; track pre.value) {
+          <button (click)="setPreset(pre.value)" [class.active]="activePreset() === pre.value">{{pre.label}}</button>
+        }
+      </div>
+
+      <div class="divider"></div>
+
+      <label class="section-title">Custom Range:</label>
+      <div class="inputs-row">
+        <div>
+          <span class="data-picker-label">from</span>
+          <mat-form-field appearance="outline" class="small-datepicker">
+            <input matInput [matDatepicker]="pickerStart" (dateChange)="onStartDateChange()" [max]="maxDate" [(ngModel)]="start">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerStart"></mat-datepicker-toggle>
+            <mat-datepicker #pickerStart></mat-datepicker>
+          </mat-form-field>
+        </div>
+        
+        <div>
+          <span class="data-picker-label">to</span>
+          <mat-form-field appearance="outline" class="small-datepicker">
+            <input matInput [matDatepicker]="pickerEnd" (dateChange)="onEndDateChange()" [max]="maxDate" [(ngModel)]="end">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+            <mat-datepicker #pickerEnd></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <button
+        class="apply-btn"
+        (click)="submit()"
+      >
+        Apply
+    </button>
+    <button
+      class="clear-btn"
+      (click)="clearDates()"
+    >
+      Reset
+    </button>
+    </div>
