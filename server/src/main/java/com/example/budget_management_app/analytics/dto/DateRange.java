@@ -17,11 +17,11 @@ public record DateRange(
         LocalDate to
 ) {
     @AssertTrue(message = "The start date (from) must be earlier than the end date (up to).")
-    private boolean isDateRangeValid() {
+    public boolean isDateRangeValid() {
         if (from == null || to == null) {
             return true;
         }
-        return from.isBefore(to);
+        return !from.isAfter(to);
     }
 
     public LocalDateTime getFromDateTime() {

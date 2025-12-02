@@ -1,6 +1,4 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { AccountService } from '../../../accounts/services/account.service';
-import { CategoryService } from '../../../categories/services/category.service';
 import { AccountSummary } from '../../model/account-summary.model';
 import { CategorySummary } from '../../model/category-summary.model';
 import { map } from 'rxjs';
@@ -36,6 +34,8 @@ import { MatSnackBar} from '@angular/material/snack-bar';
 import { UpdateTransactionDialogComponent } from '../../components/update-transaction-dialog/update-transaction-dialog.component';
 import { TransactionUpdateData } from '../../model/transaction-update-data.model';
 import { TransactionUpdateRequest } from '../../model/transaction-update-request.model';
+import { CategoryService } from '../../../../core/services/category.service';
+import { AccountService } from '../../../../core/services/account.service';
 
 @Component({
   selector: 'app-transaction-page',

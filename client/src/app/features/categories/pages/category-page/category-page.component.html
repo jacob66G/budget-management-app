@@ -1,1 +1,51 @@
-<p>category-page works!</p>
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+       <h1 class="page-title">Categories</h1>
+       <p class="page-subtitle">Manage yours categories</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="openAddDialog()" class="add-btn">
+      <mat-icon>add</mat-icon> Add Category
+    </button>
+  </div>
+
+  <div class="filters-bar">
+    <mat-chip-listbox aria-label="Filter by type" [value]="currentType()">
+      <mat-chip-option [value]="null" (click)="onFilterChange(null)" selected>
+        All
+      </mat-chip-option>
+      
+      <mat-chip-option value="EXPENSE" (click)="onFilterChange('EXPENSE')" color="warn">
+        Expense
+      </mat-chip-option>
+      
+      <mat-chip-option value="INCOME" (click)="onFilterChange('INCOME')" color="primary">
+        Income
+      </mat-chip-option>
+
+      <mat-chip-option value="GENERAL" (click)="onFilterChange('GENERAL')">
+        General
+      </mat-chip-option>
+    </mat-chip-listbox>
+  </div>
+
+  <div class="category-grid">
+    @if (isLoading()) {
+      <div class="loading-container"><mat-spinner></mat-spinner></div>
+    } @else {
+      @for (cat of categories(); track cat.id) {
+        <app-category-card 
+           [category]="cat"
+           (edit)="onEdit($event)"
+           (delete)="onDelete($event)"
+           (reassign)="onReassign($event)">
+        </app-category-card>
+      } @empty {
+        <div class="empty-state">
+          <mat-icon>category</mat-icon>
+          <p>No Categories. Add new!</p>
+        </div>
+      }
+    }
+  </div>
+</div>

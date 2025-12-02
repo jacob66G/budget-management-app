@@ -81,7 +81,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ResponseMessage> logout(
+    public ResponseEntity<Void> logout(
             @CookieValue(name = ApiConstants.REFRESH_TOKEN_COOKIE, required = false) String refreshToken
     ) {
         if (StringUtils.hasText(refreshToken)) {
@@ -91,8 +91,7 @@ public class AuthController {
         ResponseCookie clearCookie = userSessionService.generateClearCookie();
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, clearCookie.toString())
-                .body(new ResponseMessage("You have been logged out successfully."));
+                .header(HttpHeaders.SET_COOKIE, clearCookie.toString()).build();
     }
 
     @GetMapping("/verify")

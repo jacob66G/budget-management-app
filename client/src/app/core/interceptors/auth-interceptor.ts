@@ -10,6 +10,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = authService.accessToken();
 
   const excludedUrls = [
+    ApiPaths.Auth.LOGOUT,
     ApiPaths.Auth.LOGIN,
     ApiPaths.Auth.LOGIN_2FA,
     ApiPaths.Auth.REGISTER,
@@ -33,7 +34,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       if (error.status === 401) {
 
         if (req.url.includes(ApiPaths.Auth.REFRESH_TOKEN)) {
-          authService.logout();
+          authService.logout().subscribe();
           return throwError(() => error);
         }
 
@@ -44,15 +45,18 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return authService.refreshToken().pipe(
           switchMap((response: LoginResponse | null) => {
             if (response?.accessToken) {
+              console.log("1")
               authReq = addTokenToRequest(req, response.accessToken);
               return next(authReq);
             }
 
-            authService.logout();
+             console.log("2")
+            authService.logout().subscribe();
             return throwError(() => error);
           }),
           catchError((refreshError) => {
-            authService.logout();
+             console.log("3")
+            authService.logout().subscribe();
             return throwError(() => refreshError);
           })
         );

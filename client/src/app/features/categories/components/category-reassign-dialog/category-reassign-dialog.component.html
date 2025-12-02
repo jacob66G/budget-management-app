@@ -1,0 +1,37 @@
+<h2 mat-dialog-title class="dialog-title">Reassign Transactions</h2>
+
+<mat-dialog-content class="dialog-content">
+  <div class="dialog-body">
+    <p class="dialog-message">
+      You are moving all transactions from <strong>{{ data.categoryToMove.name }}</strong> category.
+    </p>
+    <p class="dialog-instruction">
+      Select a target category of the same type ({{ data.categoryToMove.type }}).
+    </p>
+
+    <mat-form-field appearance="outline" class="full-width category-select">
+      <mat-label>New category</mat-label>
+      <mat-select [formControl]="targetCategoryControl">
+        @for (cat of availableCategories; track cat.id) {
+          <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+        }
+      </mat-select>
+      @if (targetCategoryControl.touched && targetCategoryControl.invalid) {
+        <mat-error>Target category is required.</mat-error>
+      }
+    </mat-form-field>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-button mat-dialog-close>Cancel</button>
+  
+  <button 
+    mat-flat-button 
+    color="primary" 
+    class="submit-button"
+    [disabled]="targetCategoryControl.invalid" 
+    (click)="confirm()">
+    Move
+  </button>
+</mat-dialog-actions>

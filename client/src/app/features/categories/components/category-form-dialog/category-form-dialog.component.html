@@ -1,0 +1,69 @@
+<h2 mat-dialog-title>
+  {{ data.mode === 'UPDATE' ? 'Edit Category' : 'Add Category' }}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form">
+    
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name">
+      @if (form.get('name')?.hasError('required')) {
+        <mat-error>Name is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type">
+        @for (type of categoryTypes; track type) {
+          <mat-option [value]="type">{{ type }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('type')?.hasError('required')) {
+        <mat-error>Type is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Icon</mat-label>
+      <mat-select formControlName="iconPath">
+        
+        <mat-select-trigger>
+          @if (form.get('iconPath')?.value; as val) {
+             <div class="icon-option">
+                <img [src]="val" class="icon-preview" alt="selected icon"> 
+                <span>{{ getIconName(val) }}</span>
+             </div>
+          }
+        </mat-select-trigger>
+        
+        @for (icon of availableIcons; track icon) {
+          <mat-option [value]="icon">
+            <div class="icon-option">
+              <img [src]="icon" class="icon-preview" alt="icon option">
+              <span>{{ getIconName(icon) }}</span>
+            </div>
+          </mat-option>
+        }
+      </mat-select>
+      @if (form.get('iconPath')?.hasError('required')) {
+        <mat-error>Icon is required.</mat-error>
+      }
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>Cancel</button>
+  
+  <button 
+    mat-flat-button 
+    color="primary" 
+    class="submit-button"
+    (click)="onSubmit()" 
+    [disabled]="form.invalid">
+    Save
+  </button>
+</mat-dialog-actions>

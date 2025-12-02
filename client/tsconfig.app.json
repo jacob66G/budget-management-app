@@ -8,7 +8,7 @@
   },
   "include": [
     "src/**/*.ts"
-  ],
+, "src/app/features/categories/components/category-card/category-card.component.spec.ts"  ],
   "exclude": [
     "src/**/*.spec.ts"
   ]

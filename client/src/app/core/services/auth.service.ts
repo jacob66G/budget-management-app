@@ -1,4 +1,4 @@
-import { catchError, map, Observable, of, tap } from "rxjs";
+import { catchError, finalize, map, Observable, of, tap } from "rxjs";
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { LoginRequest, LoginResponse, PasswordResetConfirmationRequest, RegistrationRequest, TwoFactorLoginRequest } from "../../features/auth/model/auth.model";
 import { ResponseMessage } from "../models/response-message.model";
@@ -60,9 +60,12 @@ export class AuthService {
     );
   }
 
-  logout(): Observable<ResponseMessage> {
-    return this.http.post<ResponseMessage>(ApiPaths.Auth.LOGOUT, { withCredentials: true }).pipe(
-      tap(() => {
+logout(): Observable<void> {
+    console.log("wyloguj 1 - start");
+    
+    return this.http.post<void>(ApiPaths.Auth.LOGOUT, {}, { withCredentials: true }).pipe(
+      finalize(() => {
+        console.log("wyloguj - czyszczenie stanu");
         this.clearAuthState();
         this.router.navigate(['/login']);
       })

@@ -1,10 +1,5 @@
 export class ApiPaths {
-    // accounts
-    public static readonly ACCOUNTS = '/api/accounts';
-
-    // categories
-    public static readonly CATEGORIES = '/api/categories';
-
+    
     // transactions
     public static readonly TRANSACTIONS = '/api/v1/transactions';
 
@@ -15,6 +10,7 @@ export class ApiPaths {
     public static readonly ACCOUNT_BASE = `${ApiPaths.API}/accounts`;
     public static readonly ANALYTICS_BASE = `${ApiPaths.API}/analytics`
     public static readonly REFERENCE_DATA_BASE = `${ApiPaths.API}/reference-data`
+    public static readonly CATEGORIES_BASE = `${ApiPaths.API}/categories`;
 
     public static readonly Auth = {
         LOGIN: `${ApiPaths.AUTH_BASE}/login`,
@@ -54,5 +50,9 @@ export class ApiPaths {
 
     public static readonly ReferenceData = {
         REFERENCE_DATA: `${ApiPaths.REFERENCE_DATA_BASE}`
+    }
+
+    public static readonly Categories = {
+        CATEGORIES: `${ApiPaths.CATEGORIES_BASE}`
     }
 }
