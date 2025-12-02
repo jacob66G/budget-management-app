@@ -25,7 +25,11 @@ export class ReferenceDataService {
   
   get currencies() { return this.data()?.currencies || []; }
   get accountTypes() { return this.data()?.accountTypes || []; }
+  get categoryTypes() { return this.data()?.categoryTypes || []; }
+  get userStatuses() { return this.data()?.userStatuses || []; }
+  get accountStatuses() { return this.data()?.accountStatuses || []; }
   get budgetTypes() { return this.data()?.budgetTypes || []; }
   get accountIcons() { return this.data()?.accountIcons || []; }
   get categoryIcons() { return this.data()?.categoryIcons || []; }
+  
 }
