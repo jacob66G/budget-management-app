@@ -1,5 +1,5 @@
 <div class="page-container">
-  
+
   <div class="page-header">
     <div class="header-content">
       <h1 class="page-title">Your Accounts</h1>
@@ -14,9 +14,9 @@
 
   <div class="filters-section">
     <form [formGroup]="filterForm">
-      
+
       <div class="main-filters">
-        
+
         <mat-form-field appearance="outline" class="search-field">
           <mat-icon matPrefix>search</mat-icon>
           <mat-label>Search by name</mat-label>
@@ -26,17 +26,19 @@
         <mat-form-field appearance="outline" class="sort-field">
           <mat-label>Sort by</mat-label>
           <mat-select formControlName="sortBy">
-            <mat-option value="createdAt">Date Created</mat-option>
-            <mat-option value="balance">Balance</mat-option>
-            <mat-option value="name">Name</mat-option>
+            @for (option of sortOptions; track option.value) {
+            <mat-option [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+            }
           </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="sort-dir-field">
           <mat-label>Order</mat-label>
           <mat-select formControlName="sortDirection">
-            <mat-option value="ASC">Ascending</mat-option>
-            <mat-option value="DESC">Descending</mat-option>
+            <mat-option value="asc">Ascending</mat-option>
+            <mat-option value="desc">Descending</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
@@ -53,14 +55,14 @@
             </mat-panel-description>
           </mat-expansion-panel-header>
 
-  
+
           <div class="advanced-grid">
-            
+
             <mat-form-field appearance="outline">
               <mat-label>Currency</mat-label>
               <mat-select formControlName="currencies" multiple>
                 @for (curr of currencies; track curr) {
-                  <mat-option [value]="curr">{{ curr }}</mat-option>
+                <mat-option [value]="curr">{{ curr }}</mat-option>
                 }
               </mat-select>
             </mat-form-field>
@@ -69,7 +71,7 @@
               <mat-label>Budget Type</mat-label>
               <mat-select formControlName="budgetTypes" multiple>
                 @for (bt of budgetTypes; track bt) {
-                  <mat-option [value]="bt">{{ bt }}</mat-option>
+                <mat-option [value]="bt">{{ bt }}</mat-option>
                 }
               </mat-select>
             </mat-form-field>
@@ -91,13 +93,14 @@
               <mat-datepicker #picker1></mat-datepicker>
             </mat-form-field>
 
-             <div class="checkbox-wrapper">
-                <mat-checkbox formControlName="includedInTotalBalance" color="primary">Only Included in Total</mat-checkbox>
-             </div>
+            <div class="checkbox-wrapper">
+              <mat-checkbox formControlName="includedInTotalBalance" color="primary">Only Included in
+                Total</mat-checkbox>
+            </div>
           </div>
-          
+
           <div class="filter-actions">
-             <button mat-button color="warn" (click)="clearFilters()">Clear Filters</button>
+            <button mat-button color="warn" (click)="clearFilters()">Clear Filters</button>
           </div>
 
         </mat-expansion-panel>
@@ -107,27 +110,23 @@
   </div>
 
   @if (isLoading()) {
-    <div class="loading-container">
-      <mat-spinner [diameter]="50"></mat-spinner>
-    </div>
+  <div class="loading-container">
+    <mat-spinner [diameter]="50"></mat-spinner>
+  </div>
   } @else {
-    <div class="account-list-container">
-      @for (acc of accounts(); track acc.id) {
-        <app-account-card 
-          [account]="acc"
-          (accountClick)="onAccountClick($event)"
-          (editClick)="onEditClick($event)"
-          (deleteClick)="onDeleteClick($event)"
-          >
-        </app-account-card>
-      } @empty {
-        <div class="empty-state">
-          <mat-icon>account_balance_wallet</mat-icon>
-          <h3>No accounts found</h3>
-          <p>Try adjusting your filters or add a new account.</p>
-        </div>
-      }
+  <div class="account-list-container">
+    @for (acc of accounts(); track acc.id) {
+    <app-account-card [account]="acc" (accountClick)="onAccountClick($event)" (editClick)="onEditClick($event)"
+      (deleteClick)="onDeleteClick($event)">
+    </app-account-card>
+    } @empty {
+    <div class="empty-state">
+      <mat-icon>account_balance_wallet</mat-icon>
+      <h3>No accounts found</h3>
+      <p>Try adjusting your filters or add a new account.</p>
     </div>
+    }
+  </div>
   }
-  
+
 </div>

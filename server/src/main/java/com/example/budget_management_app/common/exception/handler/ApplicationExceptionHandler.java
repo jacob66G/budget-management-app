@@ -5,6 +5,7 @@ import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.dto.ErrorResponse;
 import com.example.budget_management_app.constants.ErrorConstants;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -107,8 +108,16 @@ public class ApplicationExceptionHandler {
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
 
         String errorMessage = "Request contains invalid data format";
+        String errorCode = ErrorConstants.INVALID_DATA_FORMAT;
 
         Throwable cause = ex.getCause();
+        if (cause instanceof ValueInstantiationException && cause.getCause() instanceof ApplicationException) {
+            ApplicationException applicationEx = (ApplicationException) cause.getCause();
+
+            errorMessage = applicationEx.getMessage();
+            errorCode = applicationEx.getErrorCode().name();
+        }
+
         if (cause instanceof MismatchedInputException mismatchedInput) {
 
             if (mismatchedInput.getTargetType() != null && mismatchedInput.getTargetType().isEnum()) {
@@ -140,7 +149,7 @@ public class ApplicationExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
-                ErrorConstants.INVALID_DATA_FORMAT,
+                errorCode,
                 errorMessage,
                 request.getRequestURI()
         );

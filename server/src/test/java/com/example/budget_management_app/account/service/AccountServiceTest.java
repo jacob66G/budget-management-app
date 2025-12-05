@@ -83,12 +83,12 @@ public class AccountServiceTest {
             user.setId(userId);
 
             requestDto = new AccountCreateRequest(
-                    "PERSONAL",
+                    AccountType.PERSONAL,
                     accountName,
-                    "PLN",
+                    SupportedCurrency.PLN,
                     description,
                     balance,
-                    "MONTHLY",
+                    BudgetType.MONTHLY,
                     budget,
                     alertThreshold,
                     true,
@@ -116,21 +116,21 @@ public class AccountServiceTest {
 
             expectedResult = new AccountDetailsResponse(
                     1L,
-                    "PERSONAL",
+                    AccountType.PERSONAL,
                     accountName,
                     balance,
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
-                    "PLN",
+                    SupportedCurrency.PLN,
                     false,
                     description,
-                    "MONTHLY",
+                    BudgetType.MONTHLY,
                     budget,
                     alertThreshold,
                     iconKey,
                     true,
                     savedAccount.getCreatedAt(),
-                    "ACTIVE",
+                    AccountStatus.ACTIVE,
                     false
             );
 
@@ -166,95 +166,14 @@ public class AccountServiceTest {
             assertThat(accountSentToDao).isNotNull();
             assertThat(accountSentToDao.getName()).isEqualTo(requestDto.name());
             assertThat(accountSentToDao.getBalance()).isEqualTo(requestDto.initialBalance());
-            assertThat(accountSentToDao.getCurrency().name()).isEqualTo(requestDto.currency());
-            assertThat(accountSentToDao.getBudgetType().name()).isEqualTo(requestDto.budgetType());
+            assertThat(accountSentToDao.getCurrency()).isEqualTo(requestDto.currency());
+            assertThat(accountSentToDao.getBudgetType()).isEqualTo(requestDto.budgetType());
             assertThat(accountSentToDao.getIconKey()).isEqualTo(requestDto.iconPath());
             assertThat(accountSentToDao.getUser()).isEqualTo(user);
 
             assertThat(accountSentToDao.getAccountStatus()).isEqualTo(AccountStatus.ACTIVE);
             assertThat(accountSentToDao.isDefault()).isFalse();
             assertThat(accountSentToDao.getCreatedAt()).isNotNull();
-        }
-
-        @Test
-        void should_throw_validationException_when_incorrect_account_type() {
-            //given
-            String accountWrongType = "no existent type";
-            AccountCreateRequest requestWithWrongType = new AccountCreateRequest(
-                    accountWrongType,
-                    accountName,
-                    "PLN",
-                    description,
-                    balance,
-                    "MONTHLY",
-                    budget,
-                    alertThreshold,
-                    true,
-                    iconKey
-            );
-            when(userDao.findById(userId)).thenReturn(Optional.of(user));
-
-            //when + then
-            ValidationException exception = assertThrows(ValidationException.class,
-                    () -> accountService.createAccount(userId, requestWithWrongType));
-
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WRONG_TYPE);
-            assertThat(exception.getMessage()).contains(accountWrongType);
-            verify(userDao, times(1)).findById(userId);
-        }
-
-        @Test
-        void should_throw_validationException_when_incorrect_currency() {
-            //given
-            String wrongCurrency = "no existent currency";
-            AccountCreateRequest requestWithWrongCurrency = new AccountCreateRequest(
-                    "PERSONAL",
-                    accountName,
-                    wrongCurrency,
-                    description,
-                    balance,
-                    "MONTHLY",
-                    budget,
-                    alertThreshold,
-                    true,
-                    iconKey
-            );
-            when(userDao.findById(userId)).thenReturn(Optional.of(user));
-
-            //when + then
-            ValidationException exception = assertThrows(ValidationException.class,
-                    () -> accountService.createAccount(userId, requestWithWrongCurrency));
-
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WRONG_CURRENCY);
-            assertThat(exception.getMessage()).contains(wrongCurrency);
-            verify(userDao, times(1)).findById(userId);
-        }
-
-        @Test
-        void should_throw_validationException_when_incorrect_budget_type() {
-            //given
-            String budgetWrongType = "no existent budget type";
-            AccountCreateRequest requestWithWrongBudgetType = new AccountCreateRequest(
-                    "PERSONAL",
-                    accountName,
-                    "PLN",
-                    description,
-                    balance,
-                    budgetWrongType,
-                    budget,
-                    alertThreshold,
-                    true,
-                    iconKey
-            );
-            when(userDao.findById(userId)).thenReturn(Optional.of(user));
-
-            //when + then
-            ValidationException exception = assertThrows(ValidationException.class,
-                    () -> accountService.createAccount(userId, requestWithWrongBudgetType));
-
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WRONG_BUDGET_TYPE);
-            assertThat(exception.getMessage()).contains(budgetWrongType);
-            verify(userDao, times(1)).findById(userId);
         }
 
         @Test
@@ -278,12 +197,12 @@ public class AccountServiceTest {
         void should_throw_validationException_when_budget_type_is_none_and_budget_is_not_null() {
             //given
             AccountCreateRequest requestWithBudget = new AccountCreateRequest(
-                    "PERSONAL",
+                    AccountType.PERSONAL,
                     accountName,
-                    "PLN",
+                    SupportedCurrency.PLN,
                     description,
                     balance,
-                    "NONE",
+                    BudgetType.NONE,
                     budget,
                     null,
                     true,
@@ -304,12 +223,12 @@ public class AccountServiceTest {
         void should_throw_validationException_when_budget_type_is_none_and_alertThreshold_is_not_null() {
             //given
             AccountCreateRequest requestWithBudget = new AccountCreateRequest(
-                    "PERSONAL",
+                    AccountType.PERSONAL,
                     accountName,
-                    "PLN",
+                    SupportedCurrency.PLN,
                     description,
                     balance,
-                    "NONE",
+                    BudgetType.NONE,
                     null,
                     alertThreshold,
                     true,
@@ -330,12 +249,12 @@ public class AccountServiceTest {
         void should_throw_validationException_when_budget_type_is_not_none_and_budget_is_null() {
             //given
             AccountCreateRequest requestWithBudget = new AccountCreateRequest(
-                    "PERSONAL",
+                    AccountType.PERSONAL,
                     accountName,
-                    "PLN",
+                    SupportedCurrency.PLN,
                     description,
                     balance,
-                    "WEEKLY",
+                    BudgetType.WEEKLY,
                     null,
                     alertThreshold,
                     true,
@@ -356,12 +275,12 @@ public class AccountServiceTest {
         void should_throw_validationException_when_budget_type_is_not_none_and_alertThreshold_is_null() {
             //given
             AccountCreateRequest requestWithBudget = new AccountCreateRequest(
-                    "PERSONAL",
+                    AccountType.PERSONAL,
                     accountName,
-                    "PLN",
+                    SupportedCurrency.PLN,
                     description,
                     balance,
-                    "WEEKLY",
+                    BudgetType.WEEKLY,
                     budget,
                     null,
                     true,
@@ -522,7 +441,7 @@ public class AccountServiceTest {
         @Test
         void should_update_currency() {
             //given
-            String newCurrency = "USD";
+            SupportedCurrency newCurrency = SupportedCurrency.USD;
             AccountUpdateRequest dto = new AccountUpdateRequest(
                     null,
                     newCurrency,
@@ -617,7 +536,7 @@ public class AccountServiceTest {
                     null,
                     null,
                     null,
-                    "NONE",
+                    BudgetType.NONE,
                     null,
                     null,
                     null,
@@ -648,7 +567,7 @@ public class AccountServiceTest {
                     null,
                     null,
                     null,
-                    "MONTHLY",
+                    BudgetType.MONTHLY,
                     null,
                     50.0,
                     null,
@@ -673,7 +592,7 @@ public class AccountServiceTest {
                     null,
                     null,
                     null,
-                    "MONTHLY",
+                    BudgetType.MONTHLY,
                     BigDecimal.valueOf(1000),
                     null,
                     null,
@@ -700,7 +619,7 @@ public class AccountServiceTest {
                     null,
                     null,
                     null,
-                    "MONTHLY",
+                    BudgetType.MONTHLY,
                     newBudget,
                     newAlert,
                     null,

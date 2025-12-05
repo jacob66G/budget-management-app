@@ -13,7 +13,7 @@ public class AuthMapper {
                 user.getName(),
                 user.getSurname(),
                 user.getEmail(),
-                user.getStatus().name(),
+                user.getStatus(),
                 user.isMfaEnabled(),
                 user.getCreatedAt(),
                 accessToken,

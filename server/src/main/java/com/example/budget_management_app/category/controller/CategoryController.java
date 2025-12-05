@@ -1,5 +1,6 @@
 package com.example.budget_management_app.category.controller;
 
+import com.example.budget_management_app.category.domain.CategoryType;
 import com.example.budget_management_app.category.dto.CategoryCreateRequest;
 import com.example.budget_management_app.category.dto.CategoryResponse;
 import com.example.budget_management_app.category.dto.CategoryUpdateRequest;
@@ -25,7 +26,7 @@ public class CategoryController {
 
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> getCategories(
-            @RequestParam(required = false) String type,
+            @RequestParam(required = false) CategoryType type,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         Long userId = userDetails.getId();

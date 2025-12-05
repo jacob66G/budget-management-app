@@ -2,7 +2,6 @@ package com.example.budget_management_app.common.converter;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
-import org.springframework.lang.NonNull;
 
 public class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
     /**
@@ -12,8 +11,7 @@ public class StringToEnumConverterFactory implements ConverterFactory<String, En
      * @return a converter from S to T
      */
     @Override
-    @NonNull
-    public <T extends Enum> Converter<String, T> getConverter(@NonNull Class<T> targetType) {
+    public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
         return new StringToEnumConverter<>(targetType);
     }
 
@@ -33,13 +31,19 @@ public class StringToEnumConverterFactory implements ConverterFactory<String, En
          * @throws IllegalArgumentException if the source cannot be converted to the desired target type
          */
         @Override
-        public T convert(@NonNull String source) {
+        public T convert(String source) {
 
             if (source.isEmpty()) {
-                throw new IllegalArgumentException("Parameter value is required");
+                return null;
             }
 
-            return (T) Enum.valueOf(this.enumType, source.trim().toUpperCase());
+            String normalized = source.trim().replace('-', '_').toUpperCase();
+
+            try {
+                return (T) Enum.valueOf(this.enumType, normalized);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid field: " + source);
+            }
         }
     }
 }

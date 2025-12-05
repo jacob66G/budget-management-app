@@ -1,6 +1,7 @@
 package com.example.budget_management_app.category.dao;
 
 import com.example.budget_management_app.category.domain.Category;
+import com.example.budget_management_app.category.domain.CategoryType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
@@ -14,8 +15,8 @@ public class CategoryDao {
     @PersistenceContext
     private EntityManager em;
 
-    public List<Category> findByUser(Long userId, String type) {
-        return em.createQuery("SELECT c FROM Category c WHERE c.user.id = :userId AND (:type IS NULL OR LOWER(c.type) = LOWER(cast(:type as text))) ", Category.class)
+    public List<Category> findByUser(Long userId, CategoryType type) {
+        return em.createQuery("SELECT c FROM Category c WHERE c.user.id = :userId AND (:type IS NULL OR c.type = :type) ORDER BY c.name", Category.class)
                 .setParameter("userId", userId)
                 .setParameter("type", type)
                 .getResultList();

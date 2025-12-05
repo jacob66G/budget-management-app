@@ -1,8 +1,11 @@
 package com.example.budget_management_app.account.dao;
 
 import com.example.budget_management_app.account.domain.Account;
+import com.example.budget_management_app.account.domain.AccountSortableField;
 import com.example.budget_management_app.account.domain.AccountStatus;
+import com.example.budget_management_app.account.domain.BudgetType;
 import com.example.budget_management_app.account.dto.SearchCriteria;
+import com.example.budget_management_app.common.enums.SupportedCurrency;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,7 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -84,7 +87,7 @@ class AccountDaoIntegrationTest {
     void should_filter_by_multiple_currencies() {
         // given
         SearchCriteria criteria = new SearchCriteria(
-                null, null, null, List.of("USD", "EUR"), null, null, null,
+                null, null, null, List.of(SupportedCurrency.USD, SupportedCurrency.EUR), null, null, null,
                 null, null, null, null, null, null, null,
                 null, null, null, null
         );
@@ -102,7 +105,7 @@ class AccountDaoIntegrationTest {
     void should_filter_by_status_inactive() {
         // given
         SearchCriteria criteria = new SearchCriteria(
-                null, null, List.of("INACTIVE"), null, null, null, null,
+                null, null, List.of(AccountStatus.INACTIVE), null, null, null, null,
                 null, null, null, null, null, null, null,
                 null, null, null, null
         );
@@ -139,7 +142,7 @@ class AccountDaoIntegrationTest {
     void should_filter_by_budget_type() {
         // given
         SearchCriteria criteria = new SearchCriteria(
-                null, null, null, null, List.of("NONE"), null, null,
+                null, null, null, null, List.of(BudgetType.NONE), null, null,
                 null, null, null, null, null, null, null,
                 null, null, null, null
         );
@@ -174,7 +177,7 @@ class AccountDaoIntegrationTest {
     @DisplayName("Should filter by date 'createdAfter'")
     void should_filter_by_createdAfter() {
         // given
-        Instant afterDate = Instant.parse("2025-02-10T00:00:00Z");
+        LocalDate afterDate = LocalDate.of(2025, 2, 10);
         SearchCriteria criteria = new SearchCriteria(
                 null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null,
@@ -193,7 +196,7 @@ class AccountDaoIntegrationTest {
     @DisplayName("Should filter by date 'createdBefore'")
     void should_filter_by_createdBefore() {
         // given
-        Instant beforeDate = Instant.parse("2025-02-01T00:00:00Z");
+        LocalDate beforeDate = LocalDate.of(2025, 2, 1);
         SearchCriteria criteria = new SearchCriteria(
                 null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null,
@@ -204,8 +207,9 @@ class AccountDaoIntegrationTest {
         List<Account> results = accountDao.findByUserAndCriteria(USER_1_ID, criteria);
 
         // then
-        assertThat(results).hasSize(1);
-        assertThat(results.get(0).getId()).isEqualTo(2L);
+        assertThat(results).hasSize(2);
+        assertThat(results.get(0).getId()).isEqualTo(3L);
+        assertThat(results.get(1).getId()).isEqualTo(2L);
     }
 
     @Test
@@ -229,7 +233,7 @@ class AccountDaoIntegrationTest {
         SearchCriteria criteria = new SearchCriteria(
                 null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null,
-                null, null, "balance", "ASC"
+                null, null, AccountSortableField.BALANCE, "ASC"
         );
 
         // when
@@ -241,13 +245,13 @@ class AccountDaoIntegrationTest {
     }
 
     @Test
-    @DisplayName("Should default to createdAt sorting on invalid sort field")
-    void should_default_to_createdAt_on_invalid_sort_field() {
+    @DisplayName("Should default to createdAt sorting on empty sort field")
+    void should_default_to_createdAt_on_empty_sort_field() {
         // given
         SearchCriteria criteria = new SearchCriteria(
                 null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null,
-                null, null, "invalidField", "ASC"
+                null, null, null, "ASC"
         );
 
         // when

@@ -1,5 +1,6 @@
 package com.example.budget_management_app.category.service;
 
+import com.example.budget_management_app.category.domain.CategoryType;
 import com.example.budget_management_app.category.dto.CategoryCreateRequest;
 import com.example.budget_management_app.category.dto.CategoryResponse;
 import com.example.budget_management_app.category.dto.CategoryUpdateRequest;
@@ -9,7 +10,7 @@ import java.util.List;
 
 public interface CategoryService {
 
-    List<CategoryResponse> getCategories(Long userId, String type);
+    List<CategoryResponse> getCategories(Long userId, CategoryType type);
 
     CategoryResponse getCategory(Long userId, Long categoryId);
 

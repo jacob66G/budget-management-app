@@ -12,6 +12,9 @@ import jakarta.persistence.criteria.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,11 +35,10 @@ public class AccountDao {
     }
 
     public List<Long> getUserAccountIds(Long userId) {
-
         return em.createQuery("""
-                    SELECT a.id FROM Account a
-                    WHERE a.user.id = :userId
-                """, Long.class)
+                            SELECT a.id FROM Account a
+                            WHERE a.user.id = :userId
+                        """, Long.class)
                 .setParameter("userId", userId)
                 .getResultList();
     }
@@ -113,20 +115,20 @@ public class AccountDao {
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(userJoin.get("id"), userId));
 
-        if (StringUtils.hasText(criteria.type())) {
-            predicates.add(cb.equal(root.get("accountType"), criteria.type().toUpperCase()));
+        if (criteria.type() != null) {
+            predicates.add(cb.equal(root.get("accountType"), criteria.type()));
         }
         if (StringUtils.hasText(criteria.name())) {
             predicates.add(cb.like(cb.lower(root.get("name")), "%" + criteria.name().toLowerCase() + "%"));
         }
         if (criteria.status() != null && !criteria.status().isEmpty()) {
-            predicates.add(root.get("accountStatus").in(criteria.status().stream().map(String::toUpperCase).toList()));
+            predicates.add(root.get("accountStatus").in(criteria.status().stream().toList()));
         }
         if (criteria.currencies() != null && !criteria.currencies().isEmpty()) {
-            predicates.add(root.get("currency").in(criteria.currencies().stream().map(String::toUpperCase).toList()));
+            predicates.add(root.get("currency").in(criteria.currencies().stream().toList()));
         }
         if (criteria.budgetTypes() != null && !criteria.budgetTypes().isEmpty()) {
-            predicates.add(root.get("budgetType").in(criteria.budgetTypes().stream().map(String::toUpperCase).toList()));
+            predicates.add(root.get("budgetType").in(criteria.budgetTypes().stream().toList()));
         }
         if (criteria.minBalance() != null) {
             predicates.add(cb.greaterThanOrEqualTo(root.get("balance"), criteria.minBalance()));
@@ -156,25 +158,27 @@ public class AccountDao {
             predicates.add(cb.equal(root.get("includeInTotalBalance"), criteria.includedInTotalBalance()));
         }
         if (criteria.createdBefore() != null) {
-            predicates.add(cb.lessThan(root.get("createdAt"), criteria.createdBefore()));
+            Instant endOfDay = criteria.createdBefore()
+                    .atTime(LocalTime.MAX)
+                    .atZone(ZoneId.of("UTC"))
+                    .toInstant();
+            predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), endOfDay));
         }
         if (criteria.createdAfter() != null) {
-            predicates.add(cb.greaterThan(root.get("createdAt"), criteria.createdAfter()));
+            Instant startOfDay = criteria.createdAfter()
+                    .atStartOfDay(ZoneId.of("UTC"))
+                    .toInstant();
+            predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), startOfDay));
         }
 
         return predicates;
     }
 
-    private Path<?> getSortField(String sortBy, Root<Account> root) {
-        if (!StringUtils.hasText(sortBy)) {
+    private Path<?> getSortField(AccountSortableField sortBy, Root<Account> root) {
+        if (sortBy == null) {
             return root.get("createdAt");
         }
-        try {
-            AccountSortableField.valueOf(sortBy.toUpperCase());
-            return root.get(sortBy);
-        } catch (IllegalArgumentException e) {
-            return root.get("createdAt");
-        }
+        return root.get(sortBy.getFieldName());
     }
 
     private Order getSortOrder(String sortDirection, CriteriaBuilder cb, Path<?> sortField) {

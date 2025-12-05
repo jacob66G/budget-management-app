@@ -7,7 +7,7 @@ import { Router, RouterLink } from '@angular/router';
 import { SearchCriteria } from '../../models/account.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { CommonModule } from '@angular/common';
+import { CommonModule, formatDate } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -21,6 +21,22 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AccountActionService } from '../../services/account-actions.service';
 import { ApiErrorService } from '../../../../core/services/api-error.service';
 import { ReferenceDataService } from '../../../../core/services/reference-data.service';
+
+export enum AccountSortableField {
+  NAME = 'name',
+  BALANCE = 'balance',
+  TOTAL_INCOME = 'total-income',
+  TOTAL_EXPENSE = 'total-expense',
+  CREATED_AT = 'created-at'
+}
+
+export const SORT_OPTIONS = [
+  { value: AccountSortableField.NAME, label: 'Name' },
+  { value: AccountSortableField.BALANCE, label: 'Balance' },
+  { value: AccountSortableField.TOTAL_INCOME, label: 'Total Income' },
+  { value: AccountSortableField.TOTAL_EXPENSE, label: 'Total Expense' },
+  { value: AccountSortableField.CREATED_AT, label: 'Date Created' }
+];
 
 @Component({
   selector: 'app-accounts-list',
@@ -54,6 +70,8 @@ export class AccountsListPage {
   currencies = this.refService.currencies;
   budgetTypes = this.refService.budgetTypes;
 
+  readonly sortOptions = Object.values(SORT_OPTIONS);
+
   ngOnInit() {
     this.initForm();
     this.loadAccounts();
@@ -71,8 +89,8 @@ export class AccountsListPage {
   private initForm(): void {
     this.filterForm = this.fb.group({
       name: [''],
-      sortBy: ['createdAt'],
-      sortDirection: ['DESC'],
+      sortBy: [AccountSortableField.CREATED_AT],
+      sortDirection: ['desc'],
 
       currencies: [[]],
       status: [[]],
@@ -93,7 +111,8 @@ export class AccountsListPage {
     if (criteria.includedInTotalBalance === false) {
       criteria.includedInTotalBalance = null;
     }
-    
+
+    criteria.createdAfter = formatDate(criteria.createdAfter, 'yyyy-MM-dd', 'en-US');
     this.accountService.getAccounts(criteria).subscribe({
       next: (data) => {
         this.accounts.set(data);
@@ -120,8 +139,8 @@ export class AccountsListPage {
 
   clearFilters(): void {
     this.filterForm.reset({
-      sortBy: 'createdAt',
-      sortDirection: 'DESC'
+      sortBy: AccountSortableField.CREATED_AT,
+      sortDirection: 'desc'
     });
   }
 

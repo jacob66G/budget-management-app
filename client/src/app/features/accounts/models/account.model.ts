@@ -64,8 +64,8 @@ export interface SearchCriteria {
 
   includedInTotalBalance?: boolean | null;
 
-  createdAfter?: string;
-  createdBefore?: string;
+  createdAfter: string;
+  createdBefore: string;
 
   sortBy?: string;
   sortDirection?: string;

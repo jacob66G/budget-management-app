@@ -65,13 +65,13 @@ public class AccountServiceImpl implements AccountService {
         validateAccount(userId, dto);
 
         Account account = new Account();
-        account.setAccountType(AccountType.valueOf(dto.type().toUpperCase()));
+        account.setAccountType(dto.type());
         account.setName(dto.name());
-        account.setCurrency(SupportedCurrency.valueOf(dto.currency().toUpperCase()));
+        account.setCurrency(dto.currency());
         account.setDescription(dto.description());
         account.setBalance(dto.initialBalance() != null ? dto.initialBalance() : BigDecimal.ZERO);
 
-        BudgetType budgetType = BudgetType.valueOf(dto.budgetType().toUpperCase());
+        BudgetType budgetType = dto.budgetType();
         account.setBudgetType(budgetType);
         account.setBudget(dto.budget());
         account.setAlertThreshold(dto.alertThreshold());
@@ -103,9 +103,8 @@ public class AccountServiceImpl implements AccountService {
             validateNameUniqueness(userId, dto.name(), accountId);
             account.setName(dto.name());
         }
-        if (StringUtils.hasText(dto.currency()) && !account.getCurrency().name().equalsIgnoreCase(dto.currency())) {
-            validateCurrency(dto.currency());
-            account.setCurrency(SupportedCurrency.valueOf(dto.currency().toUpperCase()));
+        if (dto.currency() != null && account.getCurrency() != (dto.currency())) {
+            account.setCurrency(dto.currency());
         }
         if (StringUtils.hasText(dto.description()) && !account.getDescription().equals(dto.description())) {
             account.setDescription(dto.description());
@@ -227,8 +226,7 @@ public class AccountServiceImpl implements AccountService {
 
         BudgetType newType = null;
         if (dto.budgetType() != null) {
-            validateBudgetType(dto.budgetType());
-            newType = BudgetType.valueOf(dto.budgetType().toUpperCase());
+            newType = dto.budgetType();
         }
 
         // No changes – nothing to update
@@ -283,45 +281,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private void validateAccount(Long userId, AccountCreateRequest dto) {
-        validateAccountType(dto.type());
-        validateCurrency(dto.currency());
-        validateBudgetType(dto.budgetType());
-
-        BudgetType budgetType = BudgetType.valueOf(dto.budgetType().toUpperCase());
-        validateBudgetAlertRelation(budgetType, dto.budget(), dto.alertThreshold());
+        validateBudgetAlertRelation(dto.budgetType(), dto.budget(), dto.alertThreshold());
         validateNameUniqueness(userId, dto.name(), null);
     }
 
     private void validateNameUniqueness(Long userId, String name, Long existingAccountId) {
         if (accountDao.existsByNameAndUser(name, userId, existingAccountId)) {
             throw new ValidationException("You already have account with name: " + name, ErrorCode.NAME_ALREADY_USED);
-        }
-    }
-
-    private void validateAccountType(String type) {
-        try {
-            AccountType.valueOf(type.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            log.warn("Incorrect account type provided: {}", type);
-            throw new ValidationException("Incorrect type: " + type, ErrorCode.WRONG_TYPE);
-        }
-    }
-
-    private void validateCurrency(String currency) {
-        try {
-            SupportedCurrency.valueOf(currency.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            log.warn("Incorrect currency provided: {}", currency);
-            throw new ValidationException("Incorrect currency: " + currency, ErrorCode.WRONG_CURRENCY);
-        }
-    }
-
-    private void validateBudgetType(String budgetType) {
-        try {
-            BudgetType.valueOf(budgetType.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            log.warn("Incorrect budget type provided: {}", budgetType);
-            throw new ValidationException("Incorrect budget type: " + budgetType, ErrorCode.WRONG_BUDGET_TYPE);
         }
     }
 

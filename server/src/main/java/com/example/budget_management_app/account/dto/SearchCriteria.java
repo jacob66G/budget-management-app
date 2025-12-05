@@ -1,15 +1,22 @@
 package com.example.budget_management_app.account.dto;
 
+import com.example.budget_management_app.account.domain.AccountSortableField;
+import com.example.budget_management_app.account.domain.AccountStatus;
+import com.example.budget_management_app.account.domain.AccountType;
+import com.example.budget_management_app.account.domain.BudgetType;
+import com.example.budget_management_app.common.enums.SupportedCurrency;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 public record SearchCriteria(
-        String type,
+        AccountType type,
         String name,
-        List<String> status,
-        List<String> currencies,
-        List<String> budgetTypes,
+        List<AccountStatus> status,
+        List<SupportedCurrency> currencies,
+        List<BudgetType> budgetTypes,
         BigDecimal minBalance,
         BigDecimal maxBalance,
         BigDecimal minTotalIncome,
@@ -19,9 +26,11 @@ public record SearchCriteria(
         BigDecimal minBudget,
         BigDecimal maxBudget,
         Boolean includedInTotalBalance,
-        Instant createdAfter,
-        Instant createdBefore,
-        String sortBy,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        LocalDate createdAfter,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        LocalDate createdBefore,
+        AccountSortableField sortBy,
         String sortDirection
 ) {
 }

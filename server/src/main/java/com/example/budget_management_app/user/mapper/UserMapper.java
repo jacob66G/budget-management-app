@@ -15,7 +15,7 @@ public class UserMapper {
                 user.getName(),
                 user.getSurname(),
                 user.getEmail(),
-                user.getStatus().name(),
+                user.getStatus(),
                 user.isMfaEnabled(),
                 user.getCreatedAt()
         );
@@ -28,7 +28,7 @@ public class UserMapper {
                 session.getId(),
                 session.getIpAddress(),
                 session.getDeviceInfo(),
-                session.getDeviceType().name(),
+                session.getDeviceType(),
                 session.getCreatedAt(),
                 session.getLastUsedAt(),
                 isCurrent

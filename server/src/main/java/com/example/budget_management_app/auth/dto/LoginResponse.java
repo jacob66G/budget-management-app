@@ -1,5 +1,6 @@
 package com.example.budget_management_app.auth.dto;
 
+import com.example.budget_management_app.user.domain.UserStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,7 +17,7 @@ public class LoginResponse {
         private String name;
         private String surname;
         private String email;
-        private String status;
+        private UserStatus status;
         private Boolean mfaEnabled;
         private Instant createdAt;
         private String accessToken;

@@ -1,25 +1,30 @@
 package com.example.budget_management_app.account.dto;
 
+import com.example.budget_management_app.account.domain.AccountStatus;
+import com.example.budget_management_app.account.domain.AccountType;
+import com.example.budget_management_app.account.domain.BudgetType;
+import com.example.budget_management_app.common.enums.SupportedCurrency;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 
 public record AccountDetailsResponse(
         Long id,
-        String type,
+        AccountType type,
         String name,
         BigDecimal balance,
         BigDecimal totalIncome,
         BigDecimal totalExpense,
-        String currency,
+        SupportedCurrency currency,
         Boolean isDefault,
         String description,
-        String budgetType,
+        BudgetType budgetType,
         BigDecimal budget,
         Double alertThreshold,
         String iconPath,
         Boolean includeInTotalBalance,
         Instant createdAt,
-        String status,
+        AccountStatus status,
         boolean hasTransactions
 ) {
 }

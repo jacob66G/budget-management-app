@@ -1,5 +1,7 @@
 package com.example.budget_management_app.user.dto;
 
+import com.example.budget_management_app.user.domain.UserStatus;
+
 import java.time.Instant;
 
 public record UserResponse(
@@ -7,7 +9,7 @@ public record UserResponse(
         String name,
         String surname,
         String email,
-        String status,
+        UserStatus status,
         boolean mfaEnabled,
         Instant createdAt
 ) {

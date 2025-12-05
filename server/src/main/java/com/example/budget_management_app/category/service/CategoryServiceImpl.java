@@ -40,7 +40,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<CategoryResponse> getCategories(Long userId, String type) {
+    public List<CategoryResponse> getCategories(Long userId, CategoryType type) {
         return categoryDao.findByUser(userId, type).stream().map(mapper::toCategoryResponse).toList();
     }
 
@@ -57,11 +57,11 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryResponse createCategory(Long userId, CategoryCreateRequest dto) {
         User user = userDao.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id: " + userId + " not found", ErrorCode.NOT_FOUND));
-        validateCategory(dto, user.getId());
+        validateNameUniqueness(userId, dto.name(), null);
 
         Category category = new Category();
         category.setName(dto.name());
-        category.setType(CategoryType.valueOf(dto.type().toUpperCase()));
+        category.setType(dto.type());
         category.setDefault(false);
 
         String iconKey = storageService.extractKey(dto.iconPath());
@@ -86,10 +86,9 @@ public class CategoryServiceImpl implements CategoryService {
             validateNameUniqueness(userId, dto.name(), categoryId);
             category.setName(dto.name());
         }
-        if (StringUtils.hasText(dto.type()) && !category.getType().name().equalsIgnoreCase(dto.type())) {
-            validateType(dto.type());
+        if (dto.type() != null && category.getType() != dto.type()) {
             validateCategoryTypeChange(categoryId, userId);
-            category.setType(CategoryType.valueOf(dto.type().toUpperCase()));
+            category.setType(dto.type());
         }
         if (StringUtils.hasText(dto.iconPath()) && !category.getIconKey().equals(dto.iconPath())) {
             String iconKey = storageService.extractKey(dto.iconPath());
@@ -196,23 +195,9 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    private void validateCategory(CategoryCreateRequest categoryRequest, Long userId) {
-        validateNameUniqueness(userId, categoryRequest.name(), null);
-        validateType(categoryRequest.type());
-    }
-
     private void validateNameUniqueness(Long userId, String name, Long existingCategoryId) {
         if (categoryDao.existsByNameAndUser(name, userId, existingCategoryId)) {
             throw new ValidationException("You already have category with name: " + name, ErrorCode.NAME_ALREADY_USED);
-        }
-    }
-
-    private void validateType(String type) {
-        try {
-            CategoryType.valueOf(type.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            log.warn("Incorrect category type provided: {}", type);
-            throw new ValidationException("Incorrect category type: " + type, ErrorCode.WRONG_CATEGORY_TYPE);
         }
     }
 
