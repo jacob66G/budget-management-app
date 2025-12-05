@@ -392,11 +392,10 @@ export class TransactionPageComponent implements OnInit{
       const dialogRef = this.dialog.open(AddTransactionDialogComponent, {
         data: {
           accountList: this.accounts,
-          categoryList: this.categories,
-          transactionTypes: this.transactionTypes
+          categoryList: this.categories
         },
-        width: '700px',
-        height: '700px'
+        width: '600px',
+        height: '750px'
       });
 
       dialogRef.afterClosed().subscribe( formData => {

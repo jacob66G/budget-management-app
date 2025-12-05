@@ -1,60 +1,79 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-content">
+      <h2 class="title">Add Transaction</h2>
+      <p class="subtitle">Create a new transaction by filling in the details below</p>
+    </div>
+    <button mat-icon-button mat-dialog-close class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
 
-<h2 mat-dialog-title>Create Transaction</h2>
-<mat-dialog-content>
-    <form [formGroup]="addTransactionForm">
-        <div class="form-fields-container">
-            <!-- title input field -->
-            <mat-form-field appearance="fill">
-                <mat-label>Title</mat-label>
-                <input matInput formControlName="title">
+  <mat-dialog-content>
+    <form [formGroup]="addTransactionForm" class="custom-form">
+        <div class="input-group">
+            <label class="custom-label">Amount</label>
+            <mat-form-field appearance="outline" class="no-label-field">
+            <input matInput type="number" formControlName="amount" placeholder="0.00">
             </mat-form-field>
+        </div>
 
-            <!-- amount input field -->
-            <mat-form-field appearance="fill">
-                <mat-label>Amount</mat-label>
-                <input matInput type="number" formControlName="amount">
+        <div class="input-group">
+            <label class="custom-label">Title</label>
+            <mat-form-field appearance="outline" class="no-label-field">
+            <input matInput formControlName="title" placeholder="e.g., Grocery Shopping">
             </mat-form-field>
+        </div>
 
-            <!-- transaction type input field -->
-            <mat-form-field>
-                <mat-label>choose type</mat-label>
-                <mat-select formControlName="type" (selectionChange)="onTransactionTypeChange($event)">
-                    @for (type of data.transactionTypes; track type) {
-                        <mat-option [value]="type">{{ type }}</mat-option>
-                    }
-                </mat-select>
+        <div class="input-group width-small">
+            <label class="custom-label">Type</label>
+            <mat-form-field appearance="outline" class="no-label-field">
+            <mat-select formControlName="type" (selectionChange)="onTransactionTypeChange($event)">
+                @for (type of typeOptions; track type) {
+                <mat-option [value]="type.value">{{ type.label }}</mat-option>
+                }
+            </mat-select>
             </mat-form-field>
+        </div>
 
-            <!-- descirption input field -->
-            <mat-form-field>
-                <mat-label>Description</mat-label>
-                <textarea matInput formControlName="description"></textarea>
-            </mat-form-field>
-
-            <!-- account input field -->
-            <mat-form-field>
-                <mat-label>choose account</mat-label>
+        <div class="form-row">
+            <div class="input-group">
+            <label class="custom-label">Account</label>
+            <mat-form-field appearance="outline" class="no-label-field">
                 <mat-select formControlName="account">
-                    @for (account of data.accountList; track account.id) {
-                        <mat-option [value]="account.id">{{ account.name }}</mat-option>
-                    }
+                @for (account of data.accountList; track account.id) {
+                    <mat-option [value]="account.id">{{ account.name }}</mat-option>
+                }
                 </mat-select>
             </mat-form-field>
+            </div>
 
-            <!-- category input field -->
-            <mat-form-field>
-                <mat-label>choose category</mat-label>
+            <div class="input-group">
+            <label class="custom-label">Category</label>
+            <mat-form-field appearance="outline" class="no-label-field">
                 <mat-select formControlName="category">
-                    @for (category of categories; track category.id) {
-                        <mat-option [value]="category.id">{{ category.name }}</mat-option>
-                    }
+                @for (category of categories; track category.id) {
+                    <mat-option [value]="category.id">{{ category.name }}</mat-option>
+                }
                 </mat-select>
+            </mat-form-field>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label class="custom-label">Note (Optional)</label>
+            <mat-form-field appearance="outline" class="no-label-field">
+            <textarea matInput formControlName="description" rows="1" placeholder="Add note for this transaction ..."></textarea>
             </mat-form-field>
         </div>
     </form>
-</mat-dialog-content>
-<mat-card-actions>
-    <button matButton mat-dialog-close>Cancel</button>
-    <button matButton type="button" (click)="clearForm()">Reset</button>
-    <button matButton type="button" (click)="onSubmit()" [disabled]="addTransactionForm.invalid">Submit</button>
-</mat-card-actions>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-footer">
+    <button mat-button mat-dialog-close class="btn-secondary">Cancel</button>
+    <button mat-button type="button" (click)="clearForm()" class="btn-secondary">Reset</button>
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="addTransactionForm.invalid" class="btn-primary">
+        Add Transaction
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -1,0 +1,191 @@
+// Główne style kontenera
+.dialog-container {
+  padding: 0px; // Lekki padding wewnetrzny
+  font-family: 'Inter', sans-serif; // Opcjonalnie: font ze zdjęcia wygląda na Inter/Roboto
+}
+
+// --- HEADER ---
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 24px 0 24px;
+  
+  .title {
+    margin: 0;           // Całkowite usunięcie marginesów
+    padding: 0;          // Całkowite usunięcie paddingów
+    font-size: 25px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.2;    // Poprawia pozycjonowanie w pionie
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  .subtitle {
+    margin: 4px 0 0 0;
+    font-size: 14px;
+    color: #6b7280;
+  }
+
+  .close-btn {
+    margin-top: -12px;
+    margin-right: -12px;
+    color: #9ca3af;
+  }
+}
+
+// --- FORM CONTENT ---
+::ng-deep .custom-form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px !important; // Odstępy między wierszami pól
+  padding-top: 10px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px; // Odstęp między etykietą a inputem
+
+  &.width-small {
+    max-width: 150px; // Zmniejszona szerokość dla pola "Type"
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 16px; // Odstęp między kolumnami Account i Category
+  
+  .input-group {
+    flex: 1; // Rozciągnij oba pola po równo
+  }
+}
+
+// --- LABELS & INPUTS STYLING ---
+.custom-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827; // Ciemny, prawie czarny kolor etykiet
+}
+
+// Hackowanie styli Angular Material, aby wyglądały jak "czysty" input HTML
+::ng-deep .no-label-field {
+  width: 100%;
+
+  // Usuwamy miejsce na label wewnątrz inputa
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none; // Ukrywa miejsce na hint/error (jeśli chcesz error, usuń to)
+  }
+
+  .mat-mdc-text-field-wrapper {
+    padding: 0;
+    height: 42px; // Niższe inputy jak na zdjęciu
+  }
+
+  .mat-mdc-form-field-flex {
+    height: 100%;
+    align-items: center;
+    padding: 0 12px;
+  }
+
+  // Input text styling
+  input.mat-mdc-input-element {
+    margin-top: 0 !important; // Resetowanie marginów Materiala
+  }
+
+  // Border styling (Outline)
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: #e5e7eb !important; // Jasny szary border
+    border-width: 1px !important;
+  }
+
+  // Usuwamy "wcięcie" w ramce (notch), bo label jest na zewnątrz
+  .mdc-notched-outline__notch {
+    border-top-width: 1px !important; 
+  }
+
+  // Border radius - zaokrąglenie
+  .mdc-notched-outline {
+     border-radius: 8px !important; // Zaokrąglenie rogów
+  }
+
+  // Focus state - niebieska ramka
+  &.mat-focused {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #2563eb !important; // Niebieski focus
+      border-width: 1px !important; // Cienka linia focusu (lub 2px jeśli wolisz)
+    }
+  }
+}
+
+// Specjalne dostosowanie dla textarea (wysokość)
+::ng-deep .input-group textarea {
+    min-height: 80px;
+    padding: 8px 0;
+}
+::ng-deep .input-group:has(textarea) .mat-mdc-text-field-wrapper {
+    height: auto; 
+}
+
+mat-dialog-content {
+  padding: 20px 24px !important; // Wymuszamy padding boczny zgodny z headerem
+  margin: 0;
+}
+
+.custom-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// --- FOOTER / ACTIONS ---
+.dialog-footer {
+// Używamy Grid zamiast Flex
+  display: grid !important; 
+  
+  // Trzy kolumny o identycznej szerokości (1 fraction unit każda)
+  grid-template-columns: 1fr 1fr 1fr; 
+  
+  gap: 16px; // Odstępy między przyciskami
+  padding: 16px 24px 24px 24px; // Padding: góra prawo dół lewo
+  margin: 0;
+  border-top: 1px solid #f3f4f6;
+
+  .right-actions {
+      display: flex;
+      gap: 12px;
+  }
+
+  button {
+    width: 100%;       // Przycisk rozciąga się na całą szerokość kolumny
+    margin: 0 !important; // Resetowanie marginów Angular Material
+    height: 42px;      // Stała wysokość
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  .btn-secondary {
+    background-color: #fff;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    
+    &:hover {
+        background-color: #f9fafb;
+    }
+  }
+
+  .btn-primary {
+    background-color: #2563eb !important; // Mocny niebieski
+    color: white !important;
+  }
+}
