@@ -1,0 +1,74 @@
+<div class="transactions-panel">
+  
+  <div class="panel-header">
+    <div class="header-text">
+      <h3>Recent Transactions</h3>
+      <p>Showing {{calcFirstItemNumber()}}-{{calcLastItemNumber()}} of {{paginationInfo.totalCount}} transactions</p>
+    </div>
+  </div>
+
+  <div class="list-container">
+    @for (transaction of transactions; track transaction.id) {
+      <div class="transaction-card">
+         <div class="icon-box" [class.income]="isIncome(transaction)" [class.expense]="!isIncome(transaction)">
+             <mat-icon>{{ transaction.category.iconKey }}</mat-icon>
+          </div>
+          <div class="details-section">
+             <div class="title-row">
+                <span class="transaction-title">{{ transaction.title }}</span>
+
+                @if(transaction.recurringTransactionId) {
+                   <mat-icon 
+                    class="recurring-icon"
+                    matTooltip="Recurring Transaction"
+                    matTooltipPosition="right"
+                    [matTooltipShowDelay]="500"
+                  >
+                    sync
+                  </mat-icon>
+                }
+             </div>
+             <div class="meta-row">
+                <span>{{ transaction.account.name }}</span>
+                <span class="dot-separator">•</span>
+                <span class="category-pill">{{ transaction.category.name }}</span>
+             </div>
+             @if (transaction.description) {
+                <div class="note-row">
+                  Note: {{ transaction.description }}
+                </div>
+             }
+          </div>
+          <div class="amount-section">
+             <span class="amount" [class.positive]="isIncome(transaction)" [class.negative]="!isIncome(transaction)">
+                {{ isIncome(transaction) ? '+' : '-' }}{{ transaction.amount | currency:transaction.account.currency :'symbol' }}
+             </span>
+             <span class="date">{{ transaction.transactionDate | date:'MMM d, y' }}</span>
+          </div>
+          <div class="actions-section">
+             <button mat-icon-button><mat-icon>more_vert</mat-icon></button>
+          </div>
+      </div>
+    } @empty {
+       <div class="empty-history">
+          <div class="icon-wrapper">
+             <mat-icon>search_off</mat-icon> </div>
+          <h3>No transactions found</h3>
+          <p>We couldn't find any transactions matching your filters.</p>
+       </div>
+    }
+  </div>
+
+  <div class="panel-footer">
+    <span class="page-info">Page {{paginationInfo.page}} of {{paginationInfo.totalPages}}</span>
+    <div class="pagination-controls">
+      <button mat-stroked-button (click)="onPrevClick()" [disabled]="!isPrevious()">
+        <mat-icon>chevron_left</mat-icon> Previous
+      </button>
+      <button mat-stroked-button (click)="onNextClick()" [disabled]="!isNext()">
+        Next <mat-icon iconPositionEnd>chevron_right</mat-icon>
+      </button>
+    </div>
+  </div>
+
+</div>

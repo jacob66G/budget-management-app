@@ -1,0 +1,80 @@
+<div class="upcoming-panel">
+  
+  <div class="panel-header">
+    <div class="header-text">
+      <h3>Upcoming Transactions</h3>
+      <p>Showing {{calcFirstItemNumber()}}-{{calcLastItemNumber()}} of {{paginationInfo.totalCount}} transactions</p>
+    </div>
+    
+    <div class="range-filters">
+      <button 
+        class="range-btn" 
+        [class.active]="selectedRange() === TimeRange.NEXT_7_DAYS" 
+        (click)="setRange(TimeRange.NEXT_7_DAYS)">
+        Next 7 Days
+      </button>
+      <button 
+        class="range-btn" 
+        [class.active]="selectedRange() === TimeRange.NEXT_14_DAYS" 
+        (click)="setRange(TimeRange.NEXT_14_DAYS)">
+        Next 14 Days
+      </button>
+      <button 
+        class="range-btn" 
+        [class.active]="selectedRange() === TimeRange.NEXT_MONTH" 
+        (click)="setRange(TimeRange.NEXT_MONTH)">
+        Next 30 Days
+      </button>
+    </div>
+  </div>
+
+  <div class="list-container">
+    @for (t of upcomingTransactions; track $index) {
+      <div class="transaction-card">
+        
+        <div class="icon-box" [class.income]="isIncome(t)" [class.expense]="!isIncome(t)">
+          <mat-icon>{{ t.categorySummary.iconKey }}</mat-icon>
+        </div>
+
+        <div class="details-section">
+          <div class="title-row">
+            <span class="transaction-title">{{ t.title }}</span>
+          </div>
+          <div class="meta-row">
+            <span>{{ t.accountSummary.name }}</span>
+            <span class="dot-separator">•</span>
+            <span class="category-pill">{{ t.categorySummary.name }}</span>
+          </div>
+        </div>
+
+        <div class="amount-section">
+          <span class="amount" [class.positive]="isIncome(t)" [class.negative]="!isIncome(t)">
+            {{ isIncome(t) ? '+' : '' }}{{ t.amount | currency: t.accountSummary.currency :'symbol'}}
+          </span>
+          <span class="date">{{ t.nextOccurrence | date:'MMM d, y' }}</span>
+        </div>
+
+      </div>
+    } @empty {
+       <div class="empty-history">
+          <div class="icon-wrapper">
+             <mat-icon>search_off</mat-icon> </div>
+          <h3>No upcoming transactions found</h3>
+          <p>It seems no transaction comes in given time range</p>
+       </div>
+    }
+  </div>
+
+  <div class="panel-footer">
+    <span class="page-info">Page {{paginationInfo.page}} of {{paginationInfo.totalPages}}</span>
+    <div class="pagination-controls">
+      <button mat-stroked-button (click)="onPrevClick()" [disabled]="!isPrevious()">
+        <mat-icon>chevron_left</mat-icon> Previous
+      </button>
+      <button mat-stroked-button (click)="onNextClick()" [disabled]="!isNext()">
+        Next <mat-icon iconPositionEnd>chevron_right</mat-icon>
+      </button>
+    </div>
+  </div>
+
+</div>

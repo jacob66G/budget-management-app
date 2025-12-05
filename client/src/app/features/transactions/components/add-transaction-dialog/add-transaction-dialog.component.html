@@ -72,7 +72,7 @@
   <mat-dialog-actions class="dialog-footer">
     <button mat-button mat-dialog-close class="btn-secondary">Cancel</button>
     <button mat-button type="button" (click)="clearForm()" class="btn-secondary">Reset</button>
-    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="addTransactionForm.invalid" class="btn-primary">
+    <button mat-flat-button (click)="onSubmit()" [disabled]="addTransactionForm.invalid" class="btn-primary">
         Add Transaction
     </button>
   </mat-dialog-actions>

@@ -39,8 +39,11 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DateFilterComponent, DateRange } from "../../components/date-filter/date-filter.component";
 import { DateFilterPresets } from '../../constants/date-filter-presets.enum';
-import { CategoryService } from '../../../../core/services/category.service';
-import { AccountService } from '../../../../core/services/account.service';
+import { TransactionHistoryComponent } from "../../components/transaction-history/transaction-history.component";
+import { UpcomingTransactionsComponent } from '../../components/upcoming-transactions/upcoming-transactions.component';
+import { UpcomingTransactionSummary } from '../../model/upcoming-transaction-summary.model';
+import { UpcomingTransactionsFilterParams } from '../../model/upcoming-transaction-filter-params.mode';
+import { UpcomingTransactionsTimeRange } from '../../constants/upcoming-transactions-time-range.enum';
 
 @Component({
   selector: 'app-transaction-page',
@@ -59,7 +62,9 @@ import { AccountService } from '../../../../core/services/account.service';
     MatInputModule,
     CommonModule,
     FormsModule,
-    DateFilterComponent
+    DateFilterComponent,
+    TransactionHistoryComponent,
+    UpcomingTransactionsComponent
 ],
   providers: [DatePipe],
   templateUrl: './transaction-page.component.html',
@@ -70,23 +75,23 @@ export class TransactionPageComponent implements OnInit{
   selectedType = signal<TransactionTypeFilter>(TransactionTypeFilter.ALL);
   selectedPeriod = signal<string>(DateFilterPresets.LAST_30_DAYS);
 
-  private readonly datePipe = inject(DatePipe);
-
-  pagination?: Pagination;
-  links!: { [key: string]: string };
+  pagination!: Pagination;
+  upcomingPagination!: Pagination;
 
   accounts: AccountSummary[] = [];
   categories: CategorySummary[] = [];
   transactions: TransactionSummary[] = [];
+  upcomingTransactions: UpcomingTransactionSummary[] = [];
 
-  transactionTypes = Object.values(TransactionType);
-  headerTitle: string = 'Transactions';
-  createTransactionButtonTitle: string = 'Add Transaction';
+  // transactionTypes = Object.values(TransactionType);
+  // headerTitle: string = 'Transactions';
+  // createTransactionButtonTitle: string = 'Add Transaction';
 
   readonly dialog = inject(MatDialog);
   private accountService = inject(AccountService);
   private categoryService = inject(CategoryService);
   private transactionService = inject(TransactionService);
+  private readonly datePipe = inject(DatePipe);
   private snackBar = inject(MatSnackBar);
 
   modeOptions = [
@@ -101,7 +106,7 @@ export class TransactionPageComponent implements OnInit{
     { value: TransactionSortByFilter.CATEGORY, label: 'Category' }
   ];
 
-  filter: TransactionFilterParams = {
+  transactionsfilter: TransactionFilterParams = {
     type: TransactionTypeFilter.ALL,
     mode: TransactionModeFilter.ALL,
     accountIds: undefined,
@@ -114,6 +119,13 @@ export class TransactionPageComponent implements OnInit{
     sortDirection: TransactionSortingDirection.DESC
   };
 
+  upcomingTransactionsFilter: UpcomingTransactionsFilterParams = {
+    page: 1,
+    limit: 3,
+    range: UpcomingTransactionsTimeRange.NEXT_7_DAYS,
+    accountIds: []
+  }
+
   selectedMode = TransactionModeFilter.ALL;
   selectedAccount = 'ALL';
   selectedCategory = 'ALL';
@@ -124,6 +136,7 @@ export class TransactionPageComponent implements OnInit{
     this.loadAccounts();
     this.loadCategories();
     this.loadTransactions();
+    this.loadUpcomingTransactions();
   }
 
   handleAddTransactionEvent(): void {
@@ -202,7 +215,11 @@ export class TransactionPageComponent implements OnInit{
       const end = this.formatDate(range.end);
       this.updateFilter({since: start, to: end});
     }
+  }
 
+  onUpcomingRangeChange(range: UpcomingTransactionsTimeRange): void {
+    console.log("upcoming date range change: ", range);
+    this.updateUpcomingFilter({range});
   }
 
   formatDateRangeToString(range: DateRange): string {
@@ -211,14 +228,25 @@ export class TransactionPageComponent implements OnInit{
     return `${start} - ${end}`;
   }
 
-  private updateFilter(changes: Partial<TransactionFilterParams>): void {
-    this.filter = {
-      ...this.filter,
+  private updateUpcomingFilter(changes: Partial<UpcomingTransactionsFilterParams>): void {
+    this.upcomingTransactionsFilter = {
+      ...this.upcomingTransactionsFilter,
       ...changes,
       page: 1
     };
 
-    console.log('Nowy stan filtra:', this.filter);
+    console.log('Nowy stan filtra:', this.upcomingTransactionsFilter);
+    this.loadUpcomingTransactions();
+  }
+
+  private updateFilter(changes: Partial<TransactionFilterParams>): void {
+    this.transactionsfilter = {
+      ...this.transactionsfilter,
+      ...changes,
+      page: 1
+    };
+
+    console.log('Nowy stan filtra:', this.transactionsfilter);
     this.loadTransactions();
   }
 
@@ -357,8 +385,8 @@ export class TransactionPageComponent implements OnInit{
   prevPage() {
     if (!this.pagination) return;
     if (this.pagination.page > 1) {
-      this.filter = {
-        ...this.filter,
+      this.transactionsfilter = {
+        ...this.transactionsfilter,
         page: this.pagination.page - 1,
       };
       this.loadTransactions();
@@ -368,25 +396,47 @@ export class TransactionPageComponent implements OnInit{
   nextPage() {
     if (!this.pagination) return;
     if (this.pagination.page < this.pagination.totalPages) {
-      this.filter = {
-        ...this.filter,
+      this.transactionsfilter = {
+        ...this.transactionsfilter,
         page: this.pagination.page + 1,
       };
       this.loadTransactions();
     }
   }
 
-  lastPage() {
-    if (!this.pagination) return;
-    if (this.pagination.page < this.pagination.totalPages) {
-
-      this.filter = {
-        ...this.filter,
-        page: this.pagination.totalPages
+  upcomingNextPage(): void {
+    if (!this.upcomingPagination) return;
+    if (this.upcomingPagination.page < this.pagination.totalPages) {
+      this.upcomingTransactionsFilter = {
+        ...this.upcomingTransactionsFilter,
+        page: this.upcomingPagination.page + 1,
       };
-      this.loadTransactions();
+      this.loadUpcomingTransactions();
     }
   }
+
+  upcomingPrevPage(): void {
+    if (!this.upcomingPagination) return;
+    if (this.upcomingPagination.page > 1) {
+      this.upcomingTransactionsFilter = {
+        ...this.upcomingTransactionsFilter,
+        page: this.upcomingPagination.page - 1,
+      };
+      this.loadUpcomingTransactions();
+    }
+  }
+
+  // lastPage() {
+  //   if (!this.pagination) return;
+  //   if (this.pagination.page < this.pagination.totalPages) {
+
+  //     this.transactionsfilter = {
+  //       ...this.transactionsfilter,
+  //       page: this.pagination.totalPages
+  //     };
+  //     this.loadTransactions();
+  //   }
+  // }
 
   openAddTransactionDialog(): void {
       const dialogRef = this.dialog.open(AddTransactionDialogComponent, {
@@ -425,18 +475,16 @@ export class TransactionPageComponent implements OnInit{
                   transactionDate: data.transactionDate,
                   category: category,
                   account: account,
-                  recurringTransactionsId: 0,
+                  recurringTransactionId: 0,
 
                 }
               this.loadTransactions();
               }
-
             },
             error: (error) => {
               console.log("error occurred when creating transaction");
             }
           })
-
           console.log("transactions list: ");
           console.log(this.transactions);
         }
@@ -447,15 +495,13 @@ export class TransactionPageComponent implements OnInit{
   }
 
   loadTransactions(): void {
-    this.transactionService.getTransactions(this.filter).subscribe({
+    this.transactionService.getTransactions(this.transactionsfilter).subscribe({
       next: (response) => {
         console.log("fetching transactions first page: ", response);
 
         this.transactions = response.data;
 
         this.pagination = response.pagination;
-
-        this.links = response.links;
       },
       error: (error) => {
         console.log("error occurred when fetching transactions", error);
@@ -476,6 +522,21 @@ export class TransactionPageComponent implements OnInit{
         console.log("error occured when fetching accounts", error);
       }
     });
+  }
+
+  loadUpcomingTransactions(): void {
+    this.transactionService.getUpcomingTransactions(this.upcomingTransactionsFilter)
+    .subscribe({
+      next: (response) => {
+        this.upcomingTransactions = response.data;
+
+        this.upcomingPagination = response.pagination;
+        console.log("upcoming transactions fetched: ", response);
+      },
+      error: (error) => {
+        console.log("error occurred when fetching upcoming transactions", error);
+      }
+    })
   }
 
   loadCategories(): void {

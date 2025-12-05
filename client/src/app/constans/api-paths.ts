@@ -3,6 +3,9 @@ export class ApiPaths {
     // transactions
     public static readonly TRANSACTIONS = '/api/v1/transactions';
 
+    // recurring transactions
+    public static readonly RECURRING_TRANSACTIONS = '/api/v1/recurring-transactions';
+
     private static readonly API = '/api';
 
     public static readonly AUTH_BASE = `${ApiPaths.API}/auth`;

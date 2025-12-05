@@ -114,8 +114,24 @@
             </mat-select>
           </mat-form-field>
         </div>
-
       </div>
     </div>
   </section>
+
+  <app-transaction-history
+    [paginationInfo]="pagination"
+    [transactions]="transactions"
+    (nextPageClick)="nextPage()"
+    (prevPageClick)="prevPage()"
+  >
+  </app-transaction-history>
+    
+  <app-upcoming-transactions
+    [paginationInfo]="upcomingPagination"
+    [upcomingTransactions]="upcomingTransactions"
+    (dateRangeChange)="onUpcomingRangeChange($event)"
+    (nextPageClick)="upcomingNextPage()"
+    (prevPageClick)="upcomingPrevPage()"
+  >
+  </app-upcoming-transactions>
 </div>

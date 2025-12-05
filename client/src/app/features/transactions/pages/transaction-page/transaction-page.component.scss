@@ -3,13 +3,17 @@
   font-family: 'Inter', sans-serif;
   max-width: 1200px;
   margin: 0 auto;
+
+  // --- NOWE LINIE ---
+  display: flex;              // Włączamy Flexbox
+  flex-direction: column;     // Układamy elementy jeden pod drugim
+  gap: 24px;                  // Globalny odstęp między sekcjami (Header <-> Filtry <-> Lista)
 }
 
 .header-section {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 24px;
 
   .header-text {
     h1 {
@@ -27,7 +31,7 @@
   }
 
   .add-btn {
-    background-color: #2563eb;
+    background-color: var(--primary-color);
     color: white;
     border-radius: 8px;
     padding: 20px 24px;
@@ -98,7 +102,7 @@
     }
 
     &.active {
-      background-color: #111;
+      background-color: var(--primary-color);
       color: #fff;
       border-color: #111;
     }

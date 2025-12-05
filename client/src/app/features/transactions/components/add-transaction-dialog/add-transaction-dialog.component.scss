@@ -185,7 +185,7 @@ mat-dialog-content {
   }
 
   .btn-primary {
-    background-color: #2563eb !important; // Mocny niebieski
+    background-color: var(--primary-color) !important; // Mocny niebieski
     color: white !important;
   }
 }
