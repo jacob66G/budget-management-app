@@ -1,5 +1,9 @@
+import { CategorySummary } from "./category-summary.model";
+
 export interface TransactionUpdateData {
     title: string,
     amount: number,
-    description: string
+    description: string,
+    categories: CategorySummary[],
+    categoryId: number
 }

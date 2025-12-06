@@ -1,35 +1,73 @@
-<h2 mat-dialog-title>Edit Transaction</h2>
-
-<mat-dialog-content>
-  <form [formGroup]="updateTransactionForm" class="dialog-form">
-    
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Title</mat-label>
-      <input matInput formControlName="title">
-      <!-- <mat-error *ngIf="form.get('title')?.hasError('required')">
-        Tytuł jest wymagany
-      </mat-error> -->
-    </mat-form-field>
-
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Amount</mat-label>
-      <input matInput type="number" formControlName="amount">
-    </mat-form-field>
-
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Description</mat-label>
-      <textarea matInput formControlName="description"></textarea>
-    </mat-form-field>
-
-  </form>
-</mat-dialog-content>
-
-<mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Cancel</button>
+<div class="dialog-container">
   
-  <button mat-button color="warn" (click)="onReset()">Reset</button>
-  
-  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="updateTransactionForm.invalid || isUnchanged">
-    Zapisz
-  </button>
-</mat-dialog-actions>
+  <div class="dialog-header">
+    <div class="header-content">
+      <h2 class="title">Edit Transaction</h2>
+      <p class="subtitle">Update the transaction details below</p>
+    </div>
+    <button mat-icon-button mat-dialog-close class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <form [formGroup]="updateTransactionForm" class="custom-form">
+
+      <h3 class="section-header">GENERAL</h3>
+
+      <div class="input-group">
+        <label class="custom-label">Amount</label>
+        <mat-form-field appearance="outline" class="no-label-field">
+          <input matInput type="number" formControlName="amount">
+        </mat-form-field>
+      </div>
+
+      <div class="input-group">
+        <label class="custom-label">Transaction Title</label>
+        <mat-form-field appearance="outline" class="no-label-field">
+          <input matInput formControlName="title">
+        </mat-form-field>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <h3 class="section-header spacer-top">CHANGE CATEGORY</h3>
+
+      <div class="input-group width-half">
+        <label class="custom-label">Category</label>
+        <mat-form-field appearance="outline" class="no-label-field">
+          <mat-select formControlName="categoryId">
+            @for (cat of data.categories; track cat.id) {
+              <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <h3 class="section-header spacer-top">NOTE</h3>
+
+      <div class="input-group">
+        <label class="custom-label">Transaction Note</label>
+        <mat-form-field appearance="outline" class="no-label-field">
+          <textarea 
+            matInput 
+            formControlName="description" 
+            placeholder="Add a note for this transaction..." 
+            rows="3"></textarea>
+        </mat-form-field>
+      </div>
+
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-footer">
+    <button mat-button mat-dialog-close class="btn-secondary">Cancel</button>
+    <button mat-button type="button" (click)="onReset()" class="btn-secondary">Reset</button>
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="updateTransactionForm.invalid || isUnchanged()" class="btn-primary">
+      Save Changes
+    </button>
+  </mat-dialog-actions>
+
+</div>

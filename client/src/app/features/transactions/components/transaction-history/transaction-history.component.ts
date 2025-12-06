@@ -6,7 +6,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { TransactionSummary } from '../../model/transaction-summary.model';
 import { TransactionType } from '../../constants/transaction-type.enum';
 import { Pagination } from '../../model/pagination.model';
-import {MatTooltipModule} from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDivider } from "@angular/material/divider";
 
 @Component({
   selector: 'app-transaction-history',
@@ -18,8 +19,9 @@ import {MatTooltipModule} from '@angular/material/tooltip';
     CommonModule,
     DatePipe,
     CurrencyPipe,
-    MatTooltipModule
-  ],
+    MatTooltipModule,
+    MatDivider
+],
   templateUrl: './transaction-history.component.html',
   styleUrl: './transaction-history.component.scss'
 })
@@ -30,6 +32,9 @@ export class TransactionHistoryComponent {
 
   nextPageClick = output<void>();
   prevPageClick = output<void>();
+
+  editTransaction = output<number>();
+  deleteTransaction = output<number>();
 
   isIncome(t: TransactionSummary): boolean {
     return t.type === TransactionType.INCOME;
@@ -69,5 +74,13 @@ export class TransactionHistoryComponent {
 
   onPrevClick(): void {
     this.prevPageClick.emit();
+  }
+
+  onEditClick(transactionId: number): void {
+    this.editTransaction.emit(transactionId);
+  }
+
+  onDeleteClick(transactionId: number): void {
+    this.deleteTransaction.emit(transactionId);
   }
 }

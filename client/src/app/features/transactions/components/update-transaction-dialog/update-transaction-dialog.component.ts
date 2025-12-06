@@ -6,10 +6,22 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from "@angular/material/icon";
+import { MatSelectModule } from '@angular/material/select';
+import { MatDivider } from "@angular/material/divider";
 
 @Component({
   selector: 'app-update-transaction-dialog',
-  imports: [MatDialogModule, MatFormFieldModule, ReactiveFormsModule, MatInputModule, MatButtonModule],
+  imports: [
+    MatDialogModule,
+    MatFormFieldModule,
+    ReactiveFormsModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatDivider
+],
   templateUrl: './update-transaction-dialog.component.html',
   styleUrl: './update-transaction-dialog.component.scss'
 })
@@ -25,7 +37,8 @@ export class UpdateTransactionDialogComponent implements OnInit{
     this.updateTransactionForm = this.fb.group({
       title: [this.data.title, Validators.required],
       amount: [this.data.amount, [Validators.required, Validators.min(0)]],
-      description: [this.data.description]
+      description: [this.data.description],
+      categoryId: [this.data.categoryId, Validators.required] 
     });
   }
 
@@ -34,12 +47,23 @@ export class UpdateTransactionDialogComponent implements OnInit{
   }
 
   onReset(): void {
-    this.updateTransactionForm.reset(this.data);
+    this.updateTransactionForm.reset({
+      title: this.data.title,
+      amount: this.data.amount,
+      description: this.data.description,
+      categoryId: this.data.categoryId
+    });
   }
 
-  get isUnchanged(): boolean {
+  isUnchanged(): boolean {
     const formValue = this.updateTransactionForm.value;
-    return JSON.stringify(formValue) === JSON.stringify(this.data);
+
+    return (
+      formValue.title === this.data.title &&
+      formValue.amount === this.data.amount &&
+      formValue.description === this.data.description &&
+      formValue.categoryId === this.data.categoryId
+    );
   }
 
   onSubmit(): void {

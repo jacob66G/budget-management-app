@@ -273,7 +273,6 @@
     }
   }
 
-  // Nagłówek "No transactions found"
   h3 {
     font-size: 20px;
     font-weight: 600;
@@ -281,12 +280,28 @@
     margin: 0 0 8px 0;
   }
 
-  // Tekst pomocniczy
   p {
     font-size: 14px;
-    color: #6b7280; // Szary tekst
+    color: #6b7280;
     margin: 0;
-    max-width: 300px; // Żeby tekst nie rozlał się za szeroko na dużych ekranach
+    max-width: 300px;
     line-height: 1.5;
   }
+}
+
+::ng-deep .action-menu {
+  border-radius: 10px !important;
+}
+
+::ng-deep .delete-item {
+  color: #dc2626 !important;
+
+
+  &:hover {
+    background-color: #fef2f2 !important; 
+  }
+}
+
+::ng-deep .action-menu button mat-icon {
+  color: rgb(152, 151, 151) !important;
 }

@@ -123,6 +123,8 @@
     [transactions]="transactions"
     (nextPageClick)="nextPage()"
     (prevPageClick)="prevPage()"
+    (editTransaction)="onEditTransaction($event)"
+    (deleteTransaction)="onDeleteTransaction($event)"
   >
   </app-transaction-history>
     

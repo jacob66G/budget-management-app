@@ -10,6 +10,8 @@ import { PagedResponse } from '../model/paged-response.mode';
 import { TransactionUpdateRequest } from '../model/transaction-update-request.model';
 import { UpcomingTransactionSummary } from '../model/upcoming-transaction-summary.model';
 import { UpcomingTransactionsFilterParams } from '../model/upcoming-transaction-filter-params.mode';
+import { TransactionCategoryChangeRequest } from '../model/transaction-category-change-request.model';
+import { TransactionCategoryChangeResponse } from '../model/transaction-category-change-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -38,6 +40,10 @@ export class TransactionService {
 
   updateTransaction(id: number, data: TransactionUpdateRequest): Observable<void> {
     return this.http.patch<void>(`${ApiPaths.TRANSACTIONS}/${id}`, data);
+  }
+
+  changeTransactionCategory(transactionId: number, reqBody: TransactionCategoryChangeRequest): Observable<TransactionCategoryChangeResponse> {
+    return this.http.patch<TransactionCategoryChangeResponse>(`${ApiPaths.TRANSACTIONS}/${transactionId}/category`, reqBody);
   }
 
   private getCleanParams(filter: any): HttpParams {

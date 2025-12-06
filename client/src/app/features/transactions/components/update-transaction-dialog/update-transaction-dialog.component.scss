@@ -1,0 +1,176 @@
+::ng-deep .dialog-container {
+  padding: 0;
+  font-family: var(--font-family-default) !important;
+  min-width: 400px;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 24px 0 24px;
+
+  .title {
+    margin: 0;
+    padding: 0;
+    font-size: 24px;
+    font-weight: 500;
+    color: #111827;
+  }
+
+  .subtitle {
+    margin: 4px 0 0 0;
+    font-size: 16px;
+    color: #6b7280;
+  }
+
+  .close-btn {
+    margin-top: -8px;
+    margin-right: -8px;
+    color: #9ca3af;
+  }
+}
+
+// --- CONTENT ---
+mat-dialog-content {
+  padding: 20px 30px !important;
+  margin: 0;
+  max-height: 80vh; // Zabezpieczenie na małe ekrany
+}
+
+.custom-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// Sekcje (GENERAL, CHANGE CATEGORY, NOTE)
+.section-header {
+  font-size: 18px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--primary-color);
+  margin: 0;
+  letter-spacing: 0.5px;
+  
+  &.spacer-top {
+    margin-top: 8px; // Dodatkowy odstęp przed nową sekcją
+  }
+}
+
+// Grupy Inputów
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  &.width-half {
+    max-width: 200px; // Węższe pole dla Kategorii (jak na zdjęciu)
+  }
+}
+
+.custom-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #111827;
+}
+
+// --- NADPISYWANIE MATERIAL DESIGN (Inputy) ---
+::ng-deep .no-label-field {
+  width: 100%;
+
+  // Ukrycie miejsca na hinty/błędy pod spodem (chyba że są potrzebne)
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none; 
+  }
+
+  .mat-mdc-text-field-wrapper {
+    padding: 0;
+    height: 42px; // Wysokość inputa ze zdjęcia
+    background-color: #fff;
+  }
+
+  .mat-mdc-form-field-flex {
+    height: 100%;
+    align-items: center;
+    padding: 0 12px;
+  }
+
+  // Border (Ramka)
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: #8e8f92 !important;
+    border-width: 1px !important;
+  }
+  
+  // Brak wcięcia w ramce na label
+  .mdc-notched-outline__notch {
+    border-top-width: 1px !important; 
+  }
+
+  // Zaokrąglenie
+  .mdc-notched-outline {
+     border-radius: 6px !important;
+  }
+
+  // Stan Focus
+  &.mat-focused {
+    .mdc-notched-outline__leading, 
+    .mdc-notched-outline__notch, 
+    .mdc-notched-outline__trailing {
+      border-color: #2563eb !important;
+      border-width: 2px !important;
+    }
+  }
+
+  // Stylizacja wnętrza Textarea
+  textarea.mat-mdc-input-element {
+    padding: 8px 0;
+    min-height: 80px;
+  }
+}
+
+// Specyficzne dla textarea - wrapper musi być wyższy
+::ng-deep .input-group:has(textarea) .mat-mdc-text-field-wrapper {
+    height: auto; 
+}
+
+::ng-deep mat-divider {
+    color: rgb(66, 64, 64) !important;
+}
+
+// --- FOOTER / ACTIONS ---
+::ng-deep .dialog-footer {
+  display: grid !important; 
+  grid-template-columns: 1fr 1fr 1.5fr; // Cancel i Reset mniejsze, Save większy
+  gap: 12px;
+  padding: 16px 24px 24px 24px;
+  margin: 0;
+  // border-top: 1px solid #f3f4f6; // Na zdjęciu nie widać wyraźnej linii, ale można dodać
+
+  button {
+    width: 100%;
+    margin: 0 !important;
+    height: 40px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  .btn-secondary {
+    background-color: #fff;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    
+    &:hover { background-color: #f9fafb; }
+  }
+
+  .btn-primary {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    
+    &:disabled {
+      background-color: #6e94e8 !important;
+    }
+  }
+}

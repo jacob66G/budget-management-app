@@ -1,5 +1,5 @@
 export interface TransactionUpdateRequest {
     title: string,
-    number: number,
+    amount: number,
     description: string
 }

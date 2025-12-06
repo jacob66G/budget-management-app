@@ -44,6 +44,8 @@ import { UpcomingTransactionsComponent } from '../../components/upcoming-transac
 import { UpcomingTransactionSummary } from '../../model/upcoming-transaction-summary.model';
 import { UpcomingTransactionsFilterParams } from '../../model/upcoming-transaction-filter-params.mode';
 import { UpcomingTransactionsTimeRange } from '../../constants/upcoming-transactions-time-range.enum';
+import { CategoryType } from '../../../../core/models/category-response-dto.model';
+import { TransactionCategoryChangeRequest } from '../../model/transaction-category-change-request.model';
 
 @Component({
   selector: 'app-transaction-page',
@@ -303,31 +305,70 @@ export class TransactionPageComponent implements OnInit{
 
     const transactionToUpdate = this.transactions.find( (tr) => tr.id === id);
 
+    // getting categories with the same type as transaction type
+    const catogiesToPass = this.categories.filter( (cat) => {
+      return String(cat.type) === String(transactionToUpdate?.type) || cat.type === CategoryType.GENERAL;
+    });
+
     if (transactionToUpdate) {
+          const currentCategoryId = transactionToUpdate?.category.id;
+
           const dialogRef = this.dialog.open(UpdateTransactionDialogComponent, {
             width: '600px',
             data: {
               title: transactionToUpdate.title,
               amount: transactionToUpdate.amount,
-              description: transactionToUpdate.description
+              description: transactionToUpdate.description,
+              categories: catogiesToPass,
+              categoryId: currentCategoryId // current category
             }
           });
 
           dialogRef.afterClosed().subscribe( (formData) => {
+
             if (formData) {
               console.log("Updating transactions");
 
-              const updateDto: TransactionUpdateRequest = {
-                ...formData
-              };
+              // if category has been changed
+              if (formData.categoryId !== currentCategoryId) {
 
-              this.transactionService.updateTransaction(id, updateDto).subscribe({
-                next: () => {
-                  console.log("Transaction updated");
-                  this.loadTransactions();
+                console.log("Category changed: ", formData.categoryId);
+                const changeCategoryReq: TransactionCategoryChangeRequest = {
+                  currentCategoryId: currentCategoryId,
+                  newCategoryId: formData.categoryId,
+                  accountId: transactionToUpdate.account.id
                 }
-              })
 
+                this.transactionService.changeTransactionCategory(id, changeCategoryReq).subscribe({
+                  next: (data) => {
+                    if (data) {
+                      console.log("Transaction category changed. New Category: ", data.categoryName);
+                      this.loadTransactions();
+                    }
+                  }
+                })
+              }
+
+
+              if (formData.title !== transactionToUpdate.title ||
+                  formData.amount !== transactionToUpdate.amount ||
+                  formData.description !== transactionToUpdate.description
+              )  {  // if description, amount or title changed
+                console.log("General data changed");
+
+                const updateReq: TransactionUpdateRequest = {
+                  title: formData.title,
+                  amount: formData.amount,
+                  description: formData.description
+                };
+
+                this.transactionService.updateTransaction(id, updateReq).subscribe({
+                  next: () => {
+                    console.log("Transaction general data updated");
+                    this.loadTransactions();
+                  }
+                });
+              }
             } else {
               console.log("Update canceled");
             }
@@ -425,18 +466,6 @@ export class TransactionPageComponent implements OnInit{
       this.loadUpcomingTransactions();
     }
   }
-
-  // lastPage() {
-  //   if (!this.pagination) return;
-  //   if (this.pagination.page < this.pagination.totalPages) {
-
-  //     this.transactionsfilter = {
-  //       ...this.transactionsfilter,
-  //       page: this.pagination.totalPages
-  //     };
-  //     this.loadTransactions();
-  //   }
-  // }
 
   openAddTransactionDialog(): void {
       const dialogRef = this.dialog.open(AddTransactionDialogComponent, {
