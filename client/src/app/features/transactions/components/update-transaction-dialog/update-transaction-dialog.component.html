@@ -33,15 +33,29 @@
 
       <h3 class="section-header spacer-top">CHANGE CATEGORY</h3>
 
-      <div class="input-group width-half">
+      <div class="input-group">
         <label class="custom-label">Category</label>
-        <mat-form-field appearance="outline" class="no-label-field">
-          <mat-select formControlName="categoryId">
-            @for (cat of data.categories; track cat.id) {
-              <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+
+        <div class="input-row-with-message">
+
+          <div class="flex-grow-field">
+            <mat-form-field appearance="outline" class="no-label-field" style="width: 100%">
+              <mat-select formControlName="categoryId">
+                @for (cat of data.categories; track cat.id) {
+                  <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          @if (data.isRecurring) {
+            <div class="field-info-message-side">
+              <mat-icon>info</mat-icon>
+              <span>Cannot change category for recurring transaction.</span>
+            </div>
+          }
+
+        </div>
       </div>
 
       <mat-divider></mat-divider>

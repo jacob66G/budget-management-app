@@ -3,7 +3,11 @@
   <div class="panel-header">
     <div class="header-text">
       <h3>Recent Transactions</h3>
-      <p>Showing {{calcFirstItemNumber()}}-{{calcLastItemNumber()}} of {{paginationInfo.totalCount}} transactions</p>
+      @if (transactions.length == 0) {
+        <p>Showing no transactions</p>
+      } @else {
+        <p>Showing {{calcFirstItemNumber()}}-{{calcLastItemNumber()}} of {{paginationInfo.totalCount}} transactions</p>
+      }
     </div>
   </div>
 
@@ -41,7 +45,7 @@
           </div>
           <div class="amount-section">
              <span class="amount" [class.positive]="isIncome(transaction)" [class.negative]="!isIncome(transaction)">
-                {{ isIncome(transaction) ? '+' : '-' }}{{ transaction.amount | currency:transaction.account.currency :'symbol' }}
+                {{ transaction.amount | amountFormat: transaction.account.currency : 'symbol' : isIncome(transaction) }}
              </span>
              <span class="date">{{ transaction.transactionDate | date:'MMM d, y' }}</span>
           </div>
@@ -78,7 +82,11 @@
   </div>
 
   <div class="panel-footer">
-    <span class="page-info">Page {{paginationInfo.page}} of {{paginationInfo.totalPages}}</span>
+    @if (transactions.length === 0 || !paginationInfo) {
+      <span class="page-info">No pages</span>
+    } @else {
+      <span class="page-info">Page {{paginationInfo.page}} of {{paginationInfo.totalPages}}</span>
+    }
     <div class="pagination-controls">
       <button mat-stroked-button (click)="onPrevClick()" [disabled]="!isPrevious()">
         <mat-icon>chevron_left</mat-icon> Previous

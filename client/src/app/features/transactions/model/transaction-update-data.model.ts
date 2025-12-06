@@ -5,5 +5,6 @@ export interface TransactionUpdateData {
     amount: number,
     description: string,
     categories: CategorySummary[],
-    categoryId: number
+    categoryId: number,
+    isRecurring: boolean
 }

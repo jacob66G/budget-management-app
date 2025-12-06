@@ -1,13 +1,13 @@
-import { Component, input, Input, output, signal } from '@angular/core';
+import { Component, Input, output, signal } from '@angular/core';
 import { TransactionType } from '../../constants/transaction-type.enum';
 import { UpcomingTransactionSummary } from '../../model/upcoming-transaction-summary.model';
 import { MatIcon } from "@angular/material/icon";
-import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
+import { CommonModule, DatePipe} from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { UpcomingTransactionsTimeRange } from '../../constants/upcoming-transactions-time-range.enum';
 import { Pagination } from '../../model/pagination.model';
 import { MatIconModule } from '@angular/material/icon';
-
+import { AmountFormatPipe } from '../../pipes/amount-format-pipe';
 
 @Component({
   selector: 'app-upcoming-transactions',
@@ -15,9 +15,9 @@ import { MatIconModule } from '@angular/material/icon';
     MatIcon,
     CommonModule,
     DatePipe,
-    CurrencyPipe,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    AmountFormatPipe
   ],
   templateUrl: './upcoming-transactions.component.html',
   styleUrl: './upcoming-transactions.component.scss'
@@ -54,20 +54,18 @@ export class UpcomingTransactionsComponent {
   }
 
   isNext(): boolean {
-    if (this.paginationInfo.hasNext) {
-      return true;
-    }
-    return false;
+    if (!this.paginationInfo) return false;
+    return this.paginationInfo.hasNext;
   }
 
   isPrevious(): boolean {
-    if (this.paginationInfo.page > 1) {
-      return true;
-    }
-    return false;
+    if (!this.paginationInfo) return false;
+    return this.paginationInfo.page > 1;
   }
 
   calcFirstItemNumber(): number {
+    if (!this.updatePaginationCheck()) return 0;
+
     if (this.paginationInfo.page === 1) {
       return 1;
     }
@@ -75,8 +73,13 @@ export class UpcomingTransactionsComponent {
   }
 
   calcLastItemNumber(): number {
+    if (!this.updatePaginationCheck()) return 0;
+
     if (this.paginationInfo.page === 1 && !this.paginationInfo.hasNext) {
       return this.paginationInfo.size;
+    }
+    if (this.paginationInfo.page === this.paginationInfo.totalPages) {
+      return this.paginationInfo.totalCount;
     }
     return this.paginationInfo.page * this.paginationInfo.limit;
   }
@@ -87,5 +90,9 @@ export class UpcomingTransactionsComponent {
 
   onPrevClick(): void {
     this.prevPageClick.emit();
+  }
+
+  private updatePaginationCheck(): boolean {
+    return !!this.paginationInfo;
   }
 }

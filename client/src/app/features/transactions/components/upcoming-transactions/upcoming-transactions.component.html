@@ -3,7 +3,11 @@
   <div class="panel-header">
     <div class="header-text">
       <h3>Upcoming Transactions</h3>
-      <p>Showing {{calcFirstItemNumber()}}-{{calcLastItemNumber()}} of {{paginationInfo.totalCount}} transactions</p>
+      @if (upcomingTransactions.length == 0) {
+        <p>Showing no transactions</p>
+      } @else {
+        <p>Showing {{calcFirstItemNumber()}}-{{calcLastItemNumber()}} of {{paginationInfo.totalCount}} transactions</p>
+      }
     </div>
     
     <div class="range-filters">
@@ -33,7 +37,7 @@
       <div class="transaction-card">
         
         <div class="icon-box" [class.income]="isIncome(t)" [class.expense]="!isIncome(t)">
-          <mat-icon>{{ t.categorySummary.iconKey }}</mat-icon>
+          <mat-icon>category</mat-icon>
         </div>
 
         <div class="details-section">
@@ -49,7 +53,7 @@
 
         <div class="amount-section">
           <span class="amount" [class.positive]="isIncome(t)" [class.negative]="!isIncome(t)">
-            {{ isIncome(t) ? '+' : '' }}{{ t.amount | currency: t.accountSummary.currency :'symbol'}}
+            {{t.amount | amountFormat: t.accountSummary.currency : 'symbol' : isIncome(t)}}
           </span>
           <span class="date">{{ t.nextOccurrence | date:'MMM d, y' }}</span>
         </div>
@@ -66,7 +70,11 @@
   </div>
 
   <div class="panel-footer">
-    <span class="page-info">Page {{paginationInfo.page}} of {{paginationInfo.totalPages}}</span>
+    @if (upcomingTransactions.length === 0 || !paginationInfo) {
+      <span class="page-info">No pages</span>
+    } @else {
+      <span class="page-info">Page {{paginationInfo.page}} of {{paginationInfo.totalPages}}</span>
+    }
     <div class="pagination-controls">
       <button mat-stroked-button (click)="onPrevClick()" [disabled]="!isPrevious()">
         <mat-icon>chevron_left</mat-icon> Previous

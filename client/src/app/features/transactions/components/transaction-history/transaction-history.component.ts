@@ -1,5 +1,5 @@
 import { Component, Input, output } from '@angular/core';
-import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
+import { CommonModule, DatePipe} from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
@@ -8,6 +8,7 @@ import { TransactionType } from '../../constants/transaction-type.enum';
 import { Pagination } from '../../model/pagination.model';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDivider } from "@angular/material/divider";
+import { AmountFormatPipe } from '../../pipes/amount-format-pipe';
 
 @Component({
   selector: 'app-transaction-history',
@@ -18,10 +19,10 @@ import { MatDivider } from "@angular/material/divider";
     MatMenuModule,
     CommonModule,
     DatePipe,
-    CurrencyPipe,
     MatTooltipModule,
-    MatDivider
-],
+    MatDivider,
+    AmountFormatPipe
+  ],
   templateUrl: './transaction-history.component.html',
   styleUrl: './transaction-history.component.scss'
 })
@@ -41,20 +42,18 @@ export class TransactionHistoryComponent {
   }
 
   isNext(): boolean {
-    if (this.paginationInfo.hasNext) {
-      return true;
-    }
-    return false;
+    if (!this.paginationInfo) return false;
+    return this.paginationInfo.hasNext;
   }
 
   isPrevious(): boolean {
-    if (this.paginationInfo.page > 1) {
-      return true;
-    }
-    return false;
+    if (!this.paginationInfo) return false;
+    return this.paginationInfo.page > 1;
   }
 
   calcFirstItemNumber(): number {
+    if (!this.updatePaginationCheck()) return 0;
+
     if (this.paginationInfo.page === 1) {
       return 1;
     }
@@ -62,8 +61,13 @@ export class TransactionHistoryComponent {
   }
 
   calcLastItemNumber(): number {
+    if (!this.updatePaginationCheck()) return 0;
+
     if (this.paginationInfo.page === 1 && !this.paginationInfo.hasNext) {
       return this.paginationInfo.size;
+    }
+    if (this.paginationInfo.page === this.paginationInfo.totalPages) {
+      return this.paginationInfo.totalCount;
     }
     return this.paginationInfo.page * this.paginationInfo.limit;
   }
@@ -82,5 +86,9 @@ export class TransactionHistoryComponent {
 
   onDeleteClick(transactionId: number): void {
     this.deleteTransaction.emit(transactionId);
+  }
+
+  private updatePaginationCheck(): boolean {
+    return !!this.paginationInfo;
   }
 }

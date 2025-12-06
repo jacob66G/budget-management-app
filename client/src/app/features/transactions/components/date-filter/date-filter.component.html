@@ -13,7 +13,7 @@
         <div>
           <span class="data-picker-label">from</span>
           <mat-form-field appearance="outline" class="small-datepicker">
-            <input matInput [matDatepicker]="pickerStart" (dateChange)="onStartDateChange()" [max]="maxDate" [(ngModel)]="start">
+            <input matInput [matDatepicker]="pickerStart" (dateChange)="onStartDateChange()" [min]="calcMindate()" [max]="calcMaxdate()" [(ngModel)]="start">
             <mat-datepicker-toggle matIconSuffix [for]="pickerStart"></mat-datepicker-toggle>
             <mat-datepicker #pickerStart></mat-datepicker>
           </mat-form-field>
@@ -22,7 +22,7 @@
         <div>
           <span class="data-picker-label">to</span>
           <mat-form-field appearance="outline" class="small-datepicker">
-            <input matInput [matDatepicker]="pickerEnd" (dateChange)="onEndDateChange()" [max]="maxDate" [(ngModel)]="end">
+            <input matInput [matDatepicker]="pickerEnd" (dateChange)="onEndDateChange()" [min]="calcMindate()" [max]="calcMaxdate()" [(ngModel)]="end">
             <mat-datepicker-toggle matIconSuffix [for]="pickerEnd"></mat-datepicker-toggle>
             <mat-datepicker #pickerEnd></mat-datepicker>
           </mat-form-field>

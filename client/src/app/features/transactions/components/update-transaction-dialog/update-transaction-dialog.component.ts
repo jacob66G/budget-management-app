@@ -38,7 +38,12 @@ export class UpdateTransactionDialogComponent implements OnInit{
       title: [this.data.title, Validators.required],
       amount: [this.data.amount, [Validators.required, Validators.min(0)]],
       description: [this.data.description],
-      categoryId: [this.data.categoryId, Validators.required] 
+      categoryId: [
+        {
+          value: this.data.categoryId,
+          disabled: this.data.isRecurring
+        },
+        Validators.required] 
     });
   }
 

@@ -137,8 +137,8 @@ export class TransactionPageComponent implements OnInit{
   ngOnInit(): void {
     this.loadAccounts();
     this.loadCategories();
-    this.loadTransactions();
-    this.loadUpcomingTransactions();
+    // this.loadTransactions();
+    // this.loadUpcomingTransactions();
   }
 
   handleAddTransactionEvent(): void {
@@ -320,7 +320,8 @@ export class TransactionPageComponent implements OnInit{
               amount: transactionToUpdate.amount,
               description: transactionToUpdate.description,
               categories: catogiesToPass,
-              categoryId: currentCategoryId // current category
+              categoryId: currentCategoryId, // current category
+              isRecurring: transactionToUpdate.recurringTransactionId? true : false
             }
           });
 
@@ -331,24 +332,24 @@ export class TransactionPageComponent implements OnInit{
 
               // if category has been changed
               if (formData.categoryId !== currentCategoryId) {
+                if (!transactionToUpdate.recurringTransactionId) {
+                  console.log("Category changed: ", formData.categoryId);
+                  const changeCategoryReq: TransactionCategoryChangeRequest = {
+                    currentCategoryId: currentCategoryId,
+                    newCategoryId: formData.categoryId,
+                    accountId: transactionToUpdate.account.id
+                  };
 
-                console.log("Category changed: ", formData.categoryId);
-                const changeCategoryReq: TransactionCategoryChangeRequest = {
-                  currentCategoryId: currentCategoryId,
-                  newCategoryId: formData.categoryId,
-                  accountId: transactionToUpdate.account.id
-                }
-
-                this.transactionService.changeTransactionCategory(id, changeCategoryReq).subscribe({
-                  next: (data) => {
-                    if (data) {
-                      console.log("Transaction category changed. New Category: ", data.categoryName);
-                      this.loadTransactions();
+                  this.transactionService.changeTransactionCategory(id, changeCategoryReq).subscribe({
+                    next: (data) => {
+                      if (data) {
+                        console.log("Transaction category changed. New Category: ", data.categoryName);
+                        this.loadTransactions();
+                      }
                     }
-                  }
-                })
+                  });
+                }
               }
-
 
               if (formData.title !== transactionToUpdate.title ||
                   formData.amount !== transactionToUpdate.amount ||
@@ -372,7 +373,7 @@ export class TransactionPageComponent implements OnInit{
             } else {
               console.log("Update canceled");
             }
-          })
+          });
     } else {
       console.error('Error occurred');
             this.snackBar.open('Failed to find transaction', 'Close', {

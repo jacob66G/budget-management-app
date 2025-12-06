@@ -16,6 +16,7 @@ import {
   subDays, 
   startOfYear, 
   subWeeks,
+  isToday
 } from 'date-fns';
 
 export interface DateRange {
@@ -53,6 +54,43 @@ export class DateFilterComponent {
     {value: DateFilterPresets.LAST_MONTH, label: 'Last month'},
     {value: DateFilterPresets.THIS_YEAR, label: 'This year'},
   ]
+
+  calcMaxdate(): Date | null {
+
+    const now = new Date();
+
+    const endDate = this.end();
+    // nothing is selected or only start is selected
+    if (!endDate) {
+      return now;
+    }
+
+    // end date is selected and it is today
+    if (isToday(endDate)) {
+      return now;
+    }
+    // end is selected
+    return endDate;
+  }
+
+  calcMindate(): Date | null {
+
+    const now = new Date();
+    const startDate = this.start();
+    
+    // nothing is selected or only end date is selected
+    if (!startDate) {
+      return null;
+    }
+
+    // start date is selected and it is today
+    if (isToday(startDate)) {
+      return now;
+    }
+
+    // start date is selected
+    return startDate;
+  }
 
   clearDates(): void {
     this.start.set(null);

@@ -140,14 +140,12 @@ mat-dialog-content {
     color: rgb(66, 64, 64) !important;
 }
 
-// --- FOOTER / ACTIONS ---
 ::ng-deep .dialog-footer {
   display: grid !important; 
   grid-template-columns: 1fr 1fr 1.5fr; // Cancel i Reset mniejsze, Save większy
   gap: 12px;
   padding: 16px 24px 24px 24px;
   margin: 0;
-  // border-top: 1px solid #f3f4f6; // Na zdjęciu nie widać wyraźnej linii, ale można dodać
 
   button {
     width: 100%;
@@ -166,11 +164,47 @@ mat-dialog-content {
   }
 
   .btn-primary {
-    background-color: var(--primary-color) !important;
+    background-color: var(--primary-color) !important; // Mocny niebieski
     color: white !important;
     
     &:disabled {
       background-color: #6e94e8 !important;
     }
+  }
+}
+
+.input-row-with-message {
+  display: flex;
+  align-items: center; // Wyrównanie do środka w pionie
+  gap: 16px;           // Spory odstęp między selectem a komunikatem
+  width: 100%;
+
+  .flex-grow-field {
+    flex: 1;       // Zajmij całą dostępną przestrzeń
+    min-width: 0;  // Zapobiega problemom z flexboxem na małych ekranach
+  }
+}
+
+.field-info-message-side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  
+  flex-shrink: 0;
+  max-width: 250px; // Opcjonalnie: ograniczenie szerokości, żeby tekst się zawijał
+
+  font-size: 14px;    // Znacznie większa czcionka (było 11px)
+  font-weight: 500;   // Lekkie pogrubienie
+  line-height: 1.3;
+  color: black;     // Zmiana koloru tekstu na wyrazisty niebieski (taki jak primary button)
+
+  mat-icon {
+    font-size: 23px;
+    width: 20px;
+    height: 20px;
+    overflow: visible;
+    flex-shrink: 0;
+    min-width: 20px;
+    color: var(--primary-color) !important;
   }
 }
