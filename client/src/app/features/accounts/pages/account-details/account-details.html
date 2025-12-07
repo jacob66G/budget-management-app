@@ -78,7 +78,7 @@
         <div>
           <div class="kpi-label">Total Expense</div>
           <div class="kpi-value">
-            <span>{{ acc.totalExpense | number:'1.2-2' }}</span>
+            <span>{{ acc.totalExpense > 0 ? '-' : '' }}{{ acc.totalExpense | number:'1.2-2' }}</span>
             <span class="currency-suffix"> {{ acc.currency }}</span>
           </div>
         </div>
@@ -152,11 +152,11 @@
           </div>
           <div class="detail-row">
             <span class="label">Limit</span>
-            <span class="value">{{ acc.budget ? (acc.budget | currency: acc.currency) : '-' }}</span>
+            <span class="value">{{ acc.budget != null  ? (acc.budget | currency: acc.currency) : '-' }}</span>
           </div>
           <div class="detail-row">
             <span class="label">Alert treshold</span>
-            <span class="value">{{ acc.alertThreshold ? acc.alertThreshold + '%' : '-' }}</span>
+            <span class="value">{{ acc.alertThreshold != null ? acc.alertThreshold + '%' : '-' }}</span>
           </div>
           <div class="detail-row">
             <span class="label">Included in total balance</span>
@@ -178,122 +178,127 @@
 
   </section>
 
-<section class="charts-section">
-      <mat-card class="charts-card">
-        <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms">
+  <section class="charts-section">
+    <mat-card class="charts-card">
+      <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms">
 
-          <mat-tab label="Balance history">
-            <div class="chart-tab-content">
-              <div class="chart-filters">
-                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="date-field">
-                  <mat-label>Date range</mat-label>
-                  <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker1">
-                    <input matStartDate formControlName="start" placeholder="Start" (dateChange)="onDateChange()">
-                    <input matEndDate formControlName="end" placeholder="End" (dateChange)="onDateChange()">
-                  </mat-date-range-input>
-                  <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
-                  <mat-date-range-picker #picker1></mat-date-range-picker>
-                </mat-form-field>
+        <mat-tab label="Balance history">
+          <div class="chart-tab-content">
+            <div class="chart-filters">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="date-field">
+                <mat-label>Date range</mat-label>
+                <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker1">
+                  <input matStartDate formControlName="start" placeholder="Start" (dateChange)="onDateChange()">
+                  <input matEndDate formControlName="end" placeholder="End" (dateChange)="onDateChange()">
+                </mat-date-range-input>
+                <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+                <mat-date-range-picker #picker1></mat-date-range-picker>
+              </mat-form-field>
 
-                <div class="quick-filters">
-                  <button mat-stroked-button (click)="setRange('month')">This month</button>
-                  <button mat-stroked-button (click)="setRange('week')">This week</button>
-                </div>
+              <div class="quick-filters">
+                <button mat-stroked-button [class.active-toggle]="activeRange() === 'month'"
+                  (click)="setRange('month')">This month
+                </button>
+                <button mat-stroked-button [class.active-toggle]="activeRange() === 'week'"
+                  (click)="setRange('week')">This week</button>
+              </div>
+            </div>
+
+            <div class="chart-container">
+              @if (isChartLoading()) {
+              <mat-spinner [diameter]="40"></mat-spinner>
+              } @else {
+              <app-balance-chart [data]="balanceChartData()" [currency]="acc.currency"></app-balance-chart>
+              }
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Categories Breakdown">
+          <div class="chart-tab-content">
+
+            <div class="chart-filters">
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="date-field">
+                <mat-label>Date range</mat-label>
+                <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker2">
+                  <input matStartDate formControlName="start" (dateChange)="onDateChange()">
+                  <input matEndDate formControlName="end" (dateChange)="onDateChange()">
+                </mat-date-range-input>
+                <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
+                <mat-date-range-picker #picker2></mat-date-range-picker>
+              </mat-form-field>
+
+              <div class="quick-filters">
+                <button mat-stroked-button [class.active-toggle]="activeRange() === 'month'"
+                  (click)="setRange('month')">This month
+                </button>
+                <button mat-stroked-button [class.active-toggle]="activeRange() === 'week'"
+                  (click)="setRange('week')">This week</button>
               </div>
 
+              <div class="quick-filters">
+                <button mat-stroked-button [class.active-toggle]="categoryType() === 'EXPENSE'"
+                  (click)="setCategoryType('EXPENSE')">
+                  Expenses
+                </button>
+                <button mat-stroked-button [class.active-toggle]="categoryType() === 'INCOME'"
+                  (click)="setCategoryType('INCOME')">
+                  Income
+                </button>
+              </div>
+            </div>
+
+            <div class="chart-container">
+              @if (isChartLoading()) {
+              <mat-spinner [diameter]="40"></mat-spinner>
+              } @else {
+              <app-category-sum-chart [data]="categoryChartData()">
+              </app-category-sum-chart>
+              }
+            </div>
+
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Income vs Expense">
+          <div class="chart-tab-content">
+            <div class="chart-filters">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="date-field">
+                <mat-label>Date range</mat-label>
+                <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker3">
+                  <input matStartDate formControlName="start" (dateChange)="onDateChange()">
+                  <input matEndDate formControlName="end" (dateChange)="onDateChange()">
+                </mat-date-range-input>
+                <mat-datepicker-toggle matIconSuffix [for]="picker3"></mat-datepicker-toggle>
+                <mat-date-range-picker #picker3></mat-date-range-picker>
+              </mat-form-field>
+
+              <div class="quick-filters">
+                <button mat-stroked-button [class.active-toggle]="activeRange() === 'month'"
+                  (click)="setRange('month')">This month
+                </button>
+                <button mat-stroked-button [class.active-toggle]="activeRange() === 'year'"
+                  (click)="setRange('year')">This year</button>
+              </div>
+            </div>
+
+            <div class="chart-container">
               <div class="chart-container">
                 @if (isChartLoading()) {
-                  <mat-spinner [diameter]="40"></mat-spinner>
+                <mat-spinner [diameter]="40"></mat-spinner>
                 } @else {
-                  <app-balance-chart [data]="balanceChartData()" [currency]="acc.currency"></app-balance-chart>
+                <app-cash-flow-chart [data]="cashFlowChartData()">
+                </app-cash-flow-chart>
                 }
               </div>
             </div>
-          </mat-tab>
+          </div>
+        </mat-tab>
 
-          <mat-tab label="Categories Breakdown">
-            <div class="chart-tab-content">
-              
-              <div class="chart-filters">
-              
-                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="date-field">
-                  <mat-label>Date range</mat-label>
-                  <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker2">
-                    <input matStartDate formControlName="start" (dateChange)="onDateChange()">
-                    <input matEndDate formControlName="end" (dateChange)="onDateChange()">
-                  </mat-date-range-input>
-                  <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
-                  <mat-date-range-picker #picker2></mat-date-range-picker>
-                </mat-form-field>
-
-                <div class="quick-filters">
-                  <button mat-stroked-button (click)="setRange('month')">This month</button>
-                  <button mat-stroked-button (click)="setRange('week')">This week</button>
-                </div>
-
-                <div class="quick-filters">
-                  <button mat-stroked-button 
-                          [class.active-toggle]="categoryType() === 'EXPENSE'"
-                          (click)="setCategoryType('EXPENSE')">
-                    Expenses
-                  </button>
-                  <button mat-stroked-button 
-                          [class.active-toggle]="categoryType() === 'INCOME'"
-                          (click)="setCategoryType('INCOME')">
-                    Income
-                  </button>
-                </div>
-              </div>
-
-              <div class="chart-container">
-                @if (isChartLoading()) {
-                  <mat-spinner [diameter]="40"></mat-spinner>
-                } @else {
-                  <app-category-sum-chart 
-                      [data]="categoryChartData()">
-                  </app-category-sum-chart>
-                }
-              </div>
-
-            </div>
-          </mat-tab>
-
-          <mat-tab label="Income vs Expense">
-            <div class="chart-tab-content">
-              <div class="chart-filters">
-                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="date-field">
-                  <mat-label>Date range</mat-label>
-                  <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker3">
-                    <input matStartDate formControlName="start" (dateChange)="onDateChange()">
-                    <input matEndDate formControlName="end" (dateChange)="onDateChange()">
-                  </mat-date-range-input>
-                  <mat-datepicker-toggle matIconSuffix [for]="picker3"></mat-datepicker-toggle>
-                  <mat-date-range-picker #picker3></mat-date-range-picker>
-                </mat-form-field>
-
-                <div class="quick-filters">
-                  <button mat-stroked-button (click)="setRange('month')">This month</button>
-                  <button mat-stroked-button (click)="setRange('year')">This year</button>
-                </div>
-              </div>
-
-              <div class="chart-container">
-                 <div class="chart-container">
-                @if (isChartLoading()) {
-                  <mat-spinner [diameter]="40"></mat-spinner>
-                } @else {
-                  <app-cash-flow-chart 
-                      [data]="cashFlowChartData()">
-                  </app-cash-flow-chart>
-                }
-              </div>
-              </div>
-            </div>
-          </mat-tab>
-
-        </mat-tab-group>
-      </mat-card>
-    </section>
+      </mat-tab-group>
+    </mat-card>
+  </section>
 
   } @else {
   <div class="empty-state">

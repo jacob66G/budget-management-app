@@ -1,5 +1,5 @@
 export interface ChartPoint {
-    date: Date,
+    date: string,
     amount: number
 }
 
@@ -9,7 +9,17 @@ export interface CategoryChartPoint {
 }
 
 export interface CashFlowChartPoint {
-    date: Date,
+    date: string,
     totalIncome: number,
     totalExpense: number
+}
+
+export interface ChartSeries {
+    label: string; 
+    data: number[];
+}
+
+export interface MultiSeriesChart {
+    dates: string[];
+    series: ChartSeries[];
 }

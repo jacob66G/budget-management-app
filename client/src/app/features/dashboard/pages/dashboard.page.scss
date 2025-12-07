@@ -1,0 +1,503 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: block;
+  padding: 32px;
+  background-color: #f4f7f6;
+  min-height: 100%;
+  font-family: var(--font-family-default, 'Roboto', sans-serif);
+}
+
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 500;
+    margin: 0;
+    color: #222;
+  }
+
+  p {
+    margin: 4px 0 0 0;
+    color: #666;
+  }
+}
+
+.filters-bar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+
+  .quick-filters {
+    display: flex;
+    gap: 8px;
+
+    button.active-toggle {
+      background-color: #e8eaf6 !important;
+      color: #3f51b5 !important;
+      border-color: #3f51b5 !important;
+      font-weight: 600;
+    }
+  }
+
+  .date-field {
+    width: 240px;
+    background: #fff;
+
+    ::ng-deep .mat-mdc-form-field-flex {
+      min-height: 40px;
+      padding-top: 0;
+      align-items: center;
+    }
+  }
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kpi-card {
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+
+  mat-card-content {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .kpi-label {
+    font-size: 0.85rem;
+    color: #757575;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .kpi-value {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #333;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+
+    &.negative span:first-child {
+      color: #c62828;
+    }
+  }
+
+  .currency-suffix {
+    font-size: 0.9rem;
+    color: #999;
+    font-weight: 500;
+  }
+
+  &.balance .kpi-value.negative {
+    color: #c62828;
+  }
+
+  &.income .kpi-value {
+    color: #2e7d32;
+  }
+
+  &.expense .kpi-value {
+    color: #c62828;
+  }
+
+  .kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  &.balance .kpi-icon {
+    background: #e6e6e6;
+    color: #757575;
+  }
+
+  &.income .kpi-icon {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &.expense .kpi-icon {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  &.savings .kpi-icon {
+    background: #fff3e0;
+    color: #f57c00;
+  }
+}
+
+.section-heading {
+  font-size: 1.2rem;
+  margin: 0;
+  color: #444;
+  font-weight: 500;
+}
+
+.charts-scroller {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+
+  .chart-card:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 1000px) {
+    grid-template-columns: 1fr;
+
+    chart-card:nth-child(3) {
+      grid-column: auto;
+    }
+  }
+}
+
+.chart-card {
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+
+  .card-header {
+    margin-bottom: 20px;
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #333;
+      margin: 0;
+    }
+
+    .card-subtitle {
+      font-size: 0.85rem;
+      color: #757575;
+    }
+  }
+
+  .chart-content {
+    min-height:320px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: relative;
+  }
+}
+
+.lists-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lists-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* Transakcje szersze, Konta węższe */
+  gap: 24px;
+  
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr; /* Na tabletach jedna pod drugą */
+  }
+}
+
+/* --- WSPÓLNE STYLE KARTY LISTY --- */
+.list-card {
+  padding: 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.05);
+  background: #fff;
+  overflow: hidden;
+
+  .card-header-row {
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+    
+    .section-title {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #333;
+    }
+  }
+  
+  .list-content {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+}
+
+.transactions-list {
+  padding: 0;
+
+  .transaction-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    gap: 16px;
+    transition: background 0.2s;
+
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    &:hover {
+      background-color: #fafafa;
+    }
+  }
+
+  .tx-icon-wrapper {
+    padding: 5px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: #f5f7fa;
+    color: #757575;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+
+    .tx-icon-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .tx-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+
+    .tx-title {
+      font-weight: 500;
+      color: #333;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tx-meta {
+      font-size: 0.8rem;
+      color: #9e9e9e;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bullet {
+      font-size: 0.6rem;
+      opacity: 0.5;
+    }
+  }
+
+  .tx-amount {
+    font-weight: 700;
+    font-size: 0.95rem;
+    white-space: nowrap;
+
+    &.income { color: #2e7d32; }
+    &.expense { color: #c62828; }
+  }
+}
+
+.accounts-list {
+  padding: 0;
+
+  .account-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    gap: 16px;
+
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    &:hover {
+      background-color: #f5f7fa;
+    }
+
+    &.excluded {
+      background-color: #fafafa;
+      opacity: 0.7;
+      
+      .acc-icon-box {
+        background-color: #eeeeee;
+        color: #9e9e9e;
+        filter: grayscale(100%);
+      }
+      
+      .acc-name, .acc-balance {
+        color: #757575;
+      }
+    }
+  }
+
+  .acc-icon-box {
+    padding: 10px;
+    width: 34px; 
+    height: 34px;
+    border-radius: 12px;
+    background-color: #f0f4ff;
+    color: #1976d2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+
+    .acc-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .fallback-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .acc-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .acc-name {
+      font-weight: 500;
+      color: #333;
+      font-size: 0.95rem;
+    }
+
+    .acc-type {
+      color: #999;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .acc-balance-wrapper {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .acc-balance {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #333;
+    
+    &.negative {
+      color: #c62828;
+    }
+  }
+
+  .excluded-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #9e9e9e;
+    margin-top: 4px;
+  }
+}
+
+.empty-placeholder {
+  text-align: center;
+  color: #9e9e9e;
+  font-style: italic;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    opacity: 0.2;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+.loading-container {
+  text-align: center;
+  padding: 60px;
+}

@@ -8,8 +8,9 @@ export class ApiPaths {
     public static readonly AUTH_BASE = `${ApiPaths.API}/auth`;
     public static readonly USERS_BASE = `${ApiPaths.API}/users`;
     public static readonly ACCOUNT_BASE = `${ApiPaths.API}/accounts`;
-    public static readonly ANALYTICS_BASE = `${ApiPaths.API}/analytics`
-    public static readonly REFERENCE_DATA_BASE = `${ApiPaths.API}/reference-data`
+    public static readonly ANALYTICS_ACCOUNT_BASE = `${ApiPaths.API}/analytics/accounts`;
+    public static readonly ANALYTICS_GLOBAL_BASE = `${ApiPaths.API}/analytics/global`;
+    public static readonly REFERENCE_DATA_BASE = `${ApiPaths.API}/reference-data`;
     public static readonly CATEGORIES_BASE = `${ApiPaths.API}/categories`;
 
     public static readonly Auth = {
@@ -42,10 +43,11 @@ export class ApiPaths {
     }
 
     public static readonly Analytics = {
-        ANALYTICS: `${ApiPaths.ACCOUNT_BASE}`,
-        BALANCE_HISTORY: `${ApiPaths.ANALYTICS_BASE}/balance-history`,
-        CATEGORY_SUMS: `${ApiPaths.ANALYTICS_BASE}/categories`,
-        CASH_FLOW: `${ApiPaths.ANALYTICS_BASE}/cash-flow`
+        ANALYTICS_ACCOUNT: `${ApiPaths.ANALYTICS_ACCOUNT_BASE}`,
+        GLOBAL_FINANCIAL_SUMMARY: `${ApiPaths.ANALYTICS_GLOBAL_BASE}/summary`,
+        GLOBAL_BALANCE_HISTORY: `${ApiPaths.ANALYTICS_GLOBAL_BASE}/balance-history`,
+        GLOBAL_CATEGORY_BREAKDOWN: `${ApiPaths.ANALYTICS_GLOBAL_BASE}/categories`,
+        GLOBAL_CASH_FLOW: `${ApiPaths.ANALYTICS_GLOBAL_BASE}/cash-flow`
     }
 
     public static readonly ReferenceData = {

@@ -2,7 +2,7 @@ import { Component, Input, signal, SimpleChanges, ViewChild } from '@angular/cor
 import { ChartData, ChartOptions } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
-import { CategoryChartPoint } from '../../../../core/models/analytics.model';
+import { CategoryChartPoint } from '../../../core/models/analytics.model';
 
 @Component({
   selector: 'app-category-sum-chart',
@@ -24,14 +24,18 @@ import { CategoryChartPoint } from '../../../../core/models/analytics.model';
     </div>
   `,
   styles: [`
+    :host {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    
     .chart-wrapper {
       position: relative;
-      height: 500px;
-      width: 1000px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      height: 100%; 
+      width: 100%;
     }
+    
     .no-data-container {
       height: 100%;
       display: flex;

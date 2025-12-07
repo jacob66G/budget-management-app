@@ -15,7 +15,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, getCurrencySymbol } from '@angular/common';
 import { AccountDetails } from '../../models/account.model';
 import { AccountActionService } from '../../services/account-actions.service';
 import { ApiErrorService } from '../../../../core/services/api-error.service';
@@ -24,11 +24,11 @@ import { TransactionSummary } from '../../../transactions/model/transaction-summ
 import { AnalyticsService } from '../../../../core/services/analytics.service';
 import { CashFlowChartPoint, CategoryChartPoint, ChartPoint } from '../../../../core/models/analytics.model';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { BalanceChartComponent } from '../../components/balance-chart/balance-chart.component';
+import { BalanceChartComponent } from '../../../../shared/components/charts/balance-chart.component';
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import { MatNativeDateModule } from '@angular/material/core';
-import { CategorySumChartComponent } from "../../components/category-sum-chart/category-sum-chart.component";
-import { CashFlowChartComponent } from "../../components/cash-flow-chart/cash-flow-chart.component";
+import { CategorySumChartComponent } from "../../../../shared/components/charts/category-sum-chart.component";
+import { CashFlowChartComponent } from "../../../../shared/components/charts/cash-flow-chart.component";
 
 @Component({
   selector: 'app-account-details',
@@ -54,7 +54,7 @@ import { CashFlowChartComponent } from "../../components/cash-flow-chart/cash-fl
     MatNativeDateModule,
     CategorySumChartComponent,
     CashFlowChartComponent
-],
+  ],
   templateUrl: './account-details.html',
   styleUrl: './account-details.scss'
 })
@@ -77,6 +77,7 @@ export class AccountDetailsPage {
   cashFlowChartData = signal<CashFlowChartPoint[]>([]);
 
   categoryType = signal<'EXPENSE' | 'INCOME'>('EXPENSE');
+  activeRange = signal<string>('week');
   isChartLoading = signal(false);
 
   dateRange = new FormGroup({
@@ -181,6 +182,7 @@ export class AccountDetailsPage {
 
   onDateChange(): void {
     if (this.dateRange.value.start && this.dateRange.value.end) {
+      this.activeRange.set('');
       this.loadAllCharts();
     }
   }
@@ -192,11 +194,14 @@ export class AccountDetailsPage {
 
     if (range === 'year') {
       start.setMonth(0, 1);
+      this.activeRange.set('year');
     } else if (range === 'week') {
       const day = now.getDay() || 7;
       if (day !== 1) start.setHours(-24 * (day - 1));
+      this.activeRange.set('week');
     } else if (range === 'month') {
       start.setDate(1);
+      this.activeRange.set('month');
     }
 
     this.dateRange.patchValue({ start, end });
@@ -217,9 +222,9 @@ export class AccountDetailsPage {
     this.isChartLoading.set(true);
 
     forkJoin({
-      balance: this.analyticsService.getBalanceHistory(acc.id, start, end),
-      category: this.analyticsService.getCategoryBreakdown(acc.id, start, end, this.categoryType()),
-      cashFlow: this.analyticsService.getCashFlow(acc.id, start, end)
+      balance: this.analyticsService.getAccountBalanceHistory(acc.id, start, end),
+      category: this.analyticsService.getAccountCategoryBreakdown(acc.id, start, end, this.categoryType()),
+      cashFlow: this.analyticsService.getAccountCashFlow(acc.id, start, end)
     }).subscribe({
       next: (results) => {
         this.balanceChartData.set(results.balance);
@@ -227,9 +232,9 @@ export class AccountDetailsPage {
         this.cashFlowChartData.set(results.cashFlow);
         this.isChartLoading.set(false);
       },
-      error: (err) => {
-        console.error('Chart error', err);
+      error: (err: HttpErrorResponse) => {
         this.isChartLoading.set(false);
+        this.errorService.handle(err);
       }
     });
   }

@@ -1,0 +1,222 @@
+<div class="dashboard-container">
+
+  <header class="dashboard-header">
+    <div class="header-title">
+      <h1>Dashboard</h1>
+      <p>Overview of your financial status</p>
+    </div>
+
+    <div class="filters-bar">
+
+      <div class="quick-filters">
+        <button mat-stroked-button [class.active-toggle]="activeRange() === 'month'" (click)="setRange('month')">This
+          Month</button>
+        <button mat-stroked-button [class.active-toggle]="activeRange() === '3months'" (click)="setRange('3months')">3
+          Months</button>
+        <button mat-stroked-button [class.active-toggle]="activeRange() === '6months'" (click)="setRange('6months')">6
+          Months</button>
+        <button mat-stroked-button [class.active-toggle]="activeRange() === 'year'"
+          (click)="setRange('year')">Year</button>
+      </div>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="date-field">
+        <mat-label>Date range</mat-label>
+        <mat-date-range-input [formGroup]="dateRangeForm" [rangePicker]="picker">
+          <input matStartDate formControlName="start" placeholder="Start" (dateChange)="onDateChange()">
+          <input matEndDate formControlName="end" placeholder="End" (dateChange)="onDateChange()">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      </mat-form-field>
+
+
+
+    </div>
+  </header>
+
+  @if (isLoading()) {
+  <div class="loading-container">
+    <mat-spinner [diameter]="50"></mat-spinner>
+  </div>
+  } @else if (summary(); as d) {
+
+  <section class="kpi-grid">
+
+    <mat-card class="kpi-card balance">
+      <mat-card-content>
+        <div class="kpi-icon"><mat-icon>account_balance</mat-icon></div>
+        <div>
+          <div class="kpi-label">CLOSING BALANCE</div>
+          <div class="kpi-value" [class.negative]="d.closingBalance < 0">
+            <span>{{ d.closingBalance | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="kpi-card income">
+      <mat-card-content>
+        <div class="kpi-icon"><mat-icon>arrow_upward</mat-icon></div>
+        <div>
+          <div class="kpi-label">Total Income</div>
+          <div class="kpi-value">
+            <span>{{ d.totalIncome | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="kpi-card expense">
+      <mat-card-content>
+        <div class="kpi-icon"><mat-icon>arrow_downward</mat-icon></div>
+        <div>
+          <div class="kpi-label">Total Expense</div>
+          <div class="kpi-value">
+            <span>{{ d.totalExpense > 0 ? '-' : '' }}{{ d.totalExpense | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="kpi-card savings">
+      <mat-card-content>
+        <div class="kpi-icon"><mat-icon>savings</mat-icon></div>
+        <div>
+          <div class="kpi-label">Net Savings</div>
+          <div class="kpi-value" [class.negative]="d.netSavings < 0">
+            <span>{{ d.netSavings | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </section>
+
+  <h2 class="section-heading">Financial Analytics</h2>
+
+  <div class="charts-scroller">
+
+    <mat-card class="chart-card">
+      <div class="card-header">
+        <h3 class="card-title">Cash Flow</h3>
+        <span class="card-subtitle">Incomes vs Expenses</span>
+      </div>
+      <div class="chart-content">
+        @if (isCashFlowLoading()) {
+        <mat-spinner [diameter]="40"></mat-spinner>
+        } @else {
+        <app-cash-flow-chart [data]="cashFlowChartData()">
+        </app-cash-flow-chart>
+        }
+      </div>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <div class="card-header">
+        <h3 class="card-title">Expenditure Structure</h3>
+        <span class="card-subtitle">Top Categories</span>
+      </div>
+      <div class="chart-content">
+        @if (isCategoryLoading()) {
+        <mat-spinner [diameter]="40"></mat-spinner>
+        } @else {
+        <app-category-sum-chart [data]="categoryChartData()">
+        </app-category-sum-chart>
+        }
+      </div>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <div class="card-header">
+        <h3 class="card-title">Balance History</h3>
+        <span class="card-subtitle">Net worth trend</span>
+      </div>
+      <div class="chart-content">
+        @if (isBalanceLoading()) {
+        <mat-spinner [diameter]="40"></mat-spinner>
+        } @else {
+        <app-balance-chart [multiSeriesData]="balanceChartData()" [isStacked]="true">
+        </app-balance-chart>
+        }
+      </div>
+    </mat-card>
+  </div>
+
+  <section class="lists-grid">
+
+    <mat-card class="list-card">
+      <div class="card-header-row">
+        <h3 class="section-title">Recent Transactions</h3>
+        <button mat-button color="primary" (click)="onViewTransactions()">View All</button>
+      </div>
+      <mat-divider></mat-divider>
+
+      <div class="transactions-list">
+        @for (tx of d.recentTransactions; track $index) {
+        <div class="transaction-item">
+          <div class="tx-icon-wrapper">
+            <img [src]="tx.categoryIconPath" class="tx-icon-img" onerror="this.style.display='none'">
+            <mat-icon class="fallback-icon">category</mat-icon>
+          </div>
+
+          <div class="tx-info">
+            <div class="tx-title">{{ tx.title }}</div>
+            <div class="tx-meta">
+              <span class="tx-category">{{ tx.categoryName }}</span>
+              <span class="bullet">•</span>
+              <span class="tx-date">{{ tx.date | date:'mediumDate' }}</span>
+            </div>
+          </div>
+
+          <div class="tx-amount" [class.income]="tx.type === 'INCOME'" [class.expense]="tx.type === 'EXPENSE'">
+            {{ tx.type === 'EXPENSE' ? '-' : '+' }}{{ tx.amount | number:'1.2-2' }}
+          </div>
+        </div>
+        } @empty {
+        <div class="empty-placeholder">
+          <mat-icon>receipt</mat-icon>
+          <p>No recent transactions.</p>
+        </div>
+        }
+      </div>
+    </mat-card>
+
+    <mat-card class="list-card">
+      <div class="card-header-row">
+        <h3 class="section-title">My Accounts</h3>
+        <button mat-button color="primary" routerLink="/app/accounts">Manage</button>
+      </div>
+      <mat-divider></mat-divider>
+
+      <div class="accounts-list">
+        @for (acc of d.accounts; track acc.id) {
+        <div class="account-item" [class.excluded]="!acc.includeInTotalBalance" [routerLink]="['/app/accounts', acc.id]"
+          [matTooltip]="!acc.includeInTotalBalance ? 'This account is not included in the total amount' : ''">
+
+          <div class="acc-icon-box blue-bg">
+            <img [src]="acc.iconPath" class="acc-img" onerror="this.style.display='none'">
+            <mat-icon class="fallback-icon">account_balance_wallet</mat-icon>
+          </div>
+
+          <div class="acc-details">
+            <div class="acc-name">{{ acc.name }}</div>
+            <div class="acc-type">{{ acc.type }}</div>
+          </div>
+
+          <div class="item-amount acc-balance" [class.negative]="acc.balance < 0">
+
+            @if (!acc.includeInTotalBalance) {
+            <mat-icon class="excluded-icon">visibility_off</mat-icon>
+            }
+
+            {{ acc.balance | number:'1.2-2' }} {{ acc.currency }}
+          </div>
+        </div>
+        }
+      </div>
+    </mat-card>
+
+  </section>
+
+  }
+</div>
