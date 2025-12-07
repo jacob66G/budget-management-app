@@ -34,28 +34,23 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       if (error.status === 401) {
 
         if (req.url.includes(ApiPaths.Auth.REFRESH_TOKEN)) {
-          authService.logout().subscribe();
           return throwError(() => error);
         }
 
         if (isPublicEndpoint) {
-           return throwError(() => error);
+          return throwError(() => error);
         }
 
         return authService.refreshToken().pipe(
           switchMap((response: LoginResponse | null) => {
             if (response?.accessToken) {
-              console.log("1")
               authReq = addTokenToRequest(req, response.accessToken);
               return next(authReq);
             }
-
-             console.log("2")
             authService.logout().subscribe();
             return throwError(() => error);
           }),
           catchError((refreshError) => {
-             console.log("3")
             authService.logout().subscribe();
             return throwError(() => refreshError);
           })

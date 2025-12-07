@@ -73,7 +73,7 @@ export class Login2fa {
       next: () => {
         this.isLoading.set(false);
         this.snackBar.open('Login successful', 'OK', { duration: 3000 });
-        this.router.navigate(['/app']);
+        this.router.navigate(['/app/dashboard']);
       },
       error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);

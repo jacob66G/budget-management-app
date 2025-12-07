@@ -60,14 +60,10 @@ export class AuthService {
     );
   }
 
-logout(): Observable<void> {
-    console.log("wyloguj 1 - start");
-    
+  logout(): Observable<void> {
     return this.http.post<void>(ApiPaths.Auth.LOGOUT, {}, { withCredentials: true }).pipe(
       finalize(() => {
-        console.log("wyloguj - czyszczenie stanu");
-        this.clearAuthState();
-        this.router.navigate(['/login']);
+        this.clearLocalState(true);
       })
     );
   }
@@ -82,6 +78,7 @@ logout(): Observable<void> {
           }
         }),
         catchError(() => {
+          this.clearLocalState(false);
           return of(null);
         })
       );
@@ -138,13 +135,24 @@ logout(): Observable<void> {
     localStorage.setItem(StorageKesy.USER_KEY, JSON.stringify(user));
   }
 
-  private clearAuthState(): void {
-    this.currentUser.set(null);
+  clearLocalState(navigate: boolean = true): void {
     this.accessToken.set(null);
-
+    this.currentUser.set(null);
     localStorage.removeItem(StorageKesy.TOKEN_KEY);
     localStorage.removeItem(StorageKesy.USER_KEY);
+
+    if (navigate) {
+      this.router.navigate(['/login']);
+    }
   }
+
+  // private clearAuthState(): void {
+  //   this.currentUser.set(null);
+  //   this.accessToken.set(null);
+
+  //   localStorage.removeItem(StorageKesy.TOKEN_KEY);
+  //   localStorage.removeItem(StorageKesy.USER_KEY);
+  // }
 
   private buildUser(response: LoginResponse): User {
     const user: User = {

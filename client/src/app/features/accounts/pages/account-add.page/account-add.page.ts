@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { AccountService } from '../../../../core/services/account.service';
 import { ApiErrorService } from '../../../../core/services/api-error.service';
 import { Router } from '@angular/router';
@@ -21,6 +21,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
 import { ReferenceDataService } from '../../../../core/services/reference-data.service';
 import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-account-add-page',
@@ -52,6 +53,7 @@ export class AccountAddPage {
   private router = inject(Router)
   private fb = inject(FormBuilder)
   private snackBar = inject(MatSnackBar)
+  private destroyRef = inject(DestroyRef);
 
   isLoading = signal(false);
 
@@ -63,15 +65,25 @@ export class AccountAddPage {
   createForm = this.fb.group({
     type: ['', Validators.required],
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-    currency: ['', [Validators.required, Validators.pattern('^[A-Z]{3}$')]],
+    currency: ['', Validators.required],
     description: ['', Validators.maxLength(255)],
     initialBalance: [0, [Validators.required, Validators.min(0)]],
     budgetType: ['NONE', Validators.required],
-    alertThreshold: [0, [Validators.min(0), Validators.max(100)]],
-    budget: [0, [Validators.min(0)]],
+    alertThreshold: [null as number | null, [Validators.min(0), Validators.max(100)]],
+    budget: [null as number | null, [Validators.min(0)]],
     includeInTotalBalance: [true, Validators.required],
     iconPath: ['']
   })
+
+  ngOnInit(): void {
+    this.handleBudgetTypeChange('NONE');
+
+    this.createForm.controls.budgetType.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
+        this.handleBudgetTypeChange(value);
+      });
+  }
 
   onSubmit() {
     if (!this.createForm.valid) {
@@ -104,5 +116,28 @@ export class AccountAddPage {
     const filename = url.substring(url.lastIndexOf('/') + 1);
     const name = filename.split('.')[0];
     return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
+ private handleBudgetTypeChange(type: string | null): void {
+    const budgetControl = this.createForm.controls.budget;
+    const alertControl = this.createForm.controls.alertThreshold;
+
+    if (type === 'NONE') {
+      budgetControl.setValue(null, { emitEvent: false });
+      budgetControl.disable({ emitEvent: false });
+
+      alertControl.setValue(null, { emitEvent: false });
+      alertControl.disable({ emitEvent: false });
+    } else {
+      budgetControl.enable({ emitEvent: false });
+      alertControl.enable({ emitEvent: false });
+
+      if (budgetControl.value === null) {
+        budgetControl.setValue(0, { emitEvent: false });
+      }
+      if (alertControl.value === null) {
+        alertControl.setValue(0, { emitEvent: false });
+      }
+    }
   }
 }

@@ -74,7 +74,7 @@ export class Login {
             'OK',
             { duration: 5000, panelClass: 'success-snackbar' }
           );
-           this.router.navigate(['/app']);
+           this.router.navigate(['/app/dashboard']);
         }
       }, error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);

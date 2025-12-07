@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { AccountService } from '../../../../core/services/account.service';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { of, switchMap } from 'rxjs';
@@ -21,6 +21,7 @@ import { MatDivider } from "@angular/material/divider";
 import { MatCardModule } from '@angular/material/card';
 import { MatSliderModule } from '@angular/material/slider';
 import { ReferenceDataService } from '../../../../core/services/reference-data.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-account-edit.page',
@@ -52,6 +53,8 @@ export class AccountEditPage {
   private fb = inject(FormBuilder);
   private errorService = inject(ApiErrorService);
   private refService = inject(ReferenceDataService);
+  private destroyRef = inject(DestroyRef);
+  
   private returnUrl = '/app/accounts';
 
   editForm: FormGroup = this.fb.group({
@@ -60,8 +63,8 @@ export class AccountEditPage {
     description: ['', Validators.maxLength(255)],
     initialBalance: [0, Validators.min(0)],
     budgetType: ['', Validators.required],
-    budget: [0, Validators.min(0)],
-    alertThreshold: [0, [Validators.min(0), Validators.max(100)]],
+    budget: [null as number | null, Validators.min(0)],
+    alertThreshold: [null as number | null, [Validators.min(0), Validators.max(100)]],
     includeInTotalBalance: [true, Validators.required],
     iconPath: []
   });
@@ -74,6 +77,8 @@ export class AccountEditPage {
   accountIcons = this.refService.accountIcons;
 
   constructor() {
+    this.setupFormListeners();
+
     const navigation = this.router.currentNavigation();
     const stateReturnUrl = navigation?.extras?.state?.['returnUrl'];
     if (stateReturnUrl) {
@@ -164,6 +169,37 @@ export class AccountEditPage {
     })
   }
 
+  private setupFormListeners() {
+    this.editForm.controls['budgetType'].valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((type: string) => {
+        this.handleBudgetTypeChange(type);
+      });
+  }
+
+  private handleBudgetTypeChange(type: string | null): void {
+    const budgetControl = this.editForm.controls['budget'];
+    const alertControl = this.editForm.controls['alertThreshold'];
+
+    if (type === 'NONE') {
+      budgetControl.setValue(null, { emitEvent: false });
+      budgetControl.disable({ emitEvent: false });
+
+      alertControl.setValue(null, { emitEvent: false });
+      alertControl.disable({ emitEvent: false });
+    } else {
+      budgetControl.enable({ emitEvent: false });
+      alertControl.enable({ emitEvent: false });
+
+      if (budgetControl.value === null) {
+        budgetControl.setValue(0, { emitEvent: false });
+      }
+      if (alertControl.value === null) {
+        alertControl.setValue(0, { emitEvent: false });
+      }
+    }
+  }
+
   private fillForm(data: AccountDetails) {
     this.editForm.patchValue({
       name: data.name,
@@ -175,6 +211,6 @@ export class AccountEditPage {
       alertThreshold: data.alertThreshold,
       includeInTotalBalance: data.includeInTotalBalance,
       iconPath: data.iconPath
-    })
+    }, { emitEvent: false })
   }
 }

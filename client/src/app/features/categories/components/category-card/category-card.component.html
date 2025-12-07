@@ -3,7 +3,7 @@
         
         <div class="icon-wrapper" [ngClass]="typeClass()">
            <img [src]="category().iconPath" alt="icon" class="category-icon" 
-                onerror="this.src='assets/icons/default.png'"> 
+                onerror="this.onerror=null; this.src='/assets/icons/default-category.png'"> 
         </div>
 
         <div class="info">
