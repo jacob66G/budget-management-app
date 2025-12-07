@@ -15,14 +15,11 @@ export class ApiErrorService {
       if (err.error.message) {
         errorMessage = err.error.message;
       }
-
+      
       if (err.error.fieldErrors) {
-        const fields = Object.entries(err.error.fieldErrors)
-          .map(([key, value]) => `${key}: ${value}`)
-          .join(', ');
-        
-        if (fields) {
-            errorMessage = fields;
+        const messages = Object.values(err.error.fieldErrors);
+        if (messages.length > 0) {
+          errorMessage = messages.join('\n');
         }
       }
     }

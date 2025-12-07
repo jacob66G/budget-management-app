@@ -11,9 +11,9 @@
 
   <div class="filters-bar">
     <mat-chip-listbox aria-label="Filter by type" [value]="currentType()">
-      <mat-chip-option [value]="null" (click)="onFilterChange(null)" selected>
+      <!-- <mat-chip-option [value]="null" (click)="onFilterChange(null)" selected>
         All
-      </mat-chip-option>
+      </mat-chip-option> -->
       
       <mat-chip-option value="EXPENSE" (click)="onFilterChange('EXPENSE')" color="warn">
         Expense

@@ -40,10 +40,10 @@ export class CategoryPageComponent {
   private errorService = inject(ApiErrorService)
 
   categories = signal<Category[]>([]);
-  currentType = signal<string | null>(null);
+  currentType = signal<string>('EXPENSE');
   isLoading = signal(true);
 
-  onFilterChange(type: string | null): void {
+  onFilterChange(type: string): void {
     this.currentType.set(type);
     this.loadCategories();
   }
