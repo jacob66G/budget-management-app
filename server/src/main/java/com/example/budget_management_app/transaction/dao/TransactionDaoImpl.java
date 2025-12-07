@@ -13,7 +13,6 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.*;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,7 +29,6 @@ public class TransactionDaoImpl implements TransactionDao {
     /**
      * @return List of TransactionView objects
      */
-    @Transactional(readOnly = true)
     @Override
     public List<Tuple> getTuples(
             TransactionPaginationParams paginationParams,
@@ -111,7 +109,6 @@ public class TransactionDaoImpl implements TransactionDao {
     /**
      * @return the number of transactions
      */
-    @Transactional(readOnly = true)
     @Override
     public Long getCount(TransactionFilterParams filterParams, Long userId) {
 
@@ -140,7 +137,6 @@ public class TransactionDaoImpl implements TransactionDao {
                 .getSingleResult();
     }
 
-    @Transactional
     @Override
     public Transaction save(Transaction transaction) {
         em.persist(transaction);
@@ -148,13 +144,11 @@ public class TransactionDaoImpl implements TransactionDao {
         return transaction;
     }
 
-    @Transactional
     @Override
     public void delete(Transaction transaction) {
         em.remove(transaction);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public Optional<Transaction> findByIdAndUserId(Long id, Long userId) {
 
@@ -170,7 +164,6 @@ public class TransactionDaoImpl implements TransactionDao {
         return results.stream().findFirst();
     }
 
-    @Transactional(readOnly = true)
     @Override
     public Optional<Transaction> findByIdAndUserIdAndCategoryId(Long id, Long categoryId, Long userId) {
 
@@ -191,7 +184,6 @@ public class TransactionDaoImpl implements TransactionDao {
      * @param id
      * @return
      */
-    @Transactional(readOnly = true)
     @Override
     public List<Transaction> findByRecurringTransactionId(Long id) {
 

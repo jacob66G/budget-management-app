@@ -4,8 +4,15 @@ import com.example.budget_management_app.account.dao.AccountDao;
 import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.analytics.dao.AnalyticsDao;
 import com.example.budget_management_app.analytics.dto.*;
+import com.example.budget_management_app.analytics.mapper.Mapper;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
+import com.example.budget_management_app.transaction.dao.TransactionDao;
+import com.example.budget_management_app.transaction.domain.SortDirection;
+import com.example.budget_management_app.transaction.domain.SortedBy;
+import com.example.budget_management_app.transaction.domain.TransactionModeFilter;
+import com.example.budget_management_app.transaction.dto.TransactionFilterParams;
+import com.example.budget_management_app.transaction.dto.TransactionPaginationParams;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,65 +31,216 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AnalyticsServiceImpl implements AnalyticsService {
 
     private final AccountDao accountDao;
+    private final TransactionDao transactionDao;
     private final AnalyticsDao analyticsDao;
+    private final Mapper mapper;
 
     @Override
-    @Transactional(readOnly = true)
-    public List<ChartPointDto> getBalanceHistory(Long userId, Long accountId, LocalDateTime from, LocalDateTime to) {
+    public List<BalanceHistoryPointDto> getAccountBalanceHistory(Long userId, Long accountId, LocalDateTime from, LocalDateTime to) {
         Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException("Account with id: " + accountId + "  not found.", ErrorCode.NOT_FOUND));
 
+        LocalDateTime createdAt = account.getCreatedAt().atZone(ZoneId.of("UTC")).toLocalDateTime();
+
+        LocalDateTime effectiveFrom = from;
+        if (from.isBefore(createdAt)) {
+            effectiveFrom = createdAt;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime effectiveTo = to;
+        if (to.isAfter(now)) {
+            effectiveTo = now;
+        }
+
+        if (effectiveFrom.isAfter(effectiveTo)) {
+            return new ArrayList<>();
+        }
+
         BigDecimal currentBalance = account.getBalance();
 
-        BigDecimal changesAfterPeriod = analyticsDao.sumAmountAfterDate(accountId, to);
+        BigDecimal changesAfterPeriod = analyticsDao.sumAccountNetChangeAfterDate(accountId, effectiveTo);
         BigDecimal balanceAtEnd = currentBalance.subtract(changesAfterPeriod);
 
-        long daysDiff = ChronoUnit.DAYS.between(from, to);
+        long daysDiff = ChronoUnit.DAYS.between(effectiveFrom, effectiveTo);
 
         if (daysDiff > 90) {
-            return getMonthlyHistory(accountId, from, to, balanceAtEnd);
+            return getMonthlyHistory(accountId, effectiveFrom, effectiveTo, balanceAtEnd);
         } else {
-            return getDailyHistory(accountId, from, to, balanceAtEnd);
+            return getDailyHistory(accountId, effectiveFrom, effectiveTo, balanceAtEnd);
         }
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<CategoryChartPoint> getCategoryBreakdown(Long userId, Long accountId, LocalDateTime from, LocalDateTime to, TransactionType type) {
+    public List<CategoryBreakdownPointDto> getAccountCategoryBreakdown(Long userId, Long accountId, LocalDateTime from, LocalDateTime to, TransactionType type) {
         accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException("Account with id: " + accountId + "  not found.", ErrorCode.NOT_FOUND));
 
-        return analyticsDao.getCategorySums(accountId, from, to, type);
+        return analyticsDao.getAccountCategoryBreakdown(accountId, from, to, type);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<CashFlowChartPointDto> getCashFlow(Long userId, Long accountId, LocalDateTime from, LocalDateTime to) {
+    public List<CashFlowPointDto> getAccountCashFlow(Long userId, Long accountId, LocalDateTime from, LocalDateTime to) {
         accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException("Account with id: " + accountId + "  not found.", ErrorCode.NOT_FOUND));
 
         long daysDiff = ChronoUnit.DAYS.between(from, to);
 
         if (daysDiff <= 90) {
-            return getDailyCashFlowFilled(accountId, from, to);
+            List<CashFlowPointDto> rawData = analyticsDao.getAccountDailyCashFlow(accountId, from, to);
+            return getDailyCashFlowFilled(rawData, from, to);
         } else {
-            return getMonthlyCashFlowFilled(accountId, from, to);
+            List<PeriodSumCashFlowDto> rawData = analyticsDao.getAccountMonthlyCashFlow(accountId, from, to);
+            return getMonthlyCashFlowFilled(rawData, from, to);
         }
     }
 
-    private List<CashFlowChartPointDto> getMonthlyCashFlowFilled(Long accountId, LocalDateTime from, LocalDateTime to) {
-        List<PeriodSumCashFlowDto> rawData = analyticsDao.getMonthlyCashFlow(accountId, from, to);
+    @Override
+    public MultiSeriesChartDto getGlobalBalanceHistory(Long userId, LocalDateTime from, LocalDateTime to) {
+        List<LocalDate> masterTimeline = generateMasterTimeline(from.toLocalDate(), to.toLocalDate());
 
+        List<LocalDate> labels = masterTimeline.stream().toList();
+
+        List<ChartSeriesDto> seriesList = new ArrayList<>();
+
+        List<Account> accounts = accountDao.findByUser(userId).stream()
+                .filter(Account::isIncludeInTotalBalance)
+                .toList();
+
+        for (Account acc : accounts) {
+            List<BalanceHistoryPointDto> rawHistory = getAccountBalanceHistory(userId, acc.getId(), from, to);
+
+            Map<LocalDate, BigDecimal> historyMap = rawHistory.stream()
+                    .collect(Collectors.toMap(BalanceHistoryPointDto::date, BalanceHistoryPointDto::amount));
+
+            List<BigDecimal> alignedData = new ArrayList<>();
+
+            for (LocalDate datePoint : masterTimeline) {
+                alignedData.add(historyMap.getOrDefault(datePoint, BigDecimal.ZERO));
+            }
+
+            seriesList.add(new ChartSeriesDto(acc.getName(), alignedData));
+        }
+
+        return new MultiSeriesChartDto(labels, seriesList);
+    }
+
+    private List<LocalDate> generateMasterTimeline(LocalDate from, LocalDate to) {
+        List<LocalDate> timeline = new ArrayList<>();
+        long daysDiff = ChronoUnit.DAYS.between(from, to);
+        boolean isMonthly = daysDiff > 90;
+
+        if (isMonthly) {
+            YearMonth startMonth = YearMonth.from(from);
+            YearMonth endMonth = YearMonth.from(to);
+
+            for (YearMonth month = startMonth; !month.isAfter(endMonth); month = month.plusMonths(1)) {
+                LocalDate pointDate = month.atEndOfMonth();
+                if (month.equals(endMonth) && pointDate.isAfter(to)) {
+                    pointDate = to;
+                }
+                timeline.add(pointDate);
+            }
+        } else {
+            for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
+                timeline.add(date);
+            }
+        }
+        return timeline;
+    }
+
+    @Override
+    public List<CategoryBreakdownPointDto> getGlobalCategoryBreakdown(Long userId, LocalDateTime from, LocalDateTime to, TransactionType type) {
+        return analyticsDao.getGlobalCategoryBreakdown(userId, from, to, type);
+    }
+
+    @Override
+    public List<CashFlowPointDto> getGlobalCashFlow(Long userId, LocalDateTime from, LocalDateTime to) {
+        long daysDiff = ChronoUnit.DAYS.between(from, to);
+
+        if (daysDiff <= 90) {
+            List<CashFlowPointDto> rawData = analyticsDao.getGlobalDailyCashFlow(userId, from, to);
+            return getDailyCashFlowFilled(rawData, from, to);
+        } else {
+            List<PeriodSumCashFlowDto> rawData = analyticsDao.getGlobalMonthlyCashFlow(userId, from, to);
+            return getMonthlyCashFlowFilled(rawData, from, to);
+        }
+    }
+
+    @Override
+    public FinancialSummaryDto getGlobalFinancialSummary(Long userId, LocalDateTime from, LocalDateTime to) {
+        List<Account> allAccounts = accountDao.findByUser(userId);
+
+        List<Account> analyticAccounts = allAccounts.stream()
+                .filter(Account::isIncludeInTotalBalance)
+                .toList();
+
+        BigDecimal currentTotalBalance = analyticAccounts.stream()
+                .map(Account::getBalance)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal changesAfterPeriod = analyticsDao.sumGlobalNetChangeAfterDate(userId, to);
+        BigDecimal closingBalance = currentTotalBalance.subtract(changesAfterPeriod);
+
+        BigDecimal incomeInRange = analyticsDao.sumGlobalTotalByType(userId, from, to, TransactionType.INCOME);
+        BigDecimal expenseInRange = analyticsDao.sumGlobalTotalByType(userId, from, to, TransactionType.EXPENSE);
+        BigDecimal netSavings = incomeInRange.subtract(expenseInRange);
+
+        List<Long> analyticAccountIds = analyticAccounts.stream().map(Account::getId).toList();
+
+        List<TransactionSummaryDto> transactionsSummary = List.of();
+        if (!analyticAccountIds.isEmpty()) {
+            TransactionPaginationParams pagination = new TransactionPaginationParams(1, 10, SortedBy.DATE, SortDirection.DESC);
+            TransactionFilterParams filters = new TransactionFilterParams();
+            filters.setMode(TransactionModeFilter.REGULAR);
+            filters.setAccountIds(analyticAccountIds);
+
+            transactionsSummary = transactionDao.getTuples(pagination, filters, userId)
+                    .stream().map(mapper::toTransactionSummary).toList();
+        }
+
+        List<AccountSummaryDto> accountsSummary = allAccounts.stream()
+                .map(mapper::toAccountSummary)
+                .toList();
+
+        return new FinancialSummaryDto(
+                closingBalance,
+                incomeInRange,
+                expenseInRange,
+                netSavings,
+                accountsSummary,
+                transactionsSummary
+        );
+    }
+
+    private List<CashFlowPointDto> getDailyCashFlowFilled(List<CashFlowPointDto> rawData, LocalDateTime from, LocalDateTime to) {
+        Map<LocalDate, CashFlowPointDto> dataMap = rawData.stream()
+                .collect(Collectors.toMap(CashFlowPointDto::date, dto -> dto));
+
+        List<CashFlowPointDto> result = new ArrayList<>();
+
+        for (LocalDate date = from.toLocalDate(); !date.isAfter(to.toLocalDate()); date = date.plusDays(1)) {
+            if (dataMap.containsKey(date)) {
+                result.add(dataMap.get(date));
+            } else {
+                result.add(new CashFlowPointDto(date, BigDecimal.ZERO, BigDecimal.ZERO));
+            }
+        }
+        return result;
+    }
+
+    private List<CashFlowPointDto> getMonthlyCashFlowFilled(List<PeriodSumCashFlowDto> rawData, LocalDateTime from, LocalDateTime to) {
         Map<YearMonth, PeriodSumCashFlowDto> dataMap = rawData.stream()
                 .collect(Collectors.toMap(
                         dto -> YearMonth.of(dto.year(), dto.month()),
                         dto -> dto
                 ));
 
-        List<CashFlowChartPointDto> result = new ArrayList<>();
+        List<CashFlowPointDto> result = new ArrayList<>();
 
         YearMonth startMonth = YearMonth.from(from);
         YearMonth endMonth = YearMonth.from(to);
@@ -91,13 +250,13 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
             if (dataMap.containsKey(month)) {
                 PeriodSumCashFlowDto dto = dataMap.get(month);
-                result.add(new CashFlowChartPointDto(
+                result.add(new CashFlowPointDto(
                         periodStart,
                         dto.totalIncome(),
                         dto.totalExpense()
                 ));
             } else {
-                result.add(new CashFlowChartPointDto(
+                result.add(new CashFlowPointDto(
                         periodStart,
                         BigDecimal.ZERO,
                         BigDecimal.ZERO
@@ -108,26 +267,30 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         return result;
     }
 
-    private List<CashFlowChartPointDto> getDailyCashFlowFilled(Long accountId, LocalDateTime from, LocalDateTime to) {
-        List<CashFlowChartPointDto> rawData = analyticsDao.getDailyCashFlow(accountId, from, to);
+    private List<BalanceHistoryPointDto> getDailyHistory(Long accountId, LocalDateTime from, LocalDateTime to, BigDecimal balanceAtEnd) {
+        List<DailySumDto> dailyChanges = analyticsDao.getAccountDailyNetChanges(accountId, from, to);
 
-        Map<LocalDate, CashFlowChartPointDto> dataMap = rawData.stream()
-                .collect(Collectors.toMap(CashFlowChartPointDto::date, dto -> dto));
+        Map<LocalDate, BigDecimal> changesMap = dailyChanges.stream()
+                .collect(Collectors.toMap(DailySumDto::date, DailySumDto::amount));
 
-        List<CashFlowChartPointDto> result = new ArrayList<>();
+        List<BalanceHistoryPointDto> result = new ArrayList<>();
 
-        for (LocalDate date = from.toLocalDate(); !date.isAfter(to.toLocalDate()); date = date.plusDays(1)) {
-            if (dataMap.containsKey(date)) {
-                result.add(dataMap.get(date));
-            } else {
-                result.add(new CashFlowChartPointDto(date, BigDecimal.ZERO, BigDecimal.ZERO));
-            }
+        LocalDate endDate = to.toLocalDate();
+        LocalDate startDate = from.toLocalDate();
+
+        BigDecimal runningBalance = balanceAtEnd;
+        for (LocalDate date = endDate; !date.isBefore(startDate); date = date.minusDays(1)) {
+            result.addFirst(new BalanceHistoryPointDto(date, runningBalance));
+
+            BigDecimal changeOnThisDay = changesMap.getOrDefault(date, BigDecimal.ZERO);
+            runningBalance = runningBalance.subtract(changeOnThisDay);
         }
+
         return result;
     }
 
-    private List<ChartPointDto> getMonthlyHistory(Long accountId, LocalDateTime from, LocalDateTime to, BigDecimal balanceAtEnd) {
-        List<PeriodSumDto> monthlyChanges = analyticsDao.getMonthlySums(accountId, from, to);
+    private List<BalanceHistoryPointDto> getMonthlyHistory(Long accountId, LocalDateTime from, LocalDateTime to, BigDecimal balanceAtEnd) {
+        List<PeriodSumDto> monthlyChanges = analyticsDao.getAccountMonthlyNetChanges(accountId, from, to);
 
         Map<YearMonth, BigDecimal> changesMap = monthlyChanges.stream()
                 .collect(Collectors.toMap(
@@ -135,7 +298,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                         PeriodSumDto::amount
                 ));
 
-        List<ChartPointDto> result = new ArrayList<>();
+        List<BalanceHistoryPointDto> result = new ArrayList<>();
 
         YearMonth startMonth = YearMonth.from(from);
         YearMonth endMonth = YearMonth.from(to);
@@ -150,32 +313,10 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 pointDate = to.toLocalDate();
             }
 
-            result.addFirst(new ChartPointDto(pointDate, runningBalance));
+            result.addFirst(new BalanceHistoryPointDto(pointDate, runningBalance));
 
             BigDecimal changeInMonth = changesMap.getOrDefault(month, BigDecimal.ZERO);
             runningBalance = runningBalance.subtract(changeInMonth);
-        }
-
-        return result;
-    }
-
-    private List<ChartPointDto> getDailyHistory(Long accountId, LocalDateTime from, LocalDateTime to, BigDecimal balanceAtEnd) {
-        List<DailySumDto> dailyChanges = analyticsDao.getDailySums(accountId, from, to);
-
-        Map<LocalDate, BigDecimal> changesMap = dailyChanges.stream()
-                .collect(Collectors.toMap(DailySumDto::date, DailySumDto::amount));
-
-        List<ChartPointDto> result = new ArrayList<>();
-
-        LocalDate endDate = to.toLocalDate();
-        LocalDate startDate = from.toLocalDate();
-
-        BigDecimal runningBalance = balanceAtEnd;
-        for (LocalDate date = endDate; !date.isBefore(startDate); date = date.minusDays(1)) {
-            result.addFirst(new ChartPointDto(date, runningBalance));
-
-            BigDecimal changeOnThisDay = changesMap.getOrDefault(date, BigDecimal.ZERO);
-            runningBalance = runningBalance.subtract(changeOnThisDay);
         }
 
         return result;

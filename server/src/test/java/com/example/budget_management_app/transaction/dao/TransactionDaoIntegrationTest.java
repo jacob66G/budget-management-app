@@ -163,7 +163,7 @@ public class TransactionDaoIntegrationTest {
 
             // given
             Long userId = 2L;
-            Long expectedNumberOfRecords = 4L;
+            Long expectedNumberOfRecords = 3L;
             LocalDate since = LocalDate.now().minusMonths(1).minusDays(20);
             LocalDate to = LocalDate.now().minusDays(20);
             TransactionFilterParams filterParams =

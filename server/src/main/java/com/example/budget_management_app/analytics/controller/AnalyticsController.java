@@ -1,9 +1,6 @@
 package com.example.budget_management_app.analytics.controller;
 
-import com.example.budget_management_app.analytics.dto.CashFlowChartPointDto;
-import com.example.budget_management_app.analytics.dto.DateRange;
-import com.example.budget_management_app.analytics.dto.CategoryChartPoint;
-import com.example.budget_management_app.analytics.dto.ChartPointDto;
+import com.example.budget_management_app.analytics.dto.*;
 import com.example.budget_management_app.analytics.service.AnalyticsService;
 import com.example.budget_management_app.security.service.CustomUserDetails;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
@@ -22,31 +19,61 @@ public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
 
-    @GetMapping("/balance-history/{accountId}")
-    public ResponseEntity<List<ChartPointDto>> getBalanceHistory(
+    @GetMapping("/accounts/{accountId}/balance-history")
+    public ResponseEntity<List<BalanceHistoryPointDto>> getAccountBalanceHistory(
             @PathVariable Long accountId,
             @Valid DateRange dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return ResponseEntity.ok(analyticsService.getBalanceHistory(userDetails.getId(), accountId, dto.getFromDateTime(), dto.getToDateTime()));
+        return ResponseEntity.ok(analyticsService.getAccountBalanceHistory(userDetails.getId(), accountId, dto.getFromDateTime(), dto.getToDateTime()));
     }
 
-    @GetMapping("/categories/{accountId}")
-    public ResponseEntity<List<CategoryChartPoint>> getCategoryBreakdown(
+    @GetMapping("/accounts/{accountId}/categories")
+    public ResponseEntity<List<CategoryBreakdownPointDto>> getAccountCategoryBreakdown(
             @PathVariable Long accountId,
             @RequestParam TransactionType type,
             @Valid DateRange dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return ResponseEntity.ok(analyticsService.getCategoryBreakdown(userDetails.getId(), accountId, dto.getFromDateTime(), dto.getToDateTime(), type));
+        return ResponseEntity.ok(analyticsService.getAccountCategoryBreakdown(userDetails.getId(), accountId, dto.getFromDateTime(), dto.getToDateTime(), type));
     }
 
-    @GetMapping("/cash-flow/{accountId}")
-    public ResponseEntity<List<CashFlowChartPointDto>> getCashFlow(
+    @GetMapping("/accounts/{accountId}/cash-flow")
+    public ResponseEntity<List<CashFlowPointDto>> getAccountCashFlow(
             @PathVariable Long accountId,
             @Valid DateRange dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return ResponseEntity.ok(analyticsService.getCashFlow(userDetails.getId(), accountId, dto.getFromDateTime(), dto.getToDateTime()));
+        return ResponseEntity.ok(analyticsService.getAccountCashFlow(userDetails.getId(), accountId, dto.getFromDateTime(), dto.getToDateTime()));
+    }
+
+    @GetMapping("/global/summary")
+    public ResponseEntity<FinancialSummaryDto> getGlobalFinancialSummary(@Valid DateRange dto, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(analyticsService.getGlobalFinancialSummary(userDetails.getId(), dto.getFromDateTime(), dto.getToDateTime()));
+    }
+
+    @GetMapping("/global/balance-history")
+    public ResponseEntity<MultiSeriesChartDto> getGlobalBalanceHistory(
+            @Valid DateRange dto,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(analyticsService.getGlobalBalanceHistory(userDetails.getId(), dto.getFromDateTime(), dto.getToDateTime()));
+    }
+
+    @GetMapping("/global/categories")
+    public ResponseEntity<List<CategoryBreakdownPointDto>> getGlobalCategoryBreakdown(
+            @RequestParam TransactionType type,
+            @Valid DateRange dto,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(analyticsService.getGlobalCategoryBreakdown(userDetails.getId(), dto.getFromDateTime(), dto.getToDateTime(), type));
+    }
+
+    @GetMapping("/global/cash-flow")
+    public ResponseEntity<List<CashFlowPointDto>> getGlobalCashFlow(
+            @Valid DateRange dto,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(analyticsService.getGlobalCashFlow(userDetails.getId(), dto.getFromDateTime(), dto.getToDateTime()));
     }
 }
