@@ -1,0 +1,143 @@
+<div class="page-container">
+  
+  <div class="page-header">
+    <div class="header-text">
+      <h1>Recurring Templates</h1>
+      <p>Manage your recurring transaction templates</p>
+    </div>
+    
+    <button mat-stroked-button routerLink="/app/transactions" class="back-btn">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Transactions
+    </button>
+  </div>
+
+  <div class="actions-row">
+    <button mat-flat-button class="new-template-btn" (click)="onAddRecurringTemplate()">
+      <mat-icon>add</mat-icon>
+      New Template
+    </button>
+  </div>
+
+  <div class="templates-panel">
+    
+    <div class="list-summary">
+      <h3>Recurring Templates</h3>
+      @if (!isLoading() && templates.length > 0) {
+        <p>You have {{ activeCount }} active and {{ inactiveCount }} inactive templates</p>
+      }
+    </div>
+
+    <div class="list-content">
+      @if (!isLoading()){
+        @for (template of templates; track template.id) {
+          
+          <div class="template-card" [class.inactive-card]="!template.isActive">
+            
+            <div class="card-header">
+              <div class="left-group">
+                <div class="icon-box" [class.income]="isIncome(template)" [class.expense]="!isIncome(template)">
+                  <mat-icon>{{ template.categorySummary.iconKey }}</mat-icon>
+                </div>
+                
+                <div class="title-section">
+                  <span class="t-title">{{ template.title }}</span>
+                  <span class="t-type">{{ template.categorySummary.name }}</span>
+                </div>
+              </div>
+
+              <button mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+
+              <mat-menu #menu="matMenu" xPosition="after" class="custom-action-menu">
+  
+                <button mat-menu-item (click)="onEditTemplate(template)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+
+                <mat-divider></mat-divider>
+
+                <button mat-menu-item (click)="onChangeStatus(template)">
+                  @if (template.isActive) {
+                    <mat-icon>toggle_on</mat-icon>
+                  } @else {
+                    <mat-icon>toggle_off</mat-icon>
+                  }
+
+                  <span>
+                    @if (template.isActive) { 
+                      Deactivate 
+                    } @else { 
+                      Activate 
+                    }
+                  </span>
+                </button>
+
+                <mat-divider></mat-divider>
+
+                <button mat-menu-item class="delete-item" (click)="onDeleteTemplate(template)">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+
+              </mat-menu>
+
+            </div>
+
+            <div class="card-grid">
+              
+              <div class="grid-item">
+                <label>AMOUNT</label>
+                <span class="value amount" [class.positive]="isIncome(template)" [class.negative]="!isIncome(template)">
+                  {{ template.amount | amountFormat : template.accountSummary.currency : 'symbol' : isIncome(template)}}
+                </span>
+              </div>
+
+              <div class="grid-item">
+                <label>FREQUENCY</label>
+                <span class="value other">{{ getFrequencyLabel(template.recurringValue, template.recurringInterval) }}</span>
+              </div>
+
+              <div class="grid-item">
+                <label>ACCOUNT</label>
+                <span class="value other">{{ template.accountSummary.name }}</span>
+              </div>
+
+            </div>
+
+            <div class="card-footer">
+              <div class="next-date">
+                <label>Next Occurrence:</label>
+                @if (!template.isActive) {
+                  <span class="date-val">Suspended</span>
+                }@else {
+                  <span class="date-val">{{ template.nextOccurrence | date:'MMM d, y' }}</span>
+                }
+              </div>
+
+              <div class="status-badge" [class.active]="template.isActive" [class.inactive]="!template.isActive">
+                {{ template.isActive ? 'ACTIVE' : 'INACTIVE' }}
+              </div>
+            </div>
+
+          </div>
+        } @empty {
+          <div class="empty-template-panel">
+            <div class="icon-wrapper">
+              <mat-icon>search_off</mat-icon> </div>
+            <h3>No templates</h3>
+            <p>It seems you don't have any tempalte yet</p>
+        </div>
+        }
+      } @else {
+        <div class="loading-container">
+          <mat-spinner diameter="40" strokeWidth="4"></mat-spinner>
+          <p>Fetching your templates...</p>
+        </div>
+      }
+    </div>
+
+  </div>
+</div>

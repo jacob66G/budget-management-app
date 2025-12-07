@@ -1,10 +1,10 @@
 .transactions-panel {
   background: #fff;
-  border: 1px solid #e5e7eb;     // Jasnoszara ramka
-  border-radius: 12px;           // Zaokrąglenie rogów panelu
-  padding: 24px;                 // Odstęp wewnętrzny
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); // Subtelny cień
-  font-family: 'Inter', sans-serif;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  font-family: var(--font-family-default);
   
   display: flex;
   flex-direction: column;
@@ -20,14 +20,14 @@
 
   h3 {
     font-size: 18px;
-    font-weight: 700; // Bold
-    color: #111827;   // Prawie czarny
+    font-weight: 700;
+    color: #111827;
     margin: 0 0 6px 0;
   }
 
   p {
     font-size: 14px;
-    color: #6b7280;   // Szary tekst pomocniczy
+    color: #6b7280;
     margin: 0;
   }
 }
@@ -35,24 +35,21 @@
 .list-container {
   display: flex;
   flex-direction: column;
-  gap: 10px; // Odstępy między kartami transakcji
+  gap: 10px;
 }
 
 .transaction-card {
   display: flex;
-  align-items: center; // Wyrównanie elementów do środka w pionie
+  align-items: center;
   background: #fff;
-  
-  // Ramka karty - nieco jaśniejsza niż ramka panelu
   border: 1px solid #dadbdd; 
-  border-radius: 12px; // Zaokrąglenie rogów karty
+  border-radius: 12px;
   padding: 16px 20px;
-  
-  transition: all 0.2s ease-in-out; // Płynne przejścia dla hovera
+  transition: all 0.2s ease-in-out;
 
   &:hover {
     border-color: #d1d5db; 
-    background-color: #fafafa; // Bardzo delikatne szare tło
+    background-color: #fafafa;
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
   }
 }
@@ -60,12 +57,12 @@
 .icon-box {
   width: 48px;
   height: 48px;
-  border-radius: 12px; // Kwadrat z mocno zaokrąglonymi rogami (Squircle)
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 16px;
-  flex-shrink: 0; // Zapobiega ściskaniu ikony przy małej szerokości
+  flex-shrink: 0;
 
   mat-icon {
     font-size: 24px;
@@ -73,34 +70,29 @@
     height: 24px;
   }
 
-  // Wariant dla PRZYCHODU (Zielony)
   &.income {
-    background-color: #dcfce7; // Bardzo jasny zielony
-    color: #16a34a;            // Soczysty zielony
+    background-color: #dcfce7;
+    color: #16a34a;
   }
 
-  // Wariant dla WYDATKU (Czerwony/Różowy)
   &.expense {
-    background-color: #fee2e2; // Bardzo jasny czerwony
-    color: #ef4444;            // Czerwony
+    background-color: #fee2e2;
+    color: #ef4444;
   }
 }
 
-// B. Sekcja środkowa (Tytuł, Konto, Kategoria)
 .details-section {
-  flex: 1; // Zajmuje całą dostępną przestrzeń
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px; // Odstęp między wierszem tytułu a opisem
-  overflow: hidden; // Zabezpieczenie dla bardzo długich tekstów
+  gap: 4px;
+  overflow: hidden;
 }
 
 .note-row {
-  font-size: 13px !important;       // Mały tekst, taki sam jak w meta-row
-  color: #515661 !important;        // Szary kolor (nie czarny)
-  margin-top: 6px !important;       // Mały odstęp od linii wyżej (Account • Category)
-  
-  // Opcjonalnie: Zabezpieczenie przed bardzo długim opisem
+  font-size: 13px !important;
+  color: #515661 !important;
+  margin-top: 6px !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -121,12 +113,11 @@
     text-overflow: ellipsis;
   }
 
-  // Niebieska ikona strzałek (rekurencja)
   .recurring-icon {
     font-size: 18px;
     width: 18px;
     height: 18px;
-    color: #3b82f6; // Niebieski (Primary blue)
+    color: #3b82f6;
   }
 }
 
@@ -139,22 +130,20 @@
   .dot-separator {
     margin: 0 6px;
     color: #6f747c;
-    font-size: 16px; // Mniejsza kropka
+    font-size: 16px;
   }
 
-  // Pigułka z nazwą kategorii
   .category-pill {
     background-color: #f3f4f6;
     border: 1px solid #e5e7eb;
     padding: 2px 10px;
-    border-radius: 99px; // Kształt kapsułki
+    border-radius: 99px;
     font-weight: 500;
     color: black;
     font-size: 14px;
   }
 }
 
-// Opcjonalny wiersz z notatką (jeśli chcesz go pokazywać)
 .note-row {
   font-size: 12px;
   color: #9ca3af;
@@ -162,11 +151,10 @@
   font-style: italic;
 }
 
-// C. Sekcja prawa (Kwota i Data)
 .amount-section {
   text-align: right;
   margin-right: 12px;
-  min-width: 100px; // Żeby daty były równo w pionie
+  min-width: 100px;
 
   .amount {
     display: block;
@@ -174,8 +162,8 @@
     font-size: 18px;
     margin-bottom: 6px;
 
-    &.positive { color: #16a34a; } // Zielony
-    &.negative { color: #dc2626; } // Czerwony
+    &.positive { color: #16a34a; }
+    &.negative { color: #dc2626; }
   }
 
   .date {
@@ -185,7 +173,6 @@
   }
 }
 
-// D. Przycisk akcji (3 kropki)
 .actions-section {
   button {
     color: #9ca3af;
@@ -195,12 +182,11 @@
   }
 }
 
-// --- 3. STOPKA Z PAGINACJĄ ---
 .panel-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 8px; // Lekki odstęp od listy
+  padding-top: 8px;
 
   .page-info {
     font-size: 14px;
@@ -211,7 +197,6 @@
     display: flex;
     gap: 12px;
 
-    // Style przycisków Prev/Next
     button {
       font-size: 13px;
       font-weight: 500;
@@ -225,8 +210,7 @@
         width: 18px;
         height: 18px;
         line-height: 18px;
-        
-        // Korekta marginesów ikon w przyciskach
+
         &:first-child { margin-right: 4px; margin-left: -4px; }
         &:last-child { margin-left: 4px; margin-right: -4px; }
       }
@@ -246,17 +230,14 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  
-  // Wygląd kontenera
-  padding: 64px 24px;       // Duży padding góra/dół daje "oddech"
-  background-color: #f9fafb; // Bardzo jasne szare tło (różne od białego panelu)
-  border: 2px dashed #e5e7eb; // Przerywana ramka sugeruje "miejsce na treść"
+  padding: 64px 24px;
+  background-color: #f9fafb;
+  border: 2px dashed #e5e7eb;
   border-radius: 12px;
-  margin-top: 12px;         // Odstęp od nagłówka
-  
-  // Stylizacja ikony
+  margin-top: 12px;
+ 
   .icon-wrapper {
-    background-color: #f3f4f6; // Kółko pod ikoną
+    background-color: #f3f4f6;
     width: 64px;
     height: 64px;
     border-radius: 50%;
@@ -269,14 +250,14 @@
       font-size: 32px;
       width: 32px;
       height: 32px;
-      color: #9ca3af; // Średni szary kolor ikony
+      color: #9ca3af;
     }
   }
 
   h3 {
     font-size: 20px;
     font-weight: 600;
-    color: #111827; // Ciemny tekst
+    color: #111827;
     margin: 0 0 8px 0;
   }
 
@@ -290,18 +271,25 @@
 }
 
 ::ng-deep .action-menu {
-  border-radius: 10px !important;
+  border-radius: 12px !important; 
+  padding: 4px 0;
+
+    button[mat-menu-item] {
+    font-family: var(--font-family-default);
+    font-size: 14px;
+    color: #374151;
+
+    mat-icon {
+      color: #6b7280;
+      margin-right: 12px;
+    }
+  }
 }
 
 ::ng-deep .delete-item {
   color: #dc2626 !important;
 
-
   &:hover {
     background-color: #fef2f2 !important; 
   }
-}
-
-::ng-deep .action-menu button mat-icon {
-  color: rgb(152, 151, 151) !important;
 }

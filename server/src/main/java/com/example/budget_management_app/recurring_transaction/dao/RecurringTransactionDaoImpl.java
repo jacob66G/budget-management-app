@@ -47,6 +47,7 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
                 root.get("type").alias("type"),
                 root.get("isActive").alias("isActive"),
                 root.get("description").alias("desc"),
+                root.get("nextOccurrence").alias("nextOccurrence"),
                 root.get("recurringInterval").alias("recInterval"),
                 root.get("recurringValue").alias("recValue"),
                 account.get("id").alias("accountId"),

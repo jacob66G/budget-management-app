@@ -6,6 +6,7 @@ import com.example.budget_management_app.transaction_common.dto.AccountSummary;
 import com.example.budget_management_app.transaction_common.dto.CategorySummary;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public record RecurringTransactionSummary(
         long id,
@@ -14,6 +15,7 @@ public record RecurringTransactionSummary(
         TransactionType type,
         boolean isActive,
         String description,
+        LocalDate nextOccurrence,
         RecurringInterval recurringInterval,
         int recurringValue,
         AccountSummary accountSummary,

@@ -11,7 +11,6 @@
   gap: 24px;
 }
 
-// --- Header i Filtry ---
 .panel-header {
   font-size: 18px;
   display: flex;
@@ -27,7 +26,7 @@
 
   p {
     font-size: 14px;
-    color: #6b7280;   // Szary tekst pomocniczy
+    color: #6b7280;
     margin: 0;
   }
 
@@ -36,7 +35,6 @@
     gap: 8px;
   }
 
-  // Stylowanie przycisków zakresu (Next 7 Days...)
   .range-btn {
     padding: 8px 16px;
     font-size: 14px;
@@ -44,8 +42,6 @@
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
-    
-    // Domyślny stan (nieaktywny - biały)
     background-color: #fff;
     border: 1px solid #a9abad;
     color: #000000;
@@ -54,16 +50,14 @@
       background-color: #f9fafb;
     }
 
-    // Stan aktywny (czarny, jak na zdjęciu)
     &.active {
       background-color: var(--primary-color);
-      color: #fff;            // Biały tekst
+      color: #fff;
       border-color: #111;
     }
   }
 }
 
-// --- Lista ---
 .list-container {
   display: flex;
   flex-direction: column;
@@ -88,7 +82,6 @@
   }
 }
 
-// --- Ikona ---
 .icon-box {
   width: 48px;
   height: 48px;
@@ -102,10 +95,9 @@
   mat-icon { font-size: 24px; width: 24px; height: 24px; }
 
   &.income { background-color: #dcfce7; color: #16a34a; }
-  &.expense { background-color: #fee2e2; color: #ef4444; } // Czerwony/pomarańczowy ze zdjęcia
+  &.expense { background-color: #fee2e2; color: #ef4444; }
 }
 
-// --- Środek ---
 .details-section {
   flex: 1;
   display: flex;
@@ -140,7 +132,6 @@
   }
 }
 
-// --- Prawa strona ---
 .amount-section {
   text-align: right;
   min-width: 100px;
@@ -158,11 +149,10 @@
   .date {
     display: block;
     font-size: 15px;
-    color: #6b7280; // Ciemniejszy szary dla daty
+    color: #6b7280;
   }
 }
 
-// --- Footer ---
 .panel-footer {
   display: flex;
   justify-content: space-between;
@@ -175,7 +165,6 @@
     display: flex;
     gap: 12px;
 
-    // Style przycisków Prev/Next
     button {
       font-size: 13px;
       font-weight: 500;
@@ -189,8 +178,7 @@
         width: 18px;
         height: 18px;
         line-height: 18px;
-        
-        // Korekta marginesów ikon w przyciskach
+
         &:first-child { margin-right: 4px; margin-left: -4px; }
         &:last-child { margin-left: 4px; margin-right: -4px; }
       }
@@ -210,17 +198,14 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  
-  // Wygląd kontenera
-  padding: 64px 24px;       // Duży padding góra/dół daje "oddech"
-  background-color: #f9fafb; // Bardzo jasne szare tło (różne od białego panelu)
-  border: 2px dashed #e5e7eb; // Przerywana ramka sugeruje "miejsce na treść"
+  padding: 64px 24px;
+  background-color: #f9fafb;
+  border: 2px dashed #e5e7eb;
   border-radius: 12px;
-  margin-top: 12px;         // Odstęp od nagłówka
-  
-  // Stylizacja ikony
+  margin-top: 12px;
+
   .icon-wrapper {
-    background-color: #f3f4f6; // Kółko pod ikoną
+    background-color: #f3f4f6;
     width: 64px;
     height: 64px;
     border-radius: 50%;
@@ -233,24 +218,22 @@
       font-size: 32px;
       width: 32px;
       height: 32px;
-      color: #9ca3af; // Średni szary kolor ikony
+      color: #9ca3af;
     }
   }
 
-  // Nagłówek "No transactions found"
   h3 {
     font-size: 20px;
     font-weight: 600;
-    color: #111827; // Ciemny tekst
+    color: #111827;
     margin: 0 0 8px 0;
   }
 
-  // Tekst pomocniczy
   p {
     font-size: 14px;
-    color: #6b7280; // Szary tekst
+    color: #6b7280;
     margin: 0;
-    max-width: 300px; // Żeby tekst nie rozlał się za szeroko na dużych ekranach
+    max-width: 300px;
     line-height: 1.5;
   }
 }

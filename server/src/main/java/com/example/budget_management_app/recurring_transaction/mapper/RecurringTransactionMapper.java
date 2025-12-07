@@ -33,6 +33,7 @@ public class RecurringTransactionMapper {
                         tuple.get("type", TransactionType.class),
                         tuple.get("isActive", Boolean.class),
                         tuple.get("desc", String.class),
+                        tuple.get("nextOccurrence", LocalDate.class),
                         tuple.get("recInterval", RecurringInterval.class),
                         tuple.get("recValue", Integer.class),
                         new AccountSummary(

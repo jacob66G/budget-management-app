@@ -5,12 +5,21 @@
       <h1>Transactions</h1>
       <p>Manage and track your income and expenses</p>
     </div>
+  </header>
+    
+  <div class="actions-bar">
     
     <button mat-flat-button color="primary" class="add-btn" (click)="openAddTransactionDialog()">
       <mat-icon>add</mat-icon>
       Add Transaction
     </button>
-  </header>
+
+    <button mat-stroked-button class="recurring-btn" routerLink="recurring-templates">
+      Recurring Templates
+      <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+    </button>
+    
+  </div>
 
   <section class="filters-panel">
     <h3>Filters & Sorting</h3>

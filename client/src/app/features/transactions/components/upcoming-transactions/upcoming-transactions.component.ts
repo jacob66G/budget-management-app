@@ -26,7 +26,6 @@ export class UpcomingTransactionsComponent {
 
   protected readonly TimeRange = UpcomingTransactionsTimeRange;
 
-  // Stan wybranego filtra (domyślnie 7 dni)
   selectedRange = signal<UpcomingTransactionsTimeRange>(UpcomingTransactionsTimeRange.NEXT_7_DAYS);
 
   dateRangeChange = output<UpcomingTransactionsTimeRange>();

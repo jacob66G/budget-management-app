@@ -1,6 +1,6 @@
 .page-container {
   padding: 24px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-family-default);
   max-width: 1200px;
   margin: 0 auto;
 
@@ -28,14 +28,43 @@
       margin: 0;
     }
   }
+}
+
+.actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  
+  button {
+    height: 48px; 
+    border-radius: 12px !important;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 0 24px !important;
+  }
 
   .add-btn {
     background-color: var(--primary-color);
     color: white;
-    border-radius: 8px;
-    padding: 20px 24px;
-    font-size: 14px;
-    font-weight: 500;
+  }
+
+  .recurring-btn {
+    background-color: #fff;
+    border: 2px solid #e5e7eb;
+    color: #111;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin-left: 10px;
+    }
+
+    &:hover {
+      background-color: #f9fafb;
+      border-color: #d1d5db;
+    }
   }
 }
 

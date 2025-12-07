@@ -17,7 +17,7 @@
 
       <div class="input-group">
         <label class="custom-label">Amount</label>
-        <mat-form-field appearance="outline" class="no-label-field">
+        <mat-form-field appearance="outline" class="no-label-field short">
           <input matInput type="number" formControlName="amount">
         </mat-form-field>
       </div>
@@ -39,7 +39,7 @@
         <div class="input-row-with-message">
 
           <div class="flex-grow-field">
-            <mat-form-field appearance="outline" class="no-label-field" style="width: 100%">
+            <mat-form-field appearance="outline" class="no-label-field" [class.short]="!data.isRecurring" style="width: 100%">
               <mat-select formControlName="categoryId">
                 @for (cat of data.categories; track cat.id) {
                   <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
@@ -69,7 +69,7 @@
             matInput 
             formControlName="description" 
             placeholder="Add a note for this transaction..." 
-            rows="3"></textarea>
+            rows="2"></textarea>
         </mat-form-field>
       </div>
 

@@ -34,7 +34,6 @@ export class AddTransactionDialogComponent implements OnInit{
   readonly dialogRef = inject(MatDialogRef<AddTransactionDialogComponent>);
   readonly data = inject<{accountList: AccountSummary[], categoryList: CategorySummary[]}>(MAT_DIALOG_DATA);
 
-  
   typeOptions = [
     { value: TransactionType.EXPENSE, label: 'Expense'},
     { value: TransactionType.INCOME, label: 'Income'}

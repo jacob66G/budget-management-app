@@ -46,6 +46,7 @@ import { UpcomingTransactionsFilterParams } from '../../model/upcoming-transacti
 import { UpcomingTransactionsTimeRange } from '../../constants/upcoming-transactions-time-range.enum';
 import { CategoryType } from '../../../../core/models/category-response-dto.model';
 import { TransactionCategoryChangeRequest } from '../../model/transaction-category-change-request.model';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-transaction-page',
@@ -66,7 +67,8 @@ import { TransactionCategoryChangeRequest } from '../../model/transaction-catego
     FormsModule,
     DateFilterComponent,
     TransactionHistoryComponent,
-    UpcomingTransactionsComponent
+    UpcomingTransactionsComponent,
+    RouterLink
 ],
   providers: [DatePipe],
   templateUrl: './transaction-page.component.html',
@@ -84,10 +86,6 @@ export class TransactionPageComponent implements OnInit{
   categories: CategorySummary[] = [];
   transactions: TransactionSummary[] = [];
   upcomingTransactions: UpcomingTransactionSummary[] = [];
-
-  // transactionTypes = Object.values(TransactionType);
-  // headerTitle: string = 'Transactions';
-  // createTransactionButtonTitle: string = 'Add Transaction';
 
   readonly dialog = inject(MatDialog);
   private accountService = inject(AccountService);
@@ -137,8 +135,8 @@ export class TransactionPageComponent implements OnInit{
   ngOnInit(): void {
     this.loadAccounts();
     this.loadCategories();
-    // this.loadTransactions();
-    // this.loadUpcomingTransactions();
+    this.loadTransactions();
+    this.loadUpcomingTransactions();
   }
 
   handleAddTransactionEvent(): void {
@@ -493,23 +491,7 @@ export class TransactionPageComponent implements OnInit{
           this.transactionService.createTransaction(dto).subscribe({
             next: (data) => {
               console.log("transaction created: ", data);
-              const category = this.categories.find( (cat) => cat.id === dto.categoryId);
-              const account = this.accounts.find( (acc) => acc.id === dto.accountId);
-              if (category && account) {
-
-                const { accountId, categoryId, ...baseData } = dto;
-
-                const transaction: TransactionSummary = {
-                  ...baseData,
-                  id: data.id,
-                  transactionDate: data.transactionDate,
-                  category: category,
-                  account: account,
-                  recurringTransactionId: 0,
-
-                }
               this.loadTransactions();
-              }
             },
             error: (error) => {
               console.log("error occurred when creating transaction");

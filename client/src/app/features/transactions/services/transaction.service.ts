@@ -12,6 +12,10 @@ import { UpcomingTransactionSummary } from '../model/upcoming-transaction-summar
 import { UpcomingTransactionsFilterParams } from '../model/upcoming-transaction-filter-params.mode';
 import { TransactionCategoryChangeRequest } from '../model/transaction-category-change-request.model';
 import { TransactionCategoryChangeResponse } from '../model/transaction-category-change-response.model';
+import { RecurringTemplateSummary } from '../model/recurring-template-summary.model';
+import { isAfter } from 'date-fns';
+import { RecurringTransactionCreateRequest } from '../model/recurring-template-create-request.model';
+import { RecurringTransactionCreateResponse } from '../model/recurring-template-create-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -27,11 +31,19 @@ export class TransactionService {
 
   getUpcomingTransactions(filter: UpcomingTransactionsFilterParams): Observable<PagedResponse<UpcomingTransactionSummary>> {
     const params = this.getCleanParams(filter);
-    return this.http.get<PagedResponse<UpcomingTransactionSummary>>(`${ApiPaths.RECURRING_TRANSACTIONS}/upcoming`, {params});
+    return this.http.get<PagedResponse<UpcomingTransactionSummary>>(`${ApiPaths.RECURRING_TEMPLATES}/upcoming`, {params});
+  }
+
+  getRecurringTemplates(): Observable<PagedResponse<RecurringTemplateSummary>> {
+    return this.http.get<PagedResponse<RecurringTemplateSummary>>(ApiPaths.RECURRING_TEMPLATES);
   }
 
   createTransaction(transactionData: TransactionCreateRequest): Observable<TransactionCreateResponse> {
     return this.http.post<TransactionCreateResponse>(ApiPaths.TRANSACTIONS, transactionData);
+  }
+
+  createRecurringTemplate(templateData: RecurringTransactionCreateRequest): Observable<RecurringTransactionCreateResponse> {
+    return this.http.post<RecurringTransactionCreateResponse>(ApiPaths.RECURRING_TEMPLATES, templateData);
   }
 
   deleteTransaction(id: number): Observable<void> {
@@ -44,6 +56,10 @@ export class TransactionService {
 
   changeTransactionCategory(transactionId: number, reqBody: TransactionCategoryChangeRequest): Observable<TransactionCategoryChangeResponse> {
     return this.http.patch<TransactionCategoryChangeResponse>(`${ApiPaths.TRANSACTIONS}/${transactionId}/category`, reqBody);
+  }
+
+  changeTemplateStatus(id: number, value: boolean): Observable<void> {
+    return this.http.patch<void>(`${ApiPaths.RECURRING_TEMPLATES}/${id}/status`, {isActive: value});
   }
 
   private getCleanParams(filter: any): HttpParams {
