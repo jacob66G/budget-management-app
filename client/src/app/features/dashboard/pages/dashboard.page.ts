@@ -147,4 +147,13 @@ export class DashboardPage implements OnInit {
   onViewTransactions(): void {
       this.router.navigate(['/app/transactions']);
   }
+
+  getTypeClass(type: string): string {
+    switch (type) {
+      case 'INCOME': return 'type-income';
+      case 'EXPENSE': return 'type-expense';
+      case 'GENERAL': return 'type-general';
+      default: return '';
+    }
+  }
 }
