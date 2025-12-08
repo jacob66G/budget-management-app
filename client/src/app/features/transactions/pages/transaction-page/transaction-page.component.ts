@@ -1,6 +1,4 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { AccountService } from '../../../accounts/services/account.service';
-import { CategoryService } from '../../../categories/services/category.service';
 import { AccountSummary } from '../../model/account-summary.model';
 import { CategorySummary } from '../../model/category-summary.model';
 import { map } from 'rxjs';
@@ -47,6 +45,8 @@ import { UpcomingTransactionsTimeRange } from '../../constants/upcoming-transact
 import { CategoryType } from '../../../../core/models/category-response-dto.model';
 import { TransactionCategoryChangeRequest } from '../../model/transaction-category-change-request.model';
 import { RouterLink } from '@angular/router';
+import { AccountService } from '../../../../core/services/account.service';
+import { CategoryService } from '../../../../core/services/category.service';
 
 @Component({
   selector: 'app-transaction-page',

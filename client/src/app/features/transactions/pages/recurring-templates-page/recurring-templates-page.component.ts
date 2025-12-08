@@ -15,8 +15,6 @@ import { MatDivider } from "@angular/material/divider";
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { AddRecurringTemplateDialogComponent } from '../../components/add-recurring-template-dialog/add-recurring-template-dialog.component';
-import { AccountService } from '../../../accounts/services/account.service';
-import { CategoryService } from '../../../categories/services/category.service';
 import { CategorySummary } from '../../model/category-summary.model';
 import { AccountSummary } from '../../model/account-summary.model';
 import { CategoryMapper } from '../../mappers/category.mapper';
@@ -24,6 +22,8 @@ import { map } from 'rxjs';
 import { AccountMapper } from '../../mappers/account.mapper';
 import { RecurringTransactionCreateRequest } from '../../model/recurring-template-create-request.model';
 import { RecurringTemplateMapper } from '../../mappers/recurring-template.mapper';
+import { AccountService } from '../../../../core/services/account.service';
+import { CategoryService } from '../../../../core/services/category.service';
 
 @Component({
   selector: 'app-recurring-templates-page',
