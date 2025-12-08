@@ -37,6 +37,8 @@ export class TransactionHistoryComponent {
   editTransaction = output<number>();
   deleteTransaction = output<number>();
 
+  protected readonly image = 'https://budget-management-app-bucket-2025.s3.eu-north-1.amazonaws.com/accounts/add-money-wallet-icon.png';
+
   isIncome(t: TransactionSummary): boolean {
     return t.type === TransactionType.INCOME;
   }

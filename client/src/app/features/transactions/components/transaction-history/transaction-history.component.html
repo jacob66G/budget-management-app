@@ -15,8 +15,11 @@
     @for (transaction of transactions; track transaction.id) {
       <div class="transaction-card">
          <div class="icon-box" [class.income]="isIncome(transaction)" [class.expense]="!isIncome(transaction)">
-             <mat-icon>{{ transaction.category.iconKey }}</mat-icon>
-          </div>
+            <div class="icon-wrapper">
+              <img [src]="transaction.category.iconKey" alt="icon" class="category-icon" 
+                onerror="this.onerror=null; this.src='/assets/icons/default-category.png'"> 
+            </div>
+            </div>
           <div class="details-section">
              <div class="title-row">
                 <span class="transaction-title">{{ transaction.title }}</span>
