@@ -17,5 +17,5 @@ public class PaginationParams {
 
     @Min(value = 1, message = "Page limit value must be a positive value")
     @Max(value = 20, message = "Page limit value must not exceed 20")
-    private int limit = 5;
+    private int limit = 15;
 }

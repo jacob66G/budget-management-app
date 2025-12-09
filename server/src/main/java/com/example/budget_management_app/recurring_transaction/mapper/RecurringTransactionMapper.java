@@ -3,6 +3,7 @@ package com.example.budget_management_app.recurring_transaction.mapper;
 import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.common.enums.SupportedCurrency;
+import com.example.budget_management_app.common.service.StorageService;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringInterval;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
 import com.example.budget_management_app.recurring_transaction.dto.RecurringTransactionDetailsResponse;
@@ -14,6 +15,7 @@ import com.example.budget_management_app.transaction_common.dto.AccountSummary;
 import com.example.budget_management_app.transaction_common.dto.CategorySummary;
 import com.example.budget_management_app.transaction.dto.TransactionSummary;
 import jakarta.persistence.Tuple;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -21,7 +23,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class RecurringTransactionMapper {
+
+    private final StorageService storageService;
 
     public List<RecurringTransactionSummary> fromTuples(List<Tuple> tuples) {
 
@@ -44,7 +49,7 @@ public class RecurringTransactionMapper {
                         new CategorySummary(
                                 tuple.get("categoryId", Long.class),
                                 tuple.get("categoryName", String.class),
-                                tuple.get("iconKey", String.class)
+                                storageService.getPublicUrl(tuple.get("iconKey", String.class))
                         )
                 )).toList();
     }
@@ -65,7 +70,7 @@ public class RecurringTransactionMapper {
                         new CategorySummary(
                                 tuple.get("categoryId", Long.class),
                                 tuple.get("categoryName", String.class),
-                                tuple.get("iconKey", String.class)
+                                storageService.getPublicUrl(tuple.get("iconKey", String.class))
                         )
                 )).toList();
     }

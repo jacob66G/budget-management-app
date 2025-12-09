@@ -14,12 +14,12 @@
   <div class="list-container">
     @for (transaction of transactions; track transaction.id) {
       <div class="transaction-card">
-         <div class="icon-box" [class.income]="isIncome(transaction)" [class.expense]="!isIncome(transaction)">
-            <div class="icon-wrapper">
+         <div class="icon-box">
+            <div class="icon-wrapper"  [class.type-income]="isIncome(transaction)" [class.type-expense]="!isIncome(transaction)">
               <img [src]="transaction.category.iconKey" alt="icon" class="category-icon" 
                 onerror="this.onerror=null; this.src='/assets/icons/default-category.png'"> 
             </div>
-            </div>
+          </div>
           <div class="details-section">
              <div class="title-row">
                 <span class="transaction-title">{{ transaction.title }}</span>
