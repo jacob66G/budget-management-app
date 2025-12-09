@@ -1,5 +1,6 @@
 package com.example.budget_management_app.transaction.controller;
 
+import com.example.budget_management_app.common.service.StorageService;
 import com.example.budget_management_app.common.utils.PaginationUtils;
 import com.example.budget_management_app.constants.ApiPaths;
 import com.example.budget_management_app.security.service.CustomUserDetails;
@@ -23,6 +24,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final StorageService storageService;
 
     @GetMapping
     public ResponseEntity<PagedResponse<TransactionSummary>> getSummariesPage(
@@ -70,6 +72,13 @@ public class TransactionController {
                 updateReq,
                 userDetails.getId()
         ));
+    }
+
+    @PostMapping("/{id}/receipt-upload-url")
+    public ResponseEntity<TransactionReceiptUploadResponse> getPresignedUrl(
+            @Valid @RequestBody TransactionReceiptUploadRequest receiptUploadReq) {
+
+        return null;
     }
 
     @PatchMapping("/{id}")
