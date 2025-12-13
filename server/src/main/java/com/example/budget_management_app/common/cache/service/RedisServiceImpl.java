@@ -1,4 +1,4 @@
-package com.example.budget_management_app.common.service;
+package com.example.budget_management_app.common.cache.service;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

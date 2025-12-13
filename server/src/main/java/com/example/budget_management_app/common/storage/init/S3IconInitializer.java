@@ -1,6 +1,6 @@
-package com.example.budget_management_app.common.service;
+package com.example.budget_management_app.common.storage.init;
 
-import com.example.budget_management_app.config.IconConfig;
+import com.example.budget_management_app.common.storage.config.IconConfig;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

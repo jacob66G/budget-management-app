@@ -3,7 +3,7 @@ package com.example.budget_management_app.account.mapper;
 import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.account.dto.AccountDetailsResponse;
 import com.example.budget_management_app.account.dto.AccountResponse;
-import com.example.budget_management_app.common.service.StorageService;
+import com.example.budget_management_app.common.storage.service.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

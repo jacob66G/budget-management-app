@@ -1,4 +1,4 @@
-package com.example.budget_management_app.common.event.service;
+package com.example.budget_management_app.common.mail;
 
 import com.example.budget_management_app.common.exception.EmailException;
 import com.example.budget_management_app.common.exception.ErrorCode;

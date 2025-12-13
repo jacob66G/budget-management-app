@@ -1,4 +1,4 @@
-package com.example.budget_management_app.common.service;
+package com.example.budget_management_app.common.cache.service;
 
 import java.util.List;
 

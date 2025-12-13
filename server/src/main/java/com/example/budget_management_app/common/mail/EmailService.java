@@ -1,4 +1,4 @@
-package com.example.budget_management_app.common.event.service;
+package com.example.budget_management_app.common.mail;
 
 public interface EmailService {
 

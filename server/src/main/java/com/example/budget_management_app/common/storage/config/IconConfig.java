@@ -1,4 +1,4 @@
-package com.example.budget_management_app.config;
+package com.example.budget_management_app.common.storage.config;
 
 import lombok.Getter;
 import org.springframework.context.annotation.Configuration;

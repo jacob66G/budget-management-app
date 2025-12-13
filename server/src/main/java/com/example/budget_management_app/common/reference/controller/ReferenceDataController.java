@@ -1,4 +1,4 @@
-package com.example.budget_management_app.common.controller;
+package com.example.budget_management_app.common.reference.controller;
 
 
 import com.example.budget_management_app.account.domain.AccountStatus;

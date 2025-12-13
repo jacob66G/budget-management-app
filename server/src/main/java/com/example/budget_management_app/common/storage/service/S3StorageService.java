@@ -1,4 +1,4 @@
-package com.example.budget_management_app.common.service;
+package com.example.budget_management_app.common.storage.service;
 
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.StorageException;

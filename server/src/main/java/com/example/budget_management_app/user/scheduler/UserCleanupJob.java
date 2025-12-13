@@ -1,4 +1,4 @@
-package com.example.budget_management_app.scheduler;
+package com.example.budget_management_app.user.scheduler;
 
 import com.example.budget_management_app.user.service.UserService;
 import lombok.RequiredArgsConstructor;

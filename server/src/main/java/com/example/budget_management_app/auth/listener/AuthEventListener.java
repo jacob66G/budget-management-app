@@ -1,8 +1,8 @@
-package com.example.budget_management_app.common.event.listener;
+package com.example.budget_management_app.auth.listener;
 
-import com.example.budget_management_app.common.event.model.PasswordResetEvent;
-import com.example.budget_management_app.common.event.model.VerificationEvent;
-import com.example.budget_management_app.common.event.service.EmailService;
+import com.example.budget_management_app.auth.events.PasswordResetEvent;
+import com.example.budget_management_app.auth.events.VerificationEvent;
+import com.example.budget_management_app.common.mail.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @RequiredArgsConstructor
-public class ApplicationEventListener {
+public class AuthEventListener {
 
     private final EmailService emailService;
 

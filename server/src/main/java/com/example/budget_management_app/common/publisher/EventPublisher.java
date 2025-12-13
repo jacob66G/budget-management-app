@@ -1,4 +1,4 @@
-package com.example.budget_management_app.common.event.publisher;
+package com.example.budget_management_app.common.publisher;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;

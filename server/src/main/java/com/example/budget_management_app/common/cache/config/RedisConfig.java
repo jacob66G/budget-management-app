@@ -1,4 +1,4 @@
-package com.example.budget_management_app.config;
+package com.example.budget_management_app.common.cache.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
