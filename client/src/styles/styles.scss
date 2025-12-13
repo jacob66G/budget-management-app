@@ -1,22 +1,84 @@
-
 @use '@angular/material' as mat;
-
 @use 'variables' as vars;
 
 :root {
   --primary-color: #{vars.$primary-color};
-  --accent-color: #{vars.$accent-color};
   --warn-color: #{vars.$warn-color};
+  --error-color: #{vars.$error-color};
+  --income-color: #{vars.$income-color};
+  --expense-color: #{vars.$expense-color};
+  --balance-color: #{vars.$balance-color};
+  --default-green: #{vars.$default-green};
+  --default-light-green: #{vars.$default-light-green};
+  --default-red: #{vars.$default-red};
+  --default-light-red: #{vars.$default-light-red};
+  --default-dark-gray: #{vars.$default-dark-gray};
+  --default-gray: #{vars.$default-gray};
+  --default-light-gray: #{vars.$default-light-gray};
+  --default-light-blue: #{vars.$default-light-blue};
+
   --font-family-default: #{vars.$font-family-default};
 }
 
-html, body { 
-  height: 100%; 
+html, body {
+  height: 100%;
 }
 
 body {
   padding: 0;
-  margin: 0; 
-  font-family: var(--font-family-default); 
+  margin: 0;
+  font-family: var(--font-family-default);
   background-color: #f4f7f6;
+}
+
+.mat-mdc-snack-bar-container {
+  max-width: 600px !important;
+  min-width: 400px !important;
+  margin: 24px !important;
+  white-space: pre-wrap;
+}
+
+@mixin force-snackbar-style($border-color) {
+  & .mdc-snackbar__surface {
+    background-color: #ffffff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+    
+    border-left: 6px solid $border-color !important;
+    
+    border-top: 1px solid #eee !important;
+    border-right: 1px solid #eee !important;
+    border-bottom: 1px solid #eee !important;
+  }
+
+  & .mdc-snackbar__label {
+    color: #333333 !important;
+    font-family: var(--font-family-default) !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    line-height: 1.5 !important;
+    padding: 14px 16px !important;
+  }
+
+  & .mat-mdc-snack-bar-action {
+    color: $border-color !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+  }
+}
+
+.error-snackbar {
+  @include force-snackbar-style(vars.$error-color);
+}
+
+.success-snackbar {
+  @include force-snackbar-style(vars.$primary-color);
+}
+
+.warning-snackbar {
+  @include force-snackbar-style(vars.$warn-color);
+}
+
+.info-snackbar {
+  @include force-snackbar-style(vars.$primary-color);
 }

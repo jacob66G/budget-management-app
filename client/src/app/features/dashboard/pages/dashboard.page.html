@@ -171,7 +171,7 @@
           </div>
 
           <div class="tx-amount" [class.income]="tx.type === 'INCOME'" [class.expense]="tx.type === 'EXPENSE'">
-            {{ tx.type === 'EXPENSE' ? '-' : '+' }}{{ tx.amount | number:'1.2-2' }}
+            {{ tx.amount | amountFormat: tx.currency: tx.type }}
           </div>
         </div>
         } @empty {
@@ -211,7 +211,7 @@
             <mat-icon class="excluded-icon">visibility_off</mat-icon>
             }
 
-            {{ acc.balance | number:'1.2-2' }} {{ acc.currency }}
+            {{ acc.balance | amountFormat: acc.currency }}
           </div>
         </div>
         }

@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { MatCardModule } from '@angular/material/card';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
@@ -12,6 +12,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ResponseMessage } from '../../../../core/models/response-message.model';
 import { RouterLink } from '@angular/router';
 import { ApiErrorService } from '../../../../core/services/api-error.service';
+import { ToastService } from '../../../../core/services/toast-service';
 
 @Component({
   selector: 'app-recover-password',
@@ -32,7 +33,7 @@ import { ApiErrorService } from '../../../../core/services/api-error.service';
 export class RecoverPassword {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
-  private snackBar = inject(MatSnackBar);
+  private toastService = inject(ToastService);
   private errorService = inject(ApiErrorService);
   
   isLoading = signal(false);
@@ -56,11 +57,7 @@ export class RecoverPassword {
     this.authService.resetPassword(this.recoverPasswordForm.value.email).subscribe({
       next: (response: ResponseMessage) => {
         this.isLoading.set(false);
-        this.snackBar.open(
-            response.message,
-            'OK',
-            { duration: 5000, panelClass: 'success-snackbar' }
-          );
+        this.toastService.showSuccess(response.message);
       }, error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);
 

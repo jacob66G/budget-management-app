@@ -53,7 +53,7 @@
 
         <div class="amount-section">
           <span class="amount" [class.positive]="isIncome(t)" [class.negative]="!isIncome(t)">
-            {{t.amount | amountFormat: t.accountSummary.currency : 'symbol' : isIncome(t)}}
+            {{t.amount | amountFormat: t.accountSummary.currency : t.type}}
           </span>
           <span class="date">{{ t.nextOccurrence | date:'MMM d, y' }}</span>
         </div>

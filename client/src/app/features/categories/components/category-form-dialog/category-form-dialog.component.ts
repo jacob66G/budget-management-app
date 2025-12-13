@@ -75,4 +75,16 @@ export class CategoryFormDialogComponent {
     const name = filename.split('.')[0];
     return name.charAt(0).toUpperCase() + name.slice(1);
   }
+
+  hasChanges(): boolean {
+    if (!this.data.category) return true;
+
+    const original = this.data.category;
+    const current = this.form.value;
+
+    if (current.name != original.name) return true;
+    if (current.iconPath != original.iconPath) return true;
+
+    return false;
+  }
 }

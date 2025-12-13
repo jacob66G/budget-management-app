@@ -30,11 +30,10 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background-color: #f0f4ff;
+  background-color: var(--default-light-blue);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary-color, #3f51b5);
   flex-shrink: 0;
   padding: 10px;
 
@@ -44,7 +43,12 @@
     object-fit: cover;
     border-radius: 12px;
   }
-  .default-icon { font-size: 38px; width: 38px; height: 38px; }
+
+  .default-icon {
+    font-size: 38px;
+    width: 38px;
+    height: 38px;
+  }
 }
 
 .header-info {
@@ -58,7 +62,7 @@
     margin: 0;
     font-size: 1.2rem;
     font-weight: 500;
-    color: #333;
+    color: var(--default-dark-gray);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -66,7 +70,7 @@
 
   .account-type {
     font-size: 0.8rem;
-    color: #757575;
+    color: var(--default-gray);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 500;
@@ -82,30 +86,32 @@
     border: 1px solid transparent;
     border-radius: 10px;
     transition: all 0.2s ease-in-out;
-    width:40px;
+    width: 40px;
     height: 40px;
 
     mat-icon {
       color: #9e9e9e;
       transition: color 0.2s ease-in-out;
     }
-    
+
     &:hover {
-        border-color: rgba(0,0,0,0.05);
+      border-color: rgba(0, 0, 0, 0.05);
     }
   }
 
   .edit-btn:hover {
     background-color: #dddcff;
+
     .edit-icon {
-      color: var(--primary-color, #3f51b5);
+      color: var(--primary-color);
     }
   }
 
   .delete-btn:hover {
-    background-color: #ffebee;
+    background-color: var(--default-light-red);
+
     .delete-icon {
-      color: var(--warn-color, #d93025);
+      color: var(--error-color);
     }
   }
 }
@@ -120,19 +126,21 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  
-  &.balance-item { 
-    align-items: flex-start; 
+
+  &.balance-item {
+    align-items: flex-start;
   }
-  &.income-item, &.expense-item { 
-    align-items: center; 
+
+  &.income-item,
+  &.expense-item {
+    align-items: center;
   }
 }
 
 .metric-label {
   font-size: 0.8rem;
   text-transform: uppercase;
-  color: #9e9e9e;
+  color: var(--default-gray);
   font-weight: 500;
   margin-bottom: 4px;
 }
@@ -141,15 +149,22 @@
   display: flex;
   align-items: baseline;
   gap: 2px;
-  color: #333;
-  font-weight: 600;
+  color: var(--default-dark-gray);
+  font-weight: 500;
   line-height: 1.2;
 
-  &.negative { color: #d93025; }
-  
-  &.income-text { color: #2e7d32; }
-  &.expense-text { color: #c62828; }
-  
+  &.negative {
+    color: var(--expense-color);
+  }
+
+  &.income-text {
+    color: var(--income-color);
+  }
+
+  &.expense-text {
+    color: var(--expense-color);
+  }
+
   .tiny-icon {
     font-size: 14px;
     width: 14px;
@@ -164,14 +179,15 @@
   font-size: 1.5rem;
   font-weight: 500;
 }
+
 .balance-item .symbol {
   font-size: 1rem;
-  color: #757575;
+  color: var(--balance-color);
   margin-right: 4px;
 }
 
 
-.income-item .value, 
+.income-item .value,
 .expense-item .value {
   font-size: 1rem;
 }
@@ -198,8 +214,12 @@
   align-items: center;
   gap: 6px;
   color: #9e9e9e;
-  
-  .tiny-icon { font-size: 16px; width: 16px; height: 16px; }
+
+  .tiny-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .status-badge {
@@ -207,7 +227,14 @@
   border-radius: 12px;
   font-size: 0.7rem;
   font-weight: 600;
-  
-  &.active { background-color: #e8f5e9; color: #2e7d32; }
-  &.inactive { background-color: #f5f5f5; color: #757575; }
+
+  &.active {
+    background-color: var(--default-light-green);
+    color: var(--default-green);
+  }
+
+  &.inactive {
+    background-color: #f5f5f5;
+    color: var(--balance-color);
+  }
 }

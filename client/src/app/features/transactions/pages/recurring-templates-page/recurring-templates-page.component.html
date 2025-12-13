@@ -91,7 +91,7 @@
               <div class="grid-item">
                 <label>AMOUNT</label>
                 <span class="value amount" [class.positive]="isIncome(template)" [class.negative]="!isIncome(template)">
-                  {{ template.amount | amountFormat : template.accountSummary.currency : 'symbol' : isIncome(template)}}
+                  {{ template.amount | amountFormat : template.accountSummary.currency : template.type }}
                 </span>
               </div>
 

@@ -9,9 +9,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiErrorService } from '../../../../core/services/api-error.service';
+import { ToastService } from '../../../../core/services/toast-service';
 
 @Component({
   selector: 'app-login2fa',
@@ -31,7 +31,7 @@ export class Login2fa {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private snackBar = inject(MatSnackBar);
+  private toastService = inject(ToastService);
   private errorService = inject(ApiErrorService);
 
   isLoading = signal(false);
@@ -72,7 +72,7 @@ export class Login2fa {
     this.authService.loginWith2FA(payload).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.snackBar.open('Login successful', 'OK', { duration: 3000 });
+        this.toastService.showSuccess('Login successful');
         this.router.navigate(['/app/dashboard']);
       },
       error: (err: HttpErrorResponse) => {

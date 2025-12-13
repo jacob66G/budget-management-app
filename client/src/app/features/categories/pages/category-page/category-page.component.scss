@@ -22,12 +22,12 @@
       font-size: 2rem;
       font-weight: 500;
       margin: 0 0 4px 0;
-      color: #222;
+      color: var(--default-dark-gray);
     }
 
     .page-subtitle {
       margin: 0;
-      color: #5f6368;
+      color: var(--default-gray);
       font-size: 1rem;
     }
   }
@@ -85,7 +85,9 @@
 
 .empty-state { 
   grid-column: 1 / -1;
-  text-align: center; color: #999; padding: 60px; 
+  text-align: center; 
+  color: var(--balance-color); 
+  padding: 60px; 
   display: flex; flex-direction: column; align-items: center; gap: 16px;
   
   mat-icon {

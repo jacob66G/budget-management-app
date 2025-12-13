@@ -41,12 +41,12 @@
       font-size: 2rem;
       font-weight: 500;
       margin: 0;
-      color: #222;
+      color: var(--default-dark-gray);
     }
 
     .page-subtitle {
       margin: 0;
-      color: #666;
+      color: var(--default-gray);
       font-size: 1rem;
     }
   }
@@ -88,7 +88,7 @@
     background-color: #ececec;
 
     .change-status-icon {
-      color: var(--primary-color, #3f51b5);
+      color: var(--primary-color);
     }
   }
 
@@ -96,15 +96,15 @@
     background-color: #dddcff;
 
     .edit-icon {
-      color: var(--primary-color, #3f51b5);
+      color: var(--primary-color);
     }
   }
 
   .delete-btn:hover {
-    background-color: #ffebee;
+    background-color: var(--default-light-red);
 
     .delete-icon {
-      color: var(--warn-color, #d93025);
+      color: var(--error-color);
     }
   }
 }
@@ -124,11 +124,11 @@
 
   &.status {
     background-color: #eee;
-    color: #757575;
+    color: var(--balance-color);
 
     &.active {
-      background-color: #e8f5e9;
-      color: #2e7d32;
+      background-color: var(--default-light-green);
+      color: var(--default-green);
     }
   }
 }
@@ -157,7 +157,7 @@
 
   .kpi-label {
     font-size: 0.85rem;
-    color: #757575;
+    color: var(--balance-color);
     text-transform: uppercase;
     margin-bottom: 4px;
   }
@@ -169,15 +169,15 @@
   }
 
   &.balance .kpi-value.negative {
-    color: #c62828;
+    color: var(--expense-color);
   }
 
   &.income .kpi-value {
-    color: #2e7d32;
+    color: var(--income-color);
   }
 
   &.expense .kpi-value {
-    color: #c62828;
+    color: var(--expense-color);
   }
 
   .kpi-icon {
@@ -196,25 +196,25 @@
   }
 
   &.balance .kpi-icon {
-    background-color: #e6e6e6;
-    color: #757575;
+    background-color: var(--default-light-gray);
+    color: var(--balance-color);
   }
 
   &.income .kpi-icon {
-    background-color: #e8f5e9;
-    color: #2e7d32;
+    background-color: var(--default-light-green);
+    color: var(--income-color);
   }
 
   &.expense .kpi-icon {
-    background-color: #ffebee;
-    color: #c62828;
+    background-color: var(--default-light-red);
+    color: var(--expense-color);
   }
 }
 
 .currency-suffix {
   font-size: 1rem;
   font-weight: 500;
-  color: #757575;
+  color: var(--balance-color);
   text-transform: uppercase;
 }
 
@@ -265,7 +265,7 @@
   height: 35px;
   border-radius: 10px;
   background-color: #f5f7fa;
-  color: #757575;
+  color: var(--balance-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -317,16 +317,16 @@
 }
 
 .tx-amount {
-  font-weight: 600;
+  font-weight: 500;
   font-size: 0.95rem;
   white-space: nowrap;
 
   &.income {
-    color: #2e7d32;
+    color: var(--income-color);
   }
 
   &.expense {
-    color: #c62828;
+    color: var(--expense-color);
   }
 }
 
@@ -372,7 +372,7 @@
   }
 
   .label {
-    color: #757575;
+    color: var(--balance-color);
   }
 
   .value {
@@ -381,7 +381,7 @@
   }
 
   .value.highlight.yes {
-    color: #2e7d32;
+    color: var(--default-green);
   }
 
   .description-box {
@@ -439,11 +439,11 @@
   height: 78px;
   border: #dddddd solid 1px;
   border-radius: 12px;
-  background-color: #f0f4ff;
+  background-color: var(--default-light-blue);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary-color, #3f51b5);
+  color: var(--primary-color);
   flex-shrink: 0;
   padding: 10px;
 
@@ -485,7 +485,7 @@
   gap: 16px;
   width: 100%;
   flex-direction: column;
-  
+
   .date-field {
     width: 280px;
     background-color: #fff;
@@ -508,8 +508,8 @@
 
 .active-toggle {
   background-color: #e8eaf6 !important;
-  color: #3f51b5 !important;
-  border-color: #3f51b5 !important;
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
   font-weight: 600;
 }
 

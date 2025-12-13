@@ -5,12 +5,13 @@ import { ResponseMessage } from '../../../../core/models/response-message.model'
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { MatCardModule } from '@angular/material/card';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { ApiErrorService } from '../../../../core/services/api-error.service';
+import { ToastService } from '../../../../core/services/toast-service';
 
 
 @Component({
@@ -30,7 +31,7 @@ import { ApiErrorService } from '../../../../core/services/api-error.service';
 })
 export class VerificationEmailSent {
   private authService = inject(AuthService)
-  private snackBar = inject(MatSnackBar);
+  private toastService = inject(ToastService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private errorService = inject(ApiErrorService); 
@@ -52,10 +53,7 @@ export class VerificationEmailSent {
   onResendVerificationEmail(): void {
     const currentEmail = this.email();
     if (!currentEmail) {
-      this.snackBar.open('No email address', 'OK', {
-        duration: 3000,
-        panelClass: 'error-snackbar',
-      });
+      this.toastService.showError('No email address provided.');
       return;
     }
 
@@ -64,11 +62,7 @@ export class VerificationEmailSent {
     this.authService.resendVerificationEmail(currentEmail).subscribe({
       next: (response: ResponseMessage) => {
         this.isLoading.set(false);
-           this.snackBar.open(
-            response.message,
-            'OK',
-            { duration: 5000, panelClass: 'success-snackbar' }
-          );
+           this.toastService.showSuccess(response.message);
       },
       error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);

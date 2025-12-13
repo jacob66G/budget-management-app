@@ -11,9 +11,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiErrorService } from '../../../../../core/services/api-error.service';
+import { ToastService } from '../../../../../core/services/toast-service';
 
 @Component({
   selector: 'app-profile-details',
@@ -34,7 +34,7 @@ export class ProfileDetails {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private userService = inject(UserService);
-  private snackBar = inject(MatSnackBar);
+  private toastService = inject(ToastService);
   private errorService = inject(ApiErrorService);
 
   isLoading = signal(false);
@@ -62,7 +62,7 @@ export class ProfileDetails {
       next: (response: User) => {
         this.isLoading.set(false);
         this.authService.updateCurrentUser(response);
-        this.snackBar.open('Data updated successfully', 'Close', { duration: 3000 });
+        this.toastService.showSuccess('Profile updated successfully');
       },
       error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);
@@ -74,5 +74,16 @@ export class ProfileDetails {
         });
       }
     })
+  }
+
+  hasChanges(): boolean {
+    const original = this.currentUser();
+    if (!original) return false;
+    const current = this.profileForm.value;
+
+    if (current.name != original.name) return true;
+    if (current.surname != original.surname) return true;
+
+    return false;
   }
 }

@@ -45,7 +45,7 @@
           </div>
           <div class="amount-section">
              <span class="amount" [class.positive]="isIncome(transaction)" [class.negative]="!isIncome(transaction)">
-                {{ transaction.amount | amountFormat: transaction.account.currency : 'symbol' : isIncome(transaction) }}
+                {{ transaction.amount | amountFormat: transaction.account.currency : transaction.type }}
              </span>
              <span class="date">{{ transaction.transactionDate | date:'MMM d, y' }}</span>
           </div>

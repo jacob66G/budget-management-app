@@ -12,12 +12,6 @@ export class ApiPaths {
     public static readonly RESET_PASSWORD = '/api/auth/password-reset-request';
     public static readonly REST_PASSWORD_CONFIRM = '/api/auth/password-reset-confirm';
 
-    // accounts
-    public static readonly ACCOUNTS = '/api/accounts';
-
-    // categories
-    public static readonly CATEGORIES = '/api/categories';
-
     // transactions
     public static readonly TRANSACTIONS = '/api/v1/transactions';
 
@@ -36,6 +30,7 @@ export class ApiPaths {
     public static readonly ANALYTICS_GLOBAL_BASE = `${ApiPaths.API}/analytics/global`;
     public static readonly REFERENCE_DATA_BASE = `${ApiPaths.API}/reference-data`;
     public static readonly CATEGORIES_BASE = `${ApiPaths.API}/categories`;
+    public static readonly NOTIFICATIONS_BASE = `${ApiPaths.API}/notifications`;
 
     public static readonly Auth = {
         LOGIN: `${ApiPaths.AUTH_BASE}/login`,
@@ -80,5 +75,11 @@ export class ApiPaths {
 
     public static readonly Categories = {
         CATEGORIES: `${ApiPaths.CATEGORIES_BASE}`
+    }
+
+    public static readonly Notifications = {
+        UNREAD_NOTIFICATIONS: `${ApiPaths.NOTIFICATIONS_BASE}/unread`,
+        MARK_AS_READ: (id: number) => `${ApiPaths.NOTIFICATIONS_BASE}/${id}/mark-as-read`,
+        MARK_ALL_AS_READ: `${ApiPaths.NOTIFICATIONS_BASE}/mark-as-read`
     }
 }

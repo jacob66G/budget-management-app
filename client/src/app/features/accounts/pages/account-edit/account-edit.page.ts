@@ -4,7 +4,6 @@ import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { of, switchMap } from 'rxjs';
 import { AccountDetails, UpdateAccount } from '../../models/account.model';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ApiErrorService } from '../../../../core/services/api-error.service';
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
@@ -22,6 +21,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSliderModule } from '@angular/material/slider';
 import { ReferenceDataService } from '../../../../core/services/reference-data.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ToastService } from '../../../../core/services/toast-service';
 
 @Component({
   selector: 'app-account-edit.page',
@@ -49,11 +49,11 @@ export class AccountEditPage {
   private accountService = inject(AccountService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private snackBar = inject(MatSnackBar);
   private fb = inject(FormBuilder);
   private errorService = inject(ApiErrorService);
   private refService = inject(ReferenceDataService);
   private destroyRef = inject(DestroyRef);
+  private toastService = inject(ToastService)
   
   private returnUrl = '/app/accounts';
 
@@ -61,12 +61,12 @@ export class AccountEditPage {
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
     currency: ['', Validators.required],
     description: ['', Validators.maxLength(255)],
-    initialBalance: [0, Validators.min(0)],
+    initialBalance: [0],
     budgetType: ['', Validators.required],
     budget: [null as number | null, Validators.min(0)],
     alertThreshold: [null as number | null, [Validators.min(0), Validators.max(100)]],
     includeInTotalBalance: [true, Validators.required],
-    iconPath: []
+    iconPath: ['']
   });
 
   account = signal<AccountDetails | null>(null);
@@ -114,7 +114,7 @@ export class AccountEditPage {
     this.accountService.updateAccount(accountData.id, dto).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.snackBar.open('The account have been modified successfully', 'OK', { duration: 3000, panelClass: 'success-snackbar' });
+        this.toastService.showSuccess('The account have been modified successfully');
         this.router.navigate(['/app/accounts/', accountData.id]);
       },
       error: (err: HttpErrorResponse) => {
@@ -211,6 +211,31 @@ export class AccountEditPage {
       alertThreshold: data.alertThreshold,
       includeInTotalBalance: data.includeInTotalBalance,
       iconPath: data.iconPath
-    }, { emitEvent: false })
+    }, { emitEvent: false });
+
+      this.handleBudgetTypeChange(data.budgetType); 
   }
+
+  hasChanges(): boolean {
+  const original = this.account();
+  if (!original) return false;
+  const current = this.editForm.getRawValue();
+
+  if (current.name != original.name) return true;
+  if (current.currency != original.currency) return true;
+  if (current.description != original.description) return true;
+  if (current.iconPath != original.iconPath) return true;
+  if (current.budgetType != original.budgetType) return true
+  if (current.budgetType !== 'NONE') {
+      if (current.budget != original.budget) return true;
+      if (current.alertThreshold != original.alertThreshold) return true;
+  }
+  if (current.includeInTotalBalance != original.includeInTotalBalance) return true;
+
+  if (!original.hasTransactions) {
+      if (current.initialBalance != original.balance) return true;
+  }
+
+  return false;
+}
 }

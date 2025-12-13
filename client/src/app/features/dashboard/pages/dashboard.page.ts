@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 
 import { MatIconModule } from '@angular/material/icon';
-import { CommonModule, CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -20,6 +20,7 @@ import { CashFlowChartPoint, CategoryChartPoint, MultiSeriesChart } from '../../
 import { ApiErrorService } from '../../../core/services/api-error.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { AmountFormatPipe } from "../../../shared/pipes/amount-format-pipe";
 
 @Component({
   selector: 'app-dashboard-page',
@@ -34,7 +35,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     DatePipe, DecimalPipe,
     CashFlowChartComponent,
     BalanceChartComponent,
-    CategorySumChartComponent
+    CategorySumChartComponent,
+    AmountFormatPipe
 ],
   templateUrl: './dashboard.page.html',
   styleUrl: './dashboard.page.scss'
@@ -75,7 +77,6 @@ export class DashboardPage implements OnInit {
       next: (data) => {
         this.summary.set(data);
         this.isLoading.set(false);
-
         this.loadChartsData();
       },
       error: (err: HttpErrorResponse) => {

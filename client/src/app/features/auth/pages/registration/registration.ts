@@ -18,10 +18,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import {RegistrationRequest} from '../../model/auth.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ApiErrorService } from '../../../../core/services/api-error.service';
+import { ToastService } from '../../../../core/services/toast-service';
 
 
 export function passwordsMatchValidator(
@@ -68,7 +69,7 @@ export class Registration {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private snackBar = inject(MatSnackBar);
+  private toastService = inject(ToastService);
   private errorService = inject(ApiErrorService); 
 
   isLoading = signal(false);
@@ -102,12 +103,7 @@ export class Registration {
     this.authService.register(dto).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.snackBar.open(
-          'Registration successful! Check your email to activate your account.',
-          'OK',
-          { duration: 5000, panelClass: 'success-snackbar' }
-        );
-
+        this.toastService.showSuccess('Registration successful. Please verify your email before logging in.');
         this.router.navigate(['/verifi-pending'], {
           queryParams: { email: dto.email }
         });

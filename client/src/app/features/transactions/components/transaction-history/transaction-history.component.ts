@@ -8,7 +8,7 @@ import { TransactionType } from '../../constants/transaction-type.enum';
 import { Pagination } from '../../model/pagination.model';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDivider } from "@angular/material/divider";
-import { AmountFormatPipe } from '../../pipes/amount-format-pipe';
+import { AmountFormatPipe } from '../../../../shared/pipes/amount-format-pipe';
 
 @Component({
   selector: 'app-transaction-history',

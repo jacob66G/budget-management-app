@@ -84,3 +84,90 @@
   background-color: rgba(255, 255, 255, 0.3);
   margin: 0 8px;
 }
+
+::ng-deep .notification-menu {
+  max-width: 350px;
+  min-width: 300px;
+  
+  /* Reset paddingu dla mat-menu-content */
+  .mat-mdc-menu-content {
+      padding: 0 !important;
+  }
+}
+
+.notification-header {
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  cursor: default; /* Żeby kursor nie sugerował klikania całego nagłówka */
+
+  .header-title {
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .mark-all-btn {
+    font-size: 12px;
+    height: 32px;
+    line-height: 32px;
+  }
+}
+
+/* Kontener z przewijaniem dla listy */
+.notification-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  height: auto !important; /* Pozwalamy na zmienną wysokość */
+  padding: 12px 16px !important;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  white-space: normal !important; /* Zawijanie tekstu */
+  line-height: normal !important;
+
+  /* Styl dla nieprzeczytanych */
+  &.unread {
+    background-color: #f0f7ff; /* Bardzo jasny niebieski */
+  }
+
+  /* Kolory ikon */
+  mat-icon {
+    margin-right: 0 !important; /* Reset marginu Material */
+    &.error { color: #d32f2f; }
+    &.success { color: #2e7d32; }
+    &.warning { color: #ed6c02; }
+    &.info { color: #0288d1; }
+  }
+
+  .notif-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+
+    .notif-title { font-weight: 600; font-size: 0.9rem; color: #333; }
+    .notif-msg { font-size: 0.85rem; color: #666; line-height: 1.4; }
+    .notif-date { font-size: 0.75rem; color: #999; margin-top: 4px; }
+  }
+  
+  .unread-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background-color: #1976d2; /* Niebieska kropka */
+      flex-shrink: 0; margin-top: 6px;
+  }
+}
+
+.empty-notif {
+  padding: 32px;
+  text-align: center;
+  color: #999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}

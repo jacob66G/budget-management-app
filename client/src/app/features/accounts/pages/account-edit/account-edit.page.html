@@ -160,7 +160,7 @@
                 <div class="form-actions">
                     <button type="button" mat-button (click)="onCancel()">Cancel</button>
                     <button mat-flat-button color="primary" type="submit"
-                        [disabled]="editForm.invalid || isLoading() || !editForm.dirty">
+                        [disabled]="editForm.invalid || isLoading() || !hasChanges()">
 
                         @if (isLoading()) {
                         <mat-spinner [diameter]="24"></mat-spinner>

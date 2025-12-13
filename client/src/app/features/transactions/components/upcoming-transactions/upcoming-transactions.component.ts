@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { UpcomingTransactionsTimeRange } from '../../constants/upcoming-transactions-time-range.enum';
 import { Pagination } from '../../model/pagination.model';
 import { MatIconModule } from '@angular/material/icon';
-import { AmountFormatPipe } from '../../pipes/amount-format-pipe';
+import { AmountFormatPipe } from '../../../../shared/pipes/amount-format-pipe';
 
 @Component({
   selector: 'app-upcoming-transactions',

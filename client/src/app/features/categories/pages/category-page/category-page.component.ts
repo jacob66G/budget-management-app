@@ -1,7 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CategoryService } from '../../../../core/services/category.service';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Category } from '../../../../core/models/category.model';
 import { CategoryDialogData, CategoryFormDialogComponent } from '../../components/category-form-dialog/category-form-dialog.component';
 import { UpdateCategory } from '../../category.model';
@@ -17,6 +16,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
 import { ApiErrorService } from '../../../../core/services/api-error.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ToastService } from '../../../../core/services/toast-service';
 
 @Component({
   selector: 'app-category-page',
@@ -36,7 +36,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class CategoryPageComponent {
   private categoryService = inject(CategoryService);
   private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar);
+  private toastService = inject(ToastService);
   private errorService = inject(ApiErrorService)
 
   categories = signal<Category[]>([]);
@@ -86,7 +86,7 @@ export class CategoryPageComponent {
       if (result) {
         this.categoryService.createCategory(result).subscribe({
           next: () => {
-            this.snackBar.open('Category added', 'OK', { duration: 3000 });
+            this.toastService.showSuccess('Category added');
             this.loadCategories();
           },
           error: (err: HttpErrorResponse) => {
@@ -108,7 +108,7 @@ export class CategoryPageComponent {
       if (result) {
         this.categoryService.updateCategory(category.id, result).subscribe({
           next: () => {
-            this.snackBar.open('Category updated', 'OK', { duration: 3000 });
+            this.toastService.showSuccess('Category updated');
             this.loadCategories();
           },
           error: (err: HttpErrorResponse) => {
@@ -130,7 +130,7 @@ export class CategoryPageComponent {
       if (newCategoryId) {
         this.categoryService.reassignCategory(category.id, newCategoryId).subscribe({
           next: () => {
-            this.snackBar.open('Transactions transferred', 'OK', { duration: 3000 });
+            this.toastService.showSuccess('Category reassigned');
           },
           error: (err: HttpErrorResponse) => {
             this.isLoading.set(false);
@@ -154,7 +154,7 @@ export class CategoryPageComponent {
       switchMap(() => this.categoryService.deleteCategory(category.id))
     ).subscribe({
       next: () => {
-        this.snackBar.open('Category deleted', 'OK', { duration: 3000 });
+        this.toastService.showSuccess('Category deleted');
         this.loadCategories();
       },
       error: (err: HttpErrorResponse) => {

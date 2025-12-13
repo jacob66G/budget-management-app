@@ -1,3 +1,5 @@
+import { TransactionType } from "../../transactions/constants/transaction-type.enum"
+
 export interface FinancialSummaryResponse {
     closingBalance : number,
     totalIncome: number,
@@ -20,9 +22,10 @@ export interface AccountSummary {
 export interface TransactionSummary {
     title: string,
     amount: number,
-    type: string,
+    type: TransactionType,
     date: string,
     categoryName: string,
     categoryIconPath: string
     accountName: string
+    currency: string
 }

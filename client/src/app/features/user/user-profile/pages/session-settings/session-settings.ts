@@ -7,11 +7,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UserService } from '../../../../../core/services/user.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserSession } from '../../model/user-profile.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { ApiErrorService } from '../../../../../core/services/api-error.service';
+import { ToastService } from '../../../../../core/services/toast-service';
 
 @Component({
   selector: 'app-session-settings',
@@ -32,7 +32,7 @@ import { ApiErrorService } from '../../../../../core/services/api-error.service'
 export class SessionSettings {
   private userService = inject(UserService);
   private errorService = inject(ApiErrorService);
-  private snackBar = inject(MatSnackBar);
+  private toastService = inject(ToastService);
 
   sessions = signal<UserSession[]>([]);
   isRevoking = signal<number | null>(null);
@@ -59,7 +59,7 @@ export class SessionSettings {
       next: () => {
         this.sessions.update(s => s.filter(session => session.id !== sessionId));
         this.isRevoking.set(null);
-        this.snackBar.open('The device has been logged out.', 'OK', { duration: 3000 });
+        this.toastService.showSuccess('Session revoked successfully');
       },
       error: (err: HttpErrorResponse) => {
         this.isRevoking.set(null);

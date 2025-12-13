@@ -1,12 +1,12 @@
 import { HttpErrorResponse } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { ToastService } from "./toast-service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiErrorService {
-  private snackBar = inject(MatSnackBar);
+ private toastService = inject(ToastService);
 
   handle(err: HttpErrorResponse, defaultMessage: string = 'An error occurred. Please try again.'): void {
     let errorMessage = defaultMessage;
@@ -15,7 +15,7 @@ export class ApiErrorService {
       if (err.error.message) {
         errorMessage = err.error.message;
       }
-      
+
       if (err.error.fieldErrors) {
         const messages = Object.values(err.error.fieldErrors);
         if (messages.length > 0) {
@@ -24,13 +24,6 @@ export class ApiErrorService {
       }
     }
 
-    this.showError(errorMessage);
-  }
-
-  private showError(message: string): void {
-    this.snackBar.open(message, 'OK', {
-      duration: 5000,
-      panelClass: 'error-snackbar'
-    });
+    this.toastService.showError(errorMessage);
   }
 }

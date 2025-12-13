@@ -9,6 +9,62 @@
 
   @if (currentUser(); as user) {
 
+<button mat-icon-button [matMenuTriggerFor]="notificationMenu" matTooltip="Powiadomienia">
+      <mat-icon 
+         [matBadge]="unreadCount()" 
+         [matBadgeHidden]="unreadCount() === 0"
+         matBadgeColor="warn">
+         notifications
+      </mat-icon>
+    </button>
+
+    <!-- MENU POWIADOMIEŃ -->
+    <mat-menu #notificationMenu="matMenu" class="notification-menu">
+      
+      <!-- Nagłówek Menu -->
+      <div class="notification-header" (click)="$event.stopPropagation()">
+        <span class="header-title">Notifications</span>
+        
+        <!-- Przycisk "Mark all as read" (widoczny tylko gdy są nieprzeczytane) -->
+        @if (unreadCount() > 0) {
+          <button mat-button color="primary" class="mark-all-btn" (click)="onMarkAllAsRead($event)">
+            Mark all as read
+          </button>
+        }
+      </div>
+      <mat-divider></mat-divider>
+      
+      <!-- Lista Powiadomień -->
+      <div class="notification-list">
+        @for (n of notifications(); track n.id) {
+          <button mat-menu-item class="notification-item" 
+                  [class.unread]="!n.isRead"
+                  (click)="onNotificationClick(n)">
+            
+            <mat-icon [class]="n.type.toLowerCase()">
+              {{ getIconName(n.type) }}
+            </mat-icon>
+            
+            <div class="notif-content">
+              <span class="notif-title">{{ n.title }}</span>
+              <span class="notif-msg">{{ n.message | slice:0:40 }}{{ n.message.length > 40 ? '...' : '' }}</span>
+              <span class="notif-date">{{ n.createdAt | date:'shortTime' }}</span>
+            </div>
+            
+            <!-- Kropka dla nieprzeczytanych -->
+            @if (!n.isRead) {
+              <div class="unread-dot"></div>
+            }
+          </button>
+        } @empty {
+          <div class="empty-notif">
+            <mat-icon>notifications_off</mat-icon>
+            <p>No notifications</p>
+          </div>
+        }
+      </div>
+    </mat-menu>
+
   <div class="user-profile">
 
     <div class="user-avatar-small">

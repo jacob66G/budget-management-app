@@ -28,7 +28,9 @@
 
     <div class="header-actions">
       <button mat-flat-button class="change-status-btn"
-        [color]="acc.status.toUpperCase() === 'ACTIVE' ? 'warn' : 'primary'" (click)="onStatusToggle(acc)">
+        [style.background-color]="acc.status.toUpperCase() === 'ACTIVE' ? 'var(--error-color)' : 'var(--primary-color)'"
+        style="color: white;"
+        (click)="onStatusToggle(acc)">
         {{ getToggleStatusText(acc.status) }}
       </button>
 
@@ -52,8 +54,7 @@
         <div>
           <div class="kpi-label">Current Balance</div>
           <div class="kpi-value" [class.negative]="acc.balance < 0">
-            <span>{{ acc.balance | number:'1.2-2' }}</span>
-            <span class="currency-suffix"> {{ acc.currency }}</span>
+            <span>{{ acc.balance | amountFormat: acc.currency }}</span>
           </div>
         </div>
       </mat-card-content>
@@ -65,8 +66,7 @@
         <div>
           <div class="kpi-label">Total Income</div>
           <div class="kpi-value">
-            <span>{{ acc.totalIncome | number:'1.2-2' }}</span>
-            <span class="currency-suffix"> {{ acc.currency }}</span>
+            <span>{{ acc.totalIncome | amountFormat: acc.currency}}</span>
           </div>
         </div>
       </mat-card-content>
@@ -78,8 +78,7 @@
         <div>
           <div class="kpi-label">Total Expense</div>
           <div class="kpi-value">
-            <span>{{ acc.totalExpense > 0 ? '-' : '' }}{{ acc.totalExpense | number:'1.2-2' }}</span>
-            <span class="currency-suffix"> {{ acc.currency }}</span>
+            <span>{{ acc.totalExpense | amountFormat: acc.currency }}</span>
           </div>
         </div>
       </mat-card-content>
@@ -121,9 +120,7 @@
             </div>
 
             <div class="tx-amount" [class.income]="tx.type === 'INCOME'" [class.expense]="tx.type === 'EXPENSE'">
-
-              {{ tx.type === 'EXPENSE' ? '-' : '+' }}
-              {{ tx.amount | number:'1.2-2' }} {{ acc.currency }}
+              {{ tx.amount | amountFormat: acc.currency: tx.type }}
             </div>
 
           </div>
@@ -152,7 +149,7 @@
           </div>
           <div class="detail-row">
             <span class="label">Limit</span>
-            <span class="value">{{ acc.budget != null  ? (acc.budget | currency: acc.currency) : '-' }}</span>
+            <span class="value">{{ acc.budget != null  ? (acc.budget | amountFormat: acc.currency) : '-' }}</span>
           </div>
           <div class="detail-row">
             <span class="label">Alert treshold</span>

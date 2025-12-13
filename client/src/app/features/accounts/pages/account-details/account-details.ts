@@ -1,7 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { AccountService } from '../../../../core/services/account.service';
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,7 +14,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { CommonModule, CurrencyPipe, getCurrencySymbol } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { AccountDetails } from '../../models/account.model';
 import { AccountActionService } from '../../services/account-actions.service';
 import { ApiErrorService } from '../../../../core/services/api-error.service';
@@ -29,6 +28,8 @@ import { MatDatepickerModule } from "@angular/material/datepicker";
 import { MatNativeDateModule } from '@angular/material/core';
 import { CategorySumChartComponent } from "../../../../shared/components/charts/category-sum-chart.component";
 import { CashFlowChartComponent } from "../../../../shared/components/charts/cash-flow-chart.component";
+import { ToastService } from '../../../../core/services/toast-service';
+import { AmountFormatPipe } from "../../../../shared/pipes/amount-format-pipe";
 
 @Component({
   selector: 'app-account-details',
@@ -36,7 +37,6 @@ import { CashFlowChartComponent } from "../../../../shared/components/charts/cas
   imports: [
     CommonModule,
     RouterLink,
-    CurrencyPipe,
     MatButtonModule,
     MatIconModule,
     MatDividerModule,
@@ -53,8 +53,9 @@ import { CashFlowChartComponent } from "../../../../shared/components/charts/cas
     MatDatepickerModule,
     MatNativeDateModule,
     CategorySumChartComponent,
-    CashFlowChartComponent
-  ],
+    CashFlowChartComponent,
+    AmountFormatPipe
+],
   templateUrl: './account-details.html',
   styleUrl: './account-details.scss'
 })
@@ -63,10 +64,10 @@ export class AccountDetailsPage {
   private accountAction = inject(AccountActionService)
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private snackBar = inject(MatSnackBar);
   private errorService = inject(ApiErrorService)
   private transactionService = inject(TransactionService);
   private analyticsService = inject(AnalyticsService);
+  private toastService = inject(ToastService);
 
   account = signal<AccountDetails | null>(null);
   lastTransactions = signal<TransactionSummary[] | null>(null)
@@ -159,7 +160,7 @@ export class AccountDetailsPage {
         this.isLoading.set(false);
 
         const message = isActive ? 'Your account has been deactivated.' : 'Your account has been activated.';
-        this.snackBar.open(message, 'OK', { duration: 3000, panelClass: 'success-snackbar' });
+        this.toastService.showSuccess(message);
       },
       error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);

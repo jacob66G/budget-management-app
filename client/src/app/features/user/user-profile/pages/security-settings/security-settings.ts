@@ -8,16 +8,15 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../../../core/services/auth.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserService } from '../../../../../core/services/user.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { filter } from 'rxjs';
 import { ResponseMessage } from '../../../../../core/models/response-message.model';
-import { Router } from '@angular/router';
 import { ChangePasswordDialog } from './dialogs/change-password-dialog/change-password-dialog';
 import { ManageTfaDialog } from './dialogs/manage-tfa-dialog/manage-tfa-dialog';
 import { ConfirmDialog, ConfirmDialogData } from '../../../../../shared/components/dialogs/confirm-dialog/confirm-dialog';
 import { ApiErrorService } from '../../../../../core/services/api-error.service';
+import { ToastService } from '../../../../../core/services/toast-service';
 
 
 @Component({
@@ -40,8 +39,7 @@ export class SecuritySettings {
   private userService = inject(UserService)
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar)
-  private router = inject(Router)
+  private toastService = inject(ToastService);
   private errorService = inject(ApiErrorService);
 
   currentUser = this.authService.currentUser;
@@ -57,10 +55,7 @@ export class SecuritySettings {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'success') {
-        this.snackBar.open('Password has been changed!', 'OK', {
-          duration: 3000,
-          panelClass: 'success-snackbar'
-        });
+        this.toastService.showSuccess('Password changed successfully');
       }
     });
   }
@@ -80,7 +75,7 @@ export class SecuritySettings {
         this.authService.patchCurrentUser({ mfaEnabled: isMfaEnabled });
 
         const message = newStatus ? '2FA enabled!' : '2FA disabled.';
-        this.snackBar.open(message, 'OK', { duration: 3000 });
+        this.toastService.showSuccess(message);
       }
     });
 
@@ -116,10 +111,7 @@ export class SecuritySettings {
     this.userService.closeAccount().subscribe({
       next: (response: ResponseMessage) => {
         this.isLoading.set(false);
-        this.snackBar.open(response.message, 'OK', {
-          duration: 7000,
-          panelClass: 'success-snackbar'
-        });
+        this.toastService.showSuccess(response.message);
         this.authService.logout();
       },
       error: (err: HttpErrorResponse) => {

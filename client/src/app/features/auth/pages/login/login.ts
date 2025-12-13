@@ -10,9 +10,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiErrorService } from '../../../../core/services/api-error.service';
+import { ToastService } from '../../../../core/services/toast-service';
 
 @Component({
   selector: 'app-login',
@@ -34,14 +34,14 @@ export class Login {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private snackBar = inject(MatSnackBar);
   private errorService = inject(ApiErrorService);
-  
+  private toastService = inject(ToastService);
+
   isLoading = signal(false);
   hidePassword = signal(true);
   loginForm!: FormGroup;
 
-  constructor() {}
+  constructor() { }
 
   ngOnInit(): void {
     this.loginForm = this.fb.group(
@@ -69,12 +69,8 @@ export class Login {
             state: { userId: response.userId }
           });
         } else {
-          this.snackBar.open(
-            'Login successful',
-            'OK',
-            { duration: 5000, panelClass: 'success-snackbar' }
-          );
-           this.router.navigate(['/app/dashboard']);
+          this.toastService.showSuccess('Login successful');
+          this.router.navigate(['/app/dashboard']);
         }
       }, error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);

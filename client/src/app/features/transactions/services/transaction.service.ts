@@ -5,7 +5,6 @@ import { TransactionSummary } from '../model/transaction-summary.model';
 import { ApiPaths } from '../../../constans/api-paths';
 import { TransactionCreateResponse } from '../model/transaction-create-response.model';
 import { TransactionCreateRequest } from '../model/transaction-create-request.model';
-import { TransactionFilterParams } from '../model/transaction-filter-params.model';
 import { PagedResponse } from '../model/paged-response.mode';
 import { TransactionUpdateRequest } from '../model/transaction-update-request.model';
 import { UpcomingTransactionSummary } from '../model/upcoming-transaction-summary.model';
@@ -13,7 +12,6 @@ import { UpcomingTransactionsFilterParams } from '../model/upcoming-transaction-
 import { TransactionCategoryChangeRequest } from '../model/transaction-category-change-request.model';
 import { TransactionCategoryChangeResponse } from '../model/transaction-category-change-response.model';
 import { RecurringTemplateSummary } from '../model/recurring-template-summary.model';
-import { isAfter } from 'date-fns';
 import { RecurringTransactionCreateRequest } from '../model/recurring-template-create-request.model';
 import { RecurringTransactionCreateResponse } from '../model/recurring-template-create-response.model';
 

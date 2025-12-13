@@ -9,7 +9,7 @@
   .mat-mdc-card-title {
     font-size: 1.25rem;
     font-weight: 500;
-    color: #333;
+    color: var(--default-dark-gray);
   }
   
   .mat-mdc-card-content.list-content {
@@ -36,7 +36,7 @@
 
 .icon-container {
   flex-shrink: 0;
-  color: var(--primary-color, #3f51b5);
+  color: var(--primary-color);
   background-color: #f0f4ff;
   border-radius: 50%;
   width: 44px;
@@ -47,7 +47,7 @@
 }
 
 #close-account-icon {
-  color: var(--warn-color, #d93025);
+  color: var(--error-color);
 }
 
 .item-content {
@@ -55,12 +55,12 @@
   
   .item-title {
     font-weight: 500;
-    color: #333;
+    color: var(--default-dark-gray);
     font-size: 1rem;
   }
   .item-subtitle {
     font-size: 0.875rem;
-    color: #5f6368;
+    color: var(--default-gray);
   }
 }
 
@@ -70,11 +70,11 @@
 }
 
 .status-enabled {
-  color: #2e7d32;
+  color: var(--default-green);
   font-weight: 500;
 }
 
 .status-disabled {
-  color: #5f6368;
+  color: var(--default-gray);
   font-weight: 500;
 }

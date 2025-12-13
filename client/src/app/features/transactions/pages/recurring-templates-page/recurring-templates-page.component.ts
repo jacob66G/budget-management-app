@@ -7,7 +7,7 @@ import { MatMenuModule } from "@angular/material/menu";
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { AmountFormatPipe } from '../../pipes/amount-format-pipe';
+import { AmountFormatPipe } from '../../../../shared/pipes/amount-format-pipe';
 import { TransactionService } from '../../services/transaction.service';
 import { Pagination } from '../../model/pagination.model';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';

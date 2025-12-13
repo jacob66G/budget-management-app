@@ -49,7 +49,7 @@
           color="primary"
           type="submit"
           class="submit-button"
-          [disabled]="profileForm.invalid || isLoading() || !profileForm.dirty">
+          [disabled]="profileForm.invalid || isLoading() || !hasChanges()">
           
           @if (!isLoading()) {
             <span>Save Changes</span>

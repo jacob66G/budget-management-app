@@ -19,7 +19,7 @@ export interface ReassignDialogData {
   styleUrl: './category-reassign-dialog.component.scss'
 })
 export class ReassignDialogComponent {
- private categoryService = inject(CategoryService);
+  private categoryService = inject(CategoryService);
   public dialogRef = inject(MatDialogRef<ReassignDialogComponent>);
   public data: ReassignDialogData = inject(MAT_DIALOG_DATA);
 

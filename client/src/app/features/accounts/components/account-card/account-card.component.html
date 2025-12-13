@@ -47,7 +47,7 @@
       <span class="metric-label">Expense</span>
       <div class="metric-value-wrapper expense-text">
         <mat-icon class="tiny-icon">arrow_upward</mat-icon>
-        <span class="value">{{ account().totalExpense | number:'1.2-2' }}</span>
+        <span class="value">{{ account().totalExpense > 0 ? '-' : '' }}{{ account().totalExpense | number:'1.2-2' }}</span>
       </div>
     </div>
 

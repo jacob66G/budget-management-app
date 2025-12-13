@@ -8,13 +8,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../../core/services/auth.service';
 import { passwordsMatchValidator } from '../registration/registration';
 import { PasswordResetConfirmationRequest } from '../../model/auth.model';
 import { ApiErrorService } from '../../../../core/services/api-error.service';
+import { ToastService } from '../../../../core/services/toast-service';
 
 @Component({
   selector: 'app-reset-password',
@@ -38,7 +39,7 @@ export class ResetPassword {
   private authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private snackBar = inject(MatSnackBar);
+  private toastService = inject(ToastService);
   private errorService = inject(ApiErrorService); 
 
   isLoading = signal(false);
@@ -63,10 +64,7 @@ export class ResetPassword {
 
   ngOnInit(): void {
     if (!this.token) {
-      this.snackBar.open('Invalid or missing password reset token.', 'OK', {
-        duration: 5000,
-        panelClass: 'error-snackbar',
-      });
+      this.toastService.showError('Invalid or missing password reset token.');
       this.router.navigate(['/login']);
     }
   }
@@ -88,11 +86,7 @@ export class ResetPassword {
     this.authService.resetPasswordConfirm(dto).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.snackBar.open('Your password has been successfully changed!', 'OK', {
-          duration: 5000,
-          panelClass: 'success-snackbar',
-        });
-
+        this.toastService.showSuccess('Your password has been successfully changed!');
         this.router.navigate(['/login']);
       },
       error: (err: HttpErrorResponse) => {

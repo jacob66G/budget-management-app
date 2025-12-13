@@ -5,7 +5,6 @@ import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AccountDetails, CreateAccount } from '../../models/account.model';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -22,6 +21,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { ReferenceDataService } from '../../../../core/services/reference-data.service';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ToastService } from '../../../../core/services/toast-service';
 
 @Component({
   selector: 'app-account-add-page',
@@ -52,8 +52,8 @@ export class AccountAddPage {
   private refService = inject(ReferenceDataService);
   private router = inject(Router)
   private fb = inject(FormBuilder)
-  private snackBar = inject(MatSnackBar)
   private destroyRef = inject(DestroyRef);
+  private toastService = inject(ToastService);
 
   isLoading = signal(false);
 
@@ -97,7 +97,7 @@ export class AccountAddPage {
     this.accountService.createAccount(dto).subscribe({
       next: (data: AccountDetails) => {
         this.isLoading.set(false);
-        this.snackBar.open('The account have been created successfully', 'OK', { duration: 3000, panelClass: 'success-snackbar' });
+        this.toastService.showSuccess('The account have been created successfully');
         this.router.navigate(['/app/accounts/', data.id]);
       },
       error: (err: HttpErrorResponse) => {

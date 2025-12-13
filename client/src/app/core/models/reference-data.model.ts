@@ -7,5 +7,6 @@ export interface ReferenceData {
     userStatuses: [],
     accountStatuses: [],
     accountIcons: [],
-    categoryIcons: []
+    categoryIcons: [],
+    notificationTypes: []
 }

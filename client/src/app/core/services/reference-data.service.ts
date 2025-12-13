@@ -31,5 +31,5 @@ export class ReferenceDataService {
   get budgetTypes() { return this.data()?.budgetTypes || []; }
   get accountIcons() { return this.data()?.accountIcons || []; }
   get categoryIcons() { return this.data()?.categoryIcons || []; }
-  
+  get notificationTypes() { return this.data()?.notificationTypes || []; }
 }

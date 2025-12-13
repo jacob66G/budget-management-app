@@ -146,14 +146,6 @@ export class AuthService {
     }
   }
 
-  // private clearAuthState(): void {
-  //   this.currentUser.set(null);
-  //   this.accessToken.set(null);
-
-  //   localStorage.removeItem(StorageKesy.TOKEN_KEY);
-  //   localStorage.removeItem(StorageKesy.USER_KEY);
-  // }
-
   private buildUser(response: LoginResponse): User {
     const user: User = {
       id: response.userId,

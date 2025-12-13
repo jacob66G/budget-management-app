@@ -9,7 +9,7 @@
   .mat-mdc-card-title {
     font-size: 1.25rem;
     font-weight: 500;
-    color: #333;
+    color: var(--default-dark-gray);
   }
   
   .mat-mdc-card-content.list-content {
@@ -50,7 +50,7 @@
   height: 44px;
   border-radius: 50%;
   background-color: #f5f7fa;
-  color: #5f6368;
+  color: var(--default-gray);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -70,13 +70,13 @@
 
   .item-title {
     font-weight: 500;
-    color: #333;
+    color: var(--default-dark-gray);
     font-size: 1rem;
   }
   
   .item-subtitle {
     font-size: 0.85rem;
-    color: #5f6368;
+    color: var(--default-gray);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -94,10 +94,10 @@
 }
 
 .status-current {
-  color: #2e7d32;
+  color: var(--default-green);
   font-weight: 500;
   font-size: 0.875rem;
-  background-color: #e8f5e9;
+  background-color: var(--default-light-green);
   padding: 4px 12px;
   border-radius: 16px;
 }
