@@ -27,7 +27,8 @@ public class Mapper {
                 tuple.get("transactionDate", LocalDateTime.class),
                 tuple.get("categoryName", String.class),
                 storageService.getPublicUrl(tuple.get("iconKey", String.class)),
-                tuple.get("accountName", String.class)
+                tuple.get("accountName", String.class),
+                tuple.get("currency", SupportedCurrency.class)
         );
     }
 

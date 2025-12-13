@@ -6,8 +6,9 @@ import com.example.budget_management_app.account.domain.AccountType;
 import com.example.budget_management_app.account.domain.BudgetType;
 import com.example.budget_management_app.category.domain.CategoryType;
 import com.example.budget_management_app.common.enums.SupportedCurrency;
-import com.example.budget_management_app.common.service.StorageService;
-import com.example.budget_management_app.config.IconConfig;
+import com.example.budget_management_app.common.storage.service.StorageService;
+import com.example.budget_management_app.common.storage.config.IconConfig;
+import com.example.budget_management_app.notification.domain.NotificationType;
 import com.example.budget_management_app.session.domain.DeviceType;
 import com.example.budget_management_app.user.domain.UserStatus;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +44,8 @@ public class ReferenceDataController {
 
                 iconConfig.getCategories().stream()
                         .map(storageService::getPublicUrl)
-                        .toList()
+                        .toList(),
+                Arrays.stream(NotificationType.values()).map(Enum::name).toList()
         ));
     }
 
@@ -56,7 +58,8 @@ public class ReferenceDataController {
             List<String> userStatuses,
             List<String> accountStatuses,
             List<String> accountIcons,
-            List<String> categoryIcons
+            List<String> categoryIcons,
+            List<String> notificationsTypes
     ) {
     }
 

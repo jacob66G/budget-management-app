@@ -5,8 +5,8 @@ import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
 import com.example.budget_management_app.transaction.domain.*;
-import com.example.budget_management_app.transaction.dto.TransactionPaginationParams;
 import com.example.budget_management_app.transaction.dto.TransactionFilterParams;
+import com.example.budget_management_app.transaction.dto.TransactionPaginationParams;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import com.example.budget_management_app.user.domain.User;
 import jakarta.persistence.EntityManager;
@@ -15,6 +15,7 @@ import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.*;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -292,6 +293,17 @@ public class TransactionDaoImpl implements TransactionDao {
 
         return em.createQuery(cq)
                 .getResultList();
+    }
+
+    @Override
+    public BigDecimal getSumForAccountInPeriod(Long accountId, LocalDateTime start, LocalDateTime end, TransactionType type) {
+        return em.createQuery("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
+                "WHERE t.account.id = :accountId AND t.type = :type AND t.transactionDate BETWEEN :from AND :to", BigDecimal.class)
+                .setParameter("accountId", accountId)
+                .setParameter("from", start)
+                .setParameter("to", end)
+                .setParameter("type", type)
+                .getSingleResult();
     }
 
     private List<Predicate> setPredicates(

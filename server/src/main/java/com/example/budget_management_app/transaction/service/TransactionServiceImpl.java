@@ -2,25 +2,33 @@ package com.example.budget_management_app.transaction.service;
 
 import com.example.budget_management_app.account.dao.AccountDao;
 import com.example.budget_management_app.account.domain.Account;
+import com.example.budget_management_app.account.domain.BudgetType;
 import com.example.budget_management_app.category.dao.CategoryDao;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.common.exception.CategoryChangeNotAllowedException;
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
+import com.example.budget_management_app.notification.domain.NotificationType;
 import com.example.budget_management_app.transaction.dao.TransactionDao;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction.dto.*;
+import com.example.budget_management_app.transaction.events.BudgetExceededEvent;
 import com.example.budget_management_app.transaction.mapper.TransactionMapper;
+import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 import com.example.budget_management_app.transaction_common.service.AccountUpdateService;
 import com.example.budget_management_app.transaction_common.service.CategoryValidatorService;
 import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +36,7 @@ import java.util.Set;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class TransactionServiceImpl implements TransactionService{
+public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionDao transactionDao;
     private final CategoryDao categoryDao;
@@ -36,6 +44,7 @@ public class TransactionServiceImpl implements TransactionService{
     private final CategoryValidatorService transactionValidator;
     private final AccountUpdateService accountUpdateService;
     private final TransactionMapper mapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * @return TransactionPage object
@@ -74,14 +83,14 @@ public class TransactionServiceImpl implements TransactionService{
         // checking if category exists and belongs to the logged user
         long categoryId = createReq.categoryId();
         Category category = categoryDao.findByIdAndUser(categoryId, userId)
-                .orElseThrow( () -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
 
         transactionValidator.validateCategoryType(category.getType(), createReq.type());
 
         // checking if account exists and belongs to the logged user
         long accountId = createReq.accountId();
         Account account = accountDao.findByIdAndUser(accountId, userId)
-                .orElseThrow( () -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
 
         accountUpdateService.calculateBalanceAfterTransactionCreation(account, createReq.amount(), createReq.type());
         Transaction transaction = mapper.fromDto(createReq);
@@ -89,6 +98,8 @@ public class TransactionServiceImpl implements TransactionService{
         transaction.setAccount(account);
 
         Transaction savedTransaction = transactionDao.save(transaction);
+
+        checkBudgetAndPublishEvent(account, savedTransaction);
 
         return new TransactionCreateResponse(savedTransaction.getId(), savedTransaction.getTransactionDate());
     }
@@ -98,7 +109,7 @@ public class TransactionServiceImpl implements TransactionService{
     public TransactionCategoryChangeResponse changeCategory(Long id, TransactionCategoryChangeRequest updateReq, Long userId) {
 
         Transaction transaction = transactionDao.findByIdAndUserIdAndCategoryId(id, updateReq.currentCategoryId(), userId)
-                .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
         if (transaction.getRecurringTransaction() != null) {
             throw new CategoryChangeNotAllowedException(transaction.getId(), ErrorCode.TRANSACTION_IS_RECURRING);
@@ -106,7 +117,7 @@ public class TransactionServiceImpl implements TransactionService{
 
         long newCategoryId = updateReq.newCategoryId();
         Category category = categoryDao.findByIdAndUser(newCategoryId, userId)
-                .orElseThrow( () -> new NotFoundException(Category.class.getSimpleName(), newCategoryId, ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(Category.class.getSimpleName(), newCategoryId, ErrorCode.NOT_FOUND));
 
         transactionValidator.validateCategoryType(category.getType(), transaction.getType());
         transaction.setCategory(category);
@@ -119,7 +130,7 @@ public class TransactionServiceImpl implements TransactionService{
     public void update(Long id, TransactionUpdateRequest req, Long userId) {
 
         Transaction transaction = transactionDao.findByIdAndUserId(id, userId)
-                .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
         if (!req.amount().equals(transaction.getAmount())) {
             BigDecimal newAmount = req.amount();
@@ -136,7 +147,7 @@ public class TransactionServiceImpl implements TransactionService{
     public void delete(Long id, Long userId) {
 
         Transaction transaction = transactionDao.findByIdAndUserId(id, userId)
-                .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
         accountUpdateService.calculateBalanceAfterTransactionDeletion(transaction.getAccount(), transaction.getAmount(), transaction.getType());
         transactionDao.delete(transaction);
@@ -157,7 +168,7 @@ public class TransactionServiceImpl implements TransactionService{
     private void validateCategoryIds(List<Long> categoryIds, Long userId) {
         Set<Long> userCategoryIdsSet = new HashSet<>(categoryDao.getUserCategoryIds(userId));
         List<Long> differences = categoryIds.stream().
-                filter( id -> !userCategoryIdsSet.contains(id))
+                filter(id -> !userCategoryIdsSet.contains(id))
                 .toList();
 
         if (!differences.isEmpty()) {
@@ -195,5 +206,59 @@ public class TransactionServiceImpl implements TransactionService{
     public void deleteAllByUser(Long userId) {
         transactionDao.deleteAllByUser(userId);
         log.info("User: {} has deleted ALL transactions.", userId);
+    }
+
+    private void checkBudgetAndPublishEvent(Account account, Transaction transaction) {
+        if (transaction.getType() != TransactionType.EXPENSE || account.getBudgetType() == BudgetType.NONE) {
+            return;
+        }
+
+        BigDecimal limit = account.getBudget();
+        BigDecimal currentUsageInPeriod = calculateCurrentUsage(account);
+
+        if (limit != null && currentUsageInPeriod.compareTo(limit) > 0) {
+            eventPublisher.publishEvent(new BudgetExceededEvent(
+                    account.getUser().getId(),
+                    NotificationType.ERROR,
+                    account.getId(),
+                    account.getName(),
+                    transaction.getAmount(),
+                    currentUsageInPeriod,
+                    limit
+            ));
+            return;
+        }
+
+        if (limit != null && account.getAlertThreshold() != null) {
+            BigDecimal thresholdAmount = limit.multiply(BigDecimal.valueOf(account.getAlertThreshold() / 100.0));
+
+            if (currentUsageInPeriod.compareTo(thresholdAmount) > 0) {
+                eventPublisher.publishEvent(new BudgetExceededEvent(
+                        account.getUser().getId(),
+                        NotificationType.WARNING,
+                        account.getId(),
+                        account.getName(),
+                        transaction.getAmount(),
+                        currentUsageInPeriod,
+                        limit
+                ));
+            }
+        }
+    }
+
+    private BigDecimal calculateCurrentUsage(Account account) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start;
+        LocalDateTime end = now;
+
+        if (account.getBudgetType() == BudgetType.MONTHLY) {
+            start = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        } else if (account.getBudgetType() == BudgetType.WEEKLY) {
+            start = LocalDate.now().with(DayOfWeek.MONDAY).atStartOfDay();
+        } else {
+            return BigDecimal.ZERO;
+        }
+
+        return transactionDao.getSumForAccountInPeriod(account.getId(), start, end, TransactionType.EXPENSE);
     }
 }

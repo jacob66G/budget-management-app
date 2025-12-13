@@ -3,9 +3,12 @@ package com.example.budget_management_app.transaction.dao;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction.dto.TransactionFilterParams;
 import com.example.budget_management_app.transaction.dto.TransactionPaginationParams;
+import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import jakarta.persistence.Tuple;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,4 +43,6 @@ public interface TransactionDao {
     void deleteAllByUser(Long userId);
 
     List<Tuple> getUserExpensesByAccount(LocalDate startDate, LocalDate endDate, String accountName, Long userId);
+
+    BigDecimal getSumForAccountInPeriod(Long accountId, LocalDateTime start, LocalDateTime end, TransactionType type);
 }

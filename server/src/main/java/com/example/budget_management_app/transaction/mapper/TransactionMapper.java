@@ -2,7 +2,7 @@ package com.example.budget_management_app.transaction.mapper;
 
 import com.example.budget_management_app.chat.dto.TransactionDataResponse;
 import com.example.budget_management_app.common.enums.SupportedCurrency;
-import com.example.budget_management_app.common.service.StorageService;
+import com.example.budget_management_app.common.storage.service.StorageService;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import com.example.budget_management_app.transaction_common.dto.AccountSummary;

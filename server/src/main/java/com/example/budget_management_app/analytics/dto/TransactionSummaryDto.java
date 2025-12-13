@@ -1,5 +1,6 @@
 package com.example.budget_management_app.analytics.dto;
 
+import com.example.budget_management_app.common.enums.SupportedCurrency;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
 
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ public record TransactionSummaryDto(
         LocalDateTime date,
         String categoryName,
         String categoryIconPath,
-        String accountName
+        String accountName,
+        SupportedCurrency currency
 ) {
 }

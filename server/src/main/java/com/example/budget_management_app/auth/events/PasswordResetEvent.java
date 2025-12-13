@@ -1,4 +1,4 @@
-package com.example.budget_management_app.common.event.model;
+package com.example.budget_management_app.auth.events;
 
 public record PasswordResetEvent(
         String userEmail,
