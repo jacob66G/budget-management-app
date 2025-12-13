@@ -1,0 +1,19 @@
+<h2 mat-dialog-title [class]="data.type.toLowerCase()">
+  <mat-icon>{{ getIcon(data.type) }}</mat-icon>
+  {{ data.title }}
+</h2>
+
+<mat-dialog-content>
+  <p class="date">{{ data.createdAt | date:'medium' }}</p>
+  <p class="message">{{ data.message }}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Close</button>
+
+  @if (data.targetUrl) {
+  <button mat-flat-button color="primary" (click)="navigateToTarget()">
+    Show More
+  </button>
+  }
+</mat-dialog-actions>
