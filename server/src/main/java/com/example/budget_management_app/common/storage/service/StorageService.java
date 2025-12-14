@@ -1,9 +1,5 @@
 package com.example.budget_management_app.common.storage.service;
 
-import com.example.budget_management_app.transaction.dto.TransactionReceiptUploadRequest;
-import com.example.budget_management_app.transaction.dto.TransactionReceiptUploadResponse;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 
 public interface StorageService {
@@ -11,9 +7,11 @@ public interface StorageService {
 
     String extractKey(String publicUrl);
 
-    TransactionReceiptUploadResponse generateUploadUrl(TransactionReceiptUploadRequest uploadRequest);
+    String generatePresignedPutUrl(String key, String contentType, Long fileSize);
 
-    String upload(String pathPrefix, Long resourceId, MultipartFile file);
+    String generatePresignedGetUrl(String key, Long validityPeriod);
+
+//    String upload(String pathPrefix, Long resourceId, MultipartFile file);
 
     void delete(String key);
 

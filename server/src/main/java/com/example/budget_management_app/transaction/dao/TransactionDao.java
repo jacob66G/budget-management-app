@@ -32,6 +32,8 @@ public interface TransactionDao {
 
     List<Transaction> findByRecurringTransactionId(Long id);
 
+    boolean existsByIdAndUserId(Long id, Long userId);
+
     boolean existsByCategoryIdAndUserId(Long categoryId, Long userId);
 
     boolean existsByAccountIdAndUserId(Long accountId, Long userId);

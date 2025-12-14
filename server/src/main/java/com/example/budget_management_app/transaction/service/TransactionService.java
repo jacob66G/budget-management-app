@@ -1,5 +1,6 @@
 package com.example.budget_management_app.transaction.service;
 
+import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction.dto.*;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 
@@ -18,6 +19,10 @@ public interface TransactionService {
     void update(Long id, TransactionUpdateRequest req, Long userId);
 
     void delete(Long id, Long userId);
+
+    Transaction findByIdAndUserId(Long id, Long userId);
+
+    boolean existsByIdAndUserId(Long id, Long userId);
 
     boolean existsByCategoryAndUser(Long categoryId, Long userId);
 

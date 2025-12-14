@@ -197,6 +197,26 @@ public class TransactionDaoImpl implements TransactionDao {
                 .getResultList();
     }
 
+    /**
+     * @param id
+     * @param userId
+     * @return
+     */
+    @Override
+    public boolean existsByIdAndUserId(Long id, Long userId) {
+        Long count = em.createQuery("""
+                    SELECT COUNT (t) FROM Transaction t
+                    WHERE t.id = :id
+                    AND
+                    t.account.user.id = :userId
+                """, Long.class)
+                .setParameter("id", id)
+                .setParameter("userId", userId)
+                .getSingleResult();
+
+        return count > 0;
+    }
+
     @Override
     public boolean existsByCategoryIdAndUserId(Long categoryId, Long userId) {
         List<Long> result = em.createQuery(
