@@ -34,7 +34,6 @@ public class AttachmentKeyProvider {
 
     public void validateKeyStructure(Long transactionId, Long userId, String key) {
 
-
         if (!keyTemplate.matches(key)) {
             log.error("Received key format is invalid: {}", key);
             throw new IllegalArgumentException("Key format is invalid");

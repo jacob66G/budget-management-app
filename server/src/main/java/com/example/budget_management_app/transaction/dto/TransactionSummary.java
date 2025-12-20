@@ -16,6 +16,7 @@ public record TransactionSummary(
         LocalDateTime transactionDate,
         AccountSummary account,
         CategorySummary category,
-        Long recurringTransactionId
+        Long recurringTransactionId,
+        Boolean hasAttachment
 ) {
 }

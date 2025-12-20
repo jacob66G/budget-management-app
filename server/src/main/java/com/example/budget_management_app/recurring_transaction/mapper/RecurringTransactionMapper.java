@@ -88,6 +88,6 @@ public class RecurringTransactionMapper {
         Category category = transaction.getCategory();
         return new TransactionSummary(transaction.getId(), transaction.getTitle(), transaction.getAmount(), transaction.getType(), transaction.getDescription(), transaction.getTransactionDate(),
                 new AccountSummary(account.getId(), account.getName(), account.getCurrency()),
-                new CategorySummary(category.getId(), category.getName(), category.getIconKey()), recTransactionId);
+                new CategorySummary(category.getId(), category.getName(), category.getIconKey()), recTransactionId, false);
     }
 }
