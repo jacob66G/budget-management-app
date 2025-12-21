@@ -1,4 +1,4 @@
-package com.example.budget_management_app.transaction_receipts.common;
+package com.example.budget_management_app.transaction_receipts.utils;
 
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.StorageException;

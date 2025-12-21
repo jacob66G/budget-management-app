@@ -29,9 +29,6 @@ public class S3StorageService implements StorageService {
     @Value("${aws.region}")
     private String region;
 
-    private static final long MAX_FILE_SIZE_MB = 5;
-    private static final long MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-
     @Override
     public void delete(String key) {
         if (key == null || key.isBlank()) {

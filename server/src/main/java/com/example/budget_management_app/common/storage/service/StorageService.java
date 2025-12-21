@@ -11,8 +11,6 @@ public interface StorageService {
 
     String generatePresignedGetUrl(String key, Long validityPeriod);
 
-//    String upload(String pathPrefix, Long resourceId, MultipartFile file);
-
     void delete(String key);
 
     void deleteBatch(List<String> keys);
