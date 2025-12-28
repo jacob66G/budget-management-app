@@ -55,7 +55,7 @@ public class TransactionAttachmentServiceImpl implements TransactionAttachmentSe
         String key = this.attachmentKeyProvider.generateKey(transactionId, userId, extension);
 
         // getting presigned url
-        return ReceiptUploadUrlResponse.of(key, storageService.generatePresignedPutUrl(key, fileType, fileSize));
+        return ReceiptUploadUrlResponse.of(storageService.generatePresignedPutUrl(key, fileType, fileSize), key);
     }
 
     /**

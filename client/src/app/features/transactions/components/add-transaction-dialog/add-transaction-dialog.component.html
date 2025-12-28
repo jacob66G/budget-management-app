@@ -8,7 +8,7 @@
       <mat-icon>close</mat-icon>
     </button>
   </div>
-
+  <mat-divider></mat-divider>
   <mat-dialog-content>
     <form [formGroup]="addTransactionForm" class="custom-form">
         <div class="input-group">
@@ -38,25 +38,25 @@
 
         <div class="form-row">
             <div class="input-group">
-            <label class="custom-label">Account</label>
-            <mat-form-field appearance="outline" class="no-label-field">
-                <mat-select formControlName="account">
-                @for (account of data.accountList; track account.id) {
-                    <mat-option [value]="account.id">{{ account.name }}</mat-option>
-                }
-                </mat-select>
-            </mat-form-field>
+              <label class="custom-label">Account</label>
+              <mat-form-field appearance="outline" class="no-label-field">
+                  <mat-select formControlName="account">
+                  @for (account of data.accountList; track account.id) {
+                      <mat-option [value]="account.id">{{ account.name }}</mat-option>
+                  }
+                  </mat-select>
+              </mat-form-field>
             </div>
 
             <div class="input-group">
-            <label class="custom-label">Category</label>
-            <mat-form-field appearance="outline" class="no-label-field">
-                <mat-select formControlName="category">
-                @for (category of categories; track category.id) {
-                    <mat-option [value]="category.id">{{ category.name }}</mat-option>
-                }
-                </mat-select>
-            </mat-form-field>
+              <label class="custom-label">Category</label>
+              <mat-form-field appearance="outline" class="no-label-field">
+                  <mat-select formControlName="category">
+                  @for (category of categories; track category.id) {
+                      <mat-option [value]="category.id">{{ category.name }}</mat-option>
+                  }
+                  </mat-select>
+              </mat-form-field>
             </div>
         </div>
 
@@ -65,6 +65,40 @@
             <mat-form-field appearance="outline" class="no-label-field">
             <textarea matInput formControlName="description" rows="1" placeholder="Add note for this transaction ..."></textarea>
             </mat-form-field>
+        </div>
+
+        <div class="input-group">
+            <label class="custom-label">Attachment</label>
+            <input 
+              type="file" 
+              #fileInput 
+              hidden 
+              accept="image/png, image/jpeg, image/jpg"
+              (change)="onFileSelected($event)">
+            <div class="receipt-container">
+
+              @if (!currentPhotoPreviewUrl()) {
+                <div class="upload-zone" (click)="fileInput.click()">
+                  <div class="upload-content">
+                    <mat-icon class="upload-icon">vertical_align_top</mat-icon> <span class="upload-text">Click to upload</span>
+                    <span class="upload-hint">PNG, JPG or JPEG (max 5MB)</span>
+                  </div>
+                </div>
+              }
+              @if (currentPhotoPreviewUrl()) {
+                <div class="preview-zone">
+                  <button mat-icon-button class="remove-btn" (click)="onFileRemove()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+
+                  <div class="image-wrapper">
+                    <img [src]="currentPhotoPreviewUrl()" alt="Receipt preview">
+                  </div>
+
+                  <p class="file-name">{{ selectedFile()?.name }}</p>
+                </div>
+              }
+            </div>
         </div>
     </form>
   </mat-dialog-content>

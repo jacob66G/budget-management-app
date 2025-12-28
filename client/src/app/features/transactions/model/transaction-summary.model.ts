@@ -11,5 +11,6 @@ export interface TransactionSummary {
     transactionDate: Date,
     account: AccountSummary,
     category: CategorySummary,
-    recurringTransactionId: number | undefined
+    recurringTransactionId: number | undefined,
+    hasAttachment: boolean
 }

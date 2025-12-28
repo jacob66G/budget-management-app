@@ -12,9 +12,6 @@ export class ApiPaths {
     public static readonly RESET_PASSWORD = '/api/auth/password-reset-request';
     public static readonly REST_PASSWORD_CONFIRM = '/api/auth/password-reset-confirm';
 
-    // transactions
-    public static readonly TRANSACTIONS = '/api/v1/transactions';
-
     // chat
     public static readonly CHATS = '/api/v1/chats';
 
@@ -22,6 +19,10 @@ export class ApiPaths {
     public static readonly RECURRING_TEMPLATES = '/api/v1/recurring-transactions';
 
     private static readonly API = '/api';
+    private static readonly VERSION = 'v1'
+
+        // transactions
+    public static readonly TRANSACTIONS = `${ApiPaths.API}/${ApiPaths.VERSION}/transactions`;
 
     public static readonly AUTH_BASE = `${ApiPaths.API}/auth`;
     public static readonly USERS_BASE = `${ApiPaths.API}/users`;
@@ -81,5 +82,16 @@ export class ApiPaths {
         UNREAD_NOTIFICATIONS: `${ApiPaths.NOTIFICATIONS_BASE}/unread`,
         MARK_AS_READ: (id: number) => `${ApiPaths.NOTIFICATIONS_BASE}/${id}/mark-as-read`,
         MARK_ALL_AS_READ: `${ApiPaths.NOTIFICATIONS_BASE}/mark-as-read`
+    }
+
+    public static readonly Transactions = {
+        BASE: ApiPaths.TRANSACTIONS,
+
+        BY_ID: (id: number) => `${ApiPaths.TRANSACTIONS}/${id}`,
+
+        Attachments: {
+            INIT_UPLOAD: (transactionId: number) => `${ApiPaths.TRANSACTIONS}/${transactionId}/attachment/presigned-upload-url`,
+            CONFIRM_UPLOAD: (transactionId: number) => `${ApiPaths.TRANSACTIONS}/${transactionId}/attachment`,
+        }
     }
 }

@@ -7,7 +7,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 24px 24px 0 24px;
+  padding: 24px 24px 10px 24px;
   
   .title {
     margin: 0;
@@ -174,5 +174,101 @@ mat-dialog-content {
     &:disabled {
       background-color: #6e94e8 !important;
     }
+  }
+}
+
+.spacer-top {
+  margin-top: 24px;
+}
+
+.receipt-container {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.upload-zone {
+  border: 2px dashed #e5e7eb;
+  border-radius: 8px;
+  padding: 32px 20px;
+  cursor: pointer;
+  background-color: #fff;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+  }
+
+  .upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    .upload-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    .upload-text {
+      font-size: 14px;
+      color: #374151;
+      font-weight: 500;
+    }
+
+    .upload-hint {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+  }
+}
+
+.preview-zone {
+  position: relative;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 24px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .remove-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    color: #6b7280;
+    
+    mat-icon {
+      font-size: 20px;
+    }
+  }
+
+  .image-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+    
+    img {
+      max-width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+  }
+
+  .file-name {
+    margin: 0;
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
   }
 }

@@ -4,8 +4,14 @@ import { AuthService } from '../services/auth.service';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { ApiPaths } from '../../constans/api-paths';
 import { LoginResponse } from '../../features/auth/model/auth.model';
+import { IS_S3_REQUEST } from '../tokens/tokens';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+
+  if (req.context.get(IS_S3_REQUEST)) {
+    return next(req);
+  }
+
   const authService = inject(AuthService);
   const token = authService.accessToken();
 

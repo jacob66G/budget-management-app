@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { AccountSummary } from '../../model/account-summary.model';
 import { CategorySummary } from '../../model/category-summary.model';
-import { map } from 'rxjs';
+import { concatMap, filter, map, of, tap } from 'rxjs';
 import { CategoryMapper } from '../../mappers/category.mapper';
 import { AccountMapper } from '../../mappers/account.mapper';
 import { MatDialog } from '@angular/material/dialog';
@@ -47,6 +47,7 @@ import { TransactionCategoryChangeRequest } from '../../model/transaction-catego
 import { RouterLink } from '@angular/router';
 import { AccountService } from '../../../../core/services/account.service';
 import { CategoryService } from '../../../../core/services/category.service';
+import { TransactionAttachmentManager } from '../../services/transaction-attachment-manager.service';
 
 @Component({
   selector: 'app-transaction-page',
@@ -93,6 +94,7 @@ export class TransactionPageComponent implements OnInit{
   private transactionService = inject(TransactionService);
   private readonly datePipe = inject(DatePipe);
   private snackBar = inject(MatSnackBar);
+  private attachmentManager = inject(TransactionAttachmentManager);
 
   modeOptions = [
     { value: TransactionModeFilter.ALL, label: 'All' },
@@ -473,35 +475,43 @@ export class TransactionPageComponent implements OnInit{
           categoryList: this.categories
         },
         width: '600px',
-        height: '750px'
+        maxHeight: '90vh'
       });
 
-      dialogRef.afterClosed().subscribe( formData => {
+      dialogRef.afterClosed().pipe(
 
-        console.log("closing dialog")
+        filter(result => !!result),
 
-        if (formData) {
+        concatMap((result) => {
+          const {transactionData, file} = result;
+          console.log("Gathered form data", result);
+          
+          const dto = TransactionMapper.toCreateRequest(transactionData);
 
-          console.log("Gathering form data after closing dialog");
-          console.log("Form Data: ", formData);
+          return this.transactionService.createTransaction(dto).pipe(
 
-          const dto: TransactionCreateRequest = TransactionMapper.toCreateRequest(formData);
-          console.log("TransactionCreateRequest: ", dto);
+            concatMap((createdTransactionData) => {
+              console.log("Transaction created: ", createdTransactionData);
 
-          this.transactionService.createTransaction(dto).subscribe({
-            next: (data) => {
-              console.log("transaction created: ", data);
-              this.loadTransactions();
-            },
-            error: (error) => {
-              console.log("error occurred when creating transaction");
-            }
-          })
-          console.log("transactions list: ");
-          console.log(this.transactions);
-        }
-        else {
-          console.log("Dialog close without any data");
+              if (file) {
+                return this.attachmentManager.manageAttachmentUpload(file, createdTransactionData.id);
+              } else {
+                return of(null);
+              }
+            })
+          );
+        }),
+
+        tap(() => {
+          console.log("Transaction added successfully");
+          this.loadTransactions();
+        })
+      ).subscribe({
+        next: () => {
+          
+        },
+        error: (err) => {
+          console.error("Error occurred", err);
         }
       });
   }

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -10,6 +10,7 @@ import { CategoryType } from '../../../../core/models/category-response-dto.mode
 import { MatIconModule } from '@angular/material/icon';
 import { FormBuilder, FormGroup, Validators, ɵInternalFormsSharedModule, ReactiveFormsModule } from '@angular/forms';
 import { TransactionType } from '../../constants/transaction-type.enum';
+import { MatDivider } from "@angular/material/divider";
 
 @Component({
   selector: 'app-add-transaction-dialog',
@@ -21,13 +22,23 @@ import { TransactionType } from '../../constants/transaction-type.enum';
     MatFormFieldModule,
     MatSelectModule,
     ɵInternalFormsSharedModule,
-    ReactiveFormsModule],
+    ReactiveFormsModule,
+    MatDivider
+],
   templateUrl: './add-transaction-dialog.component.html',
   styleUrl: './add-transaction-dialog.component.scss'
 })
 export class AddTransactionDialogComponent implements OnInit{
 
   addTransactionForm!: FormGroup;
+
+  // signal represents selected File
+  selectedFile = signal<File | null>(null);
+
+  // signal represents current photo url to display
+  currentPhotoPreviewUrl = signal<string | null>(null);
+
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   private fb = inject(FormBuilder);
 
@@ -51,7 +62,7 @@ export class AddTransactionDialogComponent implements OnInit{
       category: ['', Validators.required],
     });
   }
-
+ 
   clearForm(): void {
     this.addTransactionForm.reset({
       title: '',
@@ -62,12 +73,14 @@ export class AddTransactionDialogComponent implements OnInit{
       category: '',
     });
     this.categories = this.data.categoryList;
+    this.resetState();
   }
 
   onSubmit(): void {
     console.log("closing dialog after submit");
     if (this.addTransactionForm.valid) {
-       this.dialogRef.close(this.addTransactionForm.value);
+      const result = {transactionData: this.addTransactionForm.getRawValue(), file: this.selectedFile()};
+      this.dialogRef.close(result);
     }
   }
 
@@ -76,5 +89,36 @@ export class AddTransactionDialogComponent implements OnInit{
     this.categories = this.data.categoryList.filter( (category) => {
           return String(category.type) === String(chosenType) || category.type === CategoryType.GENERAL;
     })
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+
+    if (!input.files?.length) return;
+
+    const file = input.files[0];
+    this.resetState();
+
+    // validation to add
+
+    this.selectedFile.set(file);
+
+    const reader = new FileReader();
+    // onLoad will be invoked only when file reading op file succeed
+    reader.onload = () => this.currentPhotoPreviewUrl.set(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  resetState(): void {
+    this.selectedFile.set(null);
+    this.currentPhotoPreviewUrl.set(null);
+
+    if (this.fileInput?.nativeElement) {
+    this.fileInput.nativeElement.value = '';
+  }
+  }
+
+  onFileRemove(): void {
+    this.resetState();
   }
 }
