@@ -31,11 +31,19 @@ export class TransactionHistoryComponent {
   @Input() transactions: TransactionSummary[] = [];
   @Input() paginationInfo!: Pagination;
 
+  // pagination outputs
   nextPageClick = output<void>();
   prevPageClick = output<void>();
 
+  viewAttachmentClick = output<number>();
+
   editTransaction = output<number>();
   deleteTransaction = output<number>();
+
+  onViewAttachment(transactionId: number, event: Event): void {
+    event.stopPropagation();
+    this.viewAttachmentClick.emit(transactionId);
+  }
 
   isIncome(t: TransactionSummary): boolean {
     return t.type === TransactionType.INCOME;

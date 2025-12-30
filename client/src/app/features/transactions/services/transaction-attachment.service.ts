@@ -52,4 +52,9 @@ export class TransactionAttachmentService {
     const url = ApiPaths.Transactions.Attachments.CONFIRM_UPLOAD(transactionId);
     return this.http.post<AttachmentViewResponse>(url, reqBody);
   }
+
+  getPresignedGetUrl(transactionId: number): Observable<AttachmentViewResponse> {
+    const url = ApiPaths.Transactions.Attachments.GET_DOWNLOAD_URL(transactionId);
+    return this.http.get<AttachmentViewResponse>(url);
+  }
 }

@@ -1,5 +1,4 @@
 import { Injectable, signal } from '@angular/core';
-import { AttachmentViewResponse } from './transaction-attachment.service';
 import { TransactionAttachmentDetails } from '../model/transaction-attachment-details.model';
 
 export interface TransactionAttachment {
@@ -22,4 +21,30 @@ export class TransactionAttachmentStore {
     this.attachments.update(currentItems => [...currentItems, attachment]);
   }
 
+  getAttachmentDetailsByTransactionId(transactionId: number): TransactionAttachmentDetails | null {
+    const details = this.attachments().find( (att) => att.transactionId === transactionId);
+    if (!details) {
+      return null;
+    }
+    const {attachmentDetails} = details;
+    return attachmentDetails;
+  }
+
+  updateAttachmentDetailsByTransactionId(transactionId: number, data: {originalFileName: string, downloadUrl: string}): void {
+    this.attachments.update(items => 
+      items.map(att => {
+        if (att.transactionId === transactionId) {
+          return {
+            ...att,
+            attachmentDetails: {
+              ...att.attachmentDetails,
+              originalFileName: data.originalFileName,
+              downloadUrl: data.downloadUrl
+            }
+          };
+        }
+        return att;
+      })
+    );
+  }
 }

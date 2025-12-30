@@ -92,6 +92,7 @@ export class ApiPaths {
         Attachments: {
             INIT_UPLOAD: (transactionId: number) => `${ApiPaths.TRANSACTIONS}/${transactionId}/attachment/presigned-upload-url`,
             CONFIRM_UPLOAD: (transactionId: number) => `${ApiPaths.TRANSACTIONS}/${transactionId}/attachment`,
+            GET_DOWNLOAD_URL: (transactionId: number) => `${ApiPaths.TRANSACTIONS}/${transactionId}/attachment`
         }
     }
 }

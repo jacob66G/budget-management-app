@@ -48,6 +48,7 @@ import { RouterLink } from '@angular/router';
 import { AccountService } from '../../../../core/services/account.service';
 import { CategoryService } from '../../../../core/services/category.service';
 import { TransactionAttachmentManager } from '../../services/transaction-attachment-manager.service';
+import { AttachmentViewDialog } from '../../components/attachment-view-dialog/attachment-view-dialog.component';
 
 @Component({
   selector: 'app-transaction-page',
@@ -514,6 +515,28 @@ export class TransactionPageComponent implements OnInit{
           console.error("Error occurred", err);
         }
       });
+  }
+
+  async openAttachmentViewDialog(transactionId: number): Promise<void> {
+
+    console.log("Opening attachment view dialog for transaction with id: ", transactionId);
+
+    try {
+      const data = await this.attachmentManager.getTransactionAttachmentData(transactionId);
+    
+      if (data) {
+        this.dialog.open(AttachmentViewDialog, {
+          width: '600px',
+          data: data
+        });
+      } else {
+        console.error("Error occurred when fetching attachment data");
+      }
+
+    } catch (error) {
+      console.error("Unexpected error occurred", error);
+    }
+
   }
 
   loadTransactions(): void {

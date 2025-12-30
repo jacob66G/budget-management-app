@@ -1,0 +1,48 @@
+<div class="dialog-layout">
+  
+  <div class="dialog-header">
+    <div class="header-content">
+      <h2 mat-dialog-title>{{ data.originalFileName || 'Receipt Image' }}</h2>
+      <a [href]="data.downloadUrl" target="_blank" class="download-link" matTooltip="Open original">
+        <mat-icon>open_in_new</mat-icon>
+      </a>
+    </div>
+
+    <button mat-icon-button (click)="close()" class="close-icon-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="image-container">
+    
+    @if (isLoading()) {
+      <div class="loading-state">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    }
+
+    <img 
+      [src]="data.downloadUrl" 
+      [alt]="data.originalFileName"
+      (load)="onImageLoad()"
+      (error)="handleError()"
+      [class.hidden]="isLoading()"
+      class="preview-image"
+    >
+
+    @if (hasError()) {
+      <div class="error-state">
+        <mat-icon>broken_image</mat-icon>
+        <p>Could not load image</p>
+      </div>
+    }
+
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-footer">
+    <button mat-flat-button (click)="close()" class="close-btn">
+      Close
+    </button>
+  </mat-dialog-actions>
+
+</div>

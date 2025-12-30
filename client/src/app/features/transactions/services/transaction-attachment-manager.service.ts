@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { concatMap, map, Observable, of, tap } from 'rxjs';
-import { TransactionAttachmentService } from './transaction-attachment.service';
+import { catchError, concatMap, lastValueFrom, map, Observable, of, tap } from 'rxjs';
+import { AttachmentViewResponse, TransactionAttachmentService } from './transaction-attachment.service';
 import { TransactionAttachmentStore } from './transaction-attachment-store.service';
 
 @Injectable({
@@ -31,8 +31,58 @@ export class TransactionAttachmentManager {
         console.log("Received data: ", result);
         this.attachmentStoreService.addTransactionAttachment(transactionId, result);
       }),
-
     );
   }
-  
+
+  async getTransactionAttachmentData(transactionId: number): Promise<{originalFileName: string, downloadUrl: string} | null> {
+
+    const storedDetails = this.attachmentStoreService.getAttachmentDetailsByTransactionId(transactionId);
+
+    if (storedDetails) {
+      if (this.isUrlExpired(storedDetails.expiresAt)) {
+        console.log("Link expires. Fetchig new one.");
+        const newData = await this.getPresignedGetUrl(transactionId);
+        if (newData) {
+          const data = {originalFileName: newData.originalFileName, downloadUrl:newData.downloadUrl}
+          this.attachmentStoreService.updateAttachmentDetailsByTransactionId(transactionId, data);
+        }
+        return newData;
+      }
+      console.log("Using cached attachment data.");
+      return {
+        originalFileName: storedDetails.originalFileName,
+        downloadUrl: storedDetails.downloadUrl
+      };
+    }
+
+    console.log("No attachment data found");
+    console.log("Fetching new download url");
+    const data = await this.getPresignedGetUrl(transactionId);
+    if (data) {
+      this.attachmentStoreService.addTransactionAttachment(transactionId, data);
+    }
+    return data;
+  }
+
+  private async getPresignedGetUrl(transactionId: number): Promise<AttachmentViewResponse | null> {
+    try {
+      return await lastValueFrom(this.attachmentService.getPresignedGetUrl(transactionId));
+    } catch (error) {
+      console.error("Error occurrec when fetching presigned url", error);
+    }
+    return null;
+  }
+
+  private isUrlExpired(expiresAt: Date): boolean {
+    if (!expiresAt) {
+      return true;
+    }
+
+    const expirationDate = new Date(expiresAt);
+    const now = new Date();
+
+    const safetyBuffer = 2 * 60 * 1000;
+
+    return now.getTime() > (expirationDate.getTime() - safetyBuffer);
+  }
 }

@@ -46,6 +46,16 @@
                 </div>
              }
           </div>
+          @if (transaction.hasAttachment) {
+            <div class="attachment-section">
+              <button mat-icon-button
+                class="receipt-btn"
+                (click)="onViewAttachment(transaction.id, $event)"
+                matTooltip="View attachment">
+                <mat-icon>image</mat-icon>
+              </button>
+            </div>
+          }
           <div class="amount-section">
              <span class="amount" [class.positive]="isIncome(transaction)" [class.negative]="!isIncome(transaction)">
                 {{ transaction.amount | amountFormat: transaction.account.currency : transaction.type }}

@@ -52,6 +52,36 @@
     background-color: #fafafa;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   }
+
+  .attachment-section {
+    margin-right: 32px;
+    
+    .receipt-btn {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        color: transparent;
+        -webkit-text-stroke: 2px #4b5563;
+        transition: all 0.2s ease-in-out;
+        margin: 0;
+      }
+
+      &:hover {
+        background-color: #e5e7eb;;
+        mat-icon {
+          transform: scale(1.1);
+          -webkit-text-stroke: 2px #111827;
+        }
+      }
+    }
+  }
 }
 
 .icon-box {
@@ -106,7 +136,7 @@
 
   .transaction-title {
     font-weight: 600;
-    font-size: 15px;
+    font-size: 17px;
     color: #111827;
     white-space: nowrap;
     overflow: hidden;
@@ -152,7 +182,10 @@
 }
 
 .amount-section {
-  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: auto;
   margin-right: 12px;
   min-width: 100px;
 
