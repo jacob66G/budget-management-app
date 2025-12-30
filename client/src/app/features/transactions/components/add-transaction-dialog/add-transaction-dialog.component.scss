@@ -1,4 +1,4 @@
-.dialog-container {
+::ng-deep .dialog-container {
   padding: 0px;
   font-family: var(--font-family-default) !important;
 }
@@ -27,7 +27,7 @@
 
   .subtitle {
     margin: 4px 0 0 0;
-    font-size: 14px;
+    font-size: 16px;
     color: #6b7280;
   }
 
@@ -65,8 +65,8 @@
 }
 
 .custom-label {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
   color: #111827;
 }
 
@@ -112,7 +112,7 @@
     .mdc-notched-outline__notch,
     .mdc-notched-outline__trailing {
       border-color: #2563eb !important;
-      border-width: 1px !important;
+      border-width: 2px !important;
     }
   }
 }
@@ -142,7 +142,7 @@ mat-dialog-content {
   gap: 16px;
   padding: 16px 24px 24px 24px;
   margin: 0;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid #e3e4e6;
 
   .right-actions {
       display: flex;

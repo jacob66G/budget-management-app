@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { AccountSummary } from '../../model/account-summary.model';
 import { CategorySummary } from '../../model/category-summary.model';
-import { concatMap, filter, map, of, tap } from 'rxjs';
+import { concatMap, filter, forkJoin, map, of, tap } from 'rxjs';
 import { CategoryMapper } from '../../mappers/category.mapper';
 import { AccountMapper } from '../../mappers/account.mapper';
 import { MatDialog } from '@angular/material/dialog';
@@ -302,85 +302,89 @@ export class TransactionPageComponent implements OnInit{
     return `${year}-${month}-${day}`;
   }
 
-  onEditTransaction(id: number) {
+  async onEditTransaction(transactionId: number) {
 
-    const transactionToUpdate = this.transactions.find( (tr) => tr.id === id);
-
-    // getting categories with the same type as transaction type
-    const catogiesToPass = this.categories.filter( (cat) => {
-      return String(cat.type) === String(transactionToUpdate?.type) || cat.type === CategoryType.GENERAL;
-    });
+    const transactionToUpdate = this.transactions.find( (tr) => tr.id === transactionId);
 
     if (transactionToUpdate) {
-          const currentCategoryId = transactionToUpdate?.category.id;
 
-          const dialogRef = this.dialog.open(UpdateTransactionDialogComponent, {
-            width: '600px',
-            data: {
-              title: transactionToUpdate.title,
-              amount: transactionToUpdate.amount,
-              description: transactionToUpdate.description,
-              categories: catogiesToPass,
-              categoryId: currentCategoryId, // current category
-              isRecurring: transactionToUpdate.recurringTransactionId? true : false
+      let attachmentData = null;
+      if (transactionToUpdate.hasAttachment) {
+        attachmentData = await this.attachmentManager.getTransactionAttachmentData(transactionId);
+      }
+
+      // getting categories with the same type as transaction type
+      const catogiesToPass = this.categories.filter( (cat) => {
+        return String(cat.type) === String(transactionToUpdate.type) || cat.type === CategoryType.GENERAL;
+      });
+      const currentCategoryId = transactionToUpdate.category.id;
+
+      const dialogRef = this.dialog.open(UpdateTransactionDialogComponent, {
+        width: '600px',
+        maxHeight: '85vh',
+        data: {
+          title: transactionToUpdate.title,
+          amount: transactionToUpdate.amount,
+          description: transactionToUpdate.description,
+          categories: catogiesToPass,
+          categoryId: currentCategoryId, // current category
+          isRecurring: transactionToUpdate.recurringTransactionId? true : false,
+          attachmentData
+        }
+      });
+
+      dialogRef.afterClosed().pipe(
+
+        filter(result => !!result),
+
+        concatMap((result) => {
+          console.log("Gathered form data", result);
+          const {transactionData, file} = result;
+
+          const reqs$ = [];
+
+          if (transactionData.categoryId !== currentCategoryId) {
+            if (!transactionToUpdate.recurringTransactionId) {
+              console.log("Category changed");
+              const changeCategoryReq: TransactionCategoryChangeRequest = {
+                currentCategoryId: currentCategoryId,
+                newCategoryId: transactionData.categoryId,
+                accountId: transactionToUpdate.account.id
+              };
+              reqs$.push(this.transactionService.changeTransactionCategory(transactionId, changeCategoryReq));
             }
-          });
+          }
+          
+          if (transactionData.title !== transactionToUpdate.title ||
+              transactionData.amount !== transactionToUpdate.amount ||
+              transactionData.description !== transactionToUpdate.description
+          ) {
+            console.log("General data changed");
 
-          dialogRef.afterClosed().subscribe( (formData) => {
+            const updateReq: TransactionUpdateRequest = {
+              title: transactionData.title,
+              amount: transactionData.amount,
+              description: transactionData.description
+            };
+            reqs$.push(this.transactionService.updateTransaction(transactionId, updateReq));
+          }
+          
+          if (file) {
+            console.log("Updating attachment");
+            reqs$.push(this.attachmentManager.manageAttachmentUpload(file, transactionId));
+          }
 
-            if (formData) {
-              console.log("Updating transactions");
-
-              // if category has been changed
-              if (formData.categoryId !== currentCategoryId) {
-                if (!transactionToUpdate.recurringTransactionId) {
-                  console.log("Category changed: ", formData.categoryId);
-                  const changeCategoryReq: TransactionCategoryChangeRequest = {
-                    currentCategoryId: currentCategoryId,
-                    newCategoryId: formData.categoryId,
-                    accountId: transactionToUpdate.account.id
-                  };
-
-                  this.transactionService.changeTransactionCategory(id, changeCategoryReq).subscribe({
-                    next: (data) => {
-                      if (data) {
-                        console.log("Transaction category changed. New Category: ", data.categoryName);
-                        this.loadTransactions();
-                      }
-                    }
-                  });
-                }
-              }
-
-              if (formData.title !== transactionToUpdate.title ||
-                  formData.amount !== transactionToUpdate.amount ||
-                  formData.description !== transactionToUpdate.description
-              )  {  // if description, amount or title changed
-                console.log("General data changed");
-
-                const updateReq: TransactionUpdateRequest = {
-                  title: formData.title,
-                  amount: formData.amount,
-                  description: formData.description
-                };
-
-                this.transactionService.updateTransaction(id, updateReq).subscribe({
-                  next: () => {
-                    console.log("Transaction general data updated");
-                    this.loadTransactions();
-                  }
-                });
-              }
-            } else {
-              console.log("Update canceled");
-            }
-          });
-    } else {
-      console.error('Error occurred');
-            this.snackBar.open('Failed to find transaction', 'Close', {
-              duration: 3000,
-              panelClass: ['error-snackbar']
-            });
+          if (reqs$.length === 0) {
+            console.log("Nothing changed");
+            return of(null);
+          }
+          return forkJoin(reqs$).pipe(
+            tap(() => this.loadTransactions())
+          );
+        }),
+      ).subscribe({
+        error: (err) => console.error("Error occurred when saving changes", err)
+      });
     }
   }
 
@@ -508,11 +512,8 @@ export class TransactionPageComponent implements OnInit{
           this.loadTransactions();
         })
       ).subscribe({
-        next: () => {
-          
-        },
         error: (err) => {
-          console.error("Error occurred", err);
+          console.error("Error occurred when adding transaction", err);
         }
       });
   }

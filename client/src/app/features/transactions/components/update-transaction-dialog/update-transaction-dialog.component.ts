@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TransactionUpdateData } from '../../model/transaction-update-data.model';
@@ -33,6 +33,9 @@ export class UpdateTransactionDialogComponent implements OnInit{
   readonly dialogRef = inject(MatDialogRef<UpdateTransactionDialogComponent>);
   readonly data = inject<TransactionUpdateData>(MAT_DIALOG_DATA);
 
+  selectedFile = signal<File | null>(null);
+  currentPhotoPreviewUrl = signal<string | null>(null);
+
   ngOnInit(): void {
     this.updateTransactionForm = this.fb.group({
       title: [this.data.title, Validators.required],
@@ -45,6 +48,7 @@ export class UpdateTransactionDialogComponent implements OnInit{
         },
         Validators.required] 
     });
+    if (this.data.attachmentData) this.currentPhotoPreviewUrl.set(this.data.attachmentData.downloadUrl);
   }
 
   onCancel(): void {
@@ -58,6 +62,7 @@ export class UpdateTransactionDialogComponent implements OnInit{
       description: this.data.description,
       categoryId: this.data.categoryId
     });
+    this.resetAttachmentState();
   }
 
   isUnchanged(): boolean {
@@ -67,13 +72,41 @@ export class UpdateTransactionDialogComponent implements OnInit{
       formValue.title === this.data.title &&
       formValue.amount === this.data.amount &&
       formValue.description === this.data.description &&
-      formValue.categoryId === this.data.categoryId
+      formValue.categoryId === this.data.categoryId &&
+      this.selectedFile() == null
     );
   }
 
   onSubmit(): void {
     if (this.updateTransactionForm.valid) {
-      this.dialogRef.close(this.updateTransactionForm.value);
+      const result = {transactionData: this.updateTransactionForm.getRawValue(), file: this.selectedFile()}
+      this.dialogRef.close(result);
     }
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+
+    if (!input.files?.length) return;
+
+    const file = input.files[0];
+    this.resetAttachmentState();
+
+    this.selectedFile.set(file);
+
+    const reader = new FileReader();
+    // onLoad will be invoked only when file reading op file succeed
+    reader.onload = () => this.currentPhotoPreviewUrl.set(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  onFileRemove(): void {
+    this.selectedFile.set(null);
+    this.currentPhotoPreviewUrl.set(null);
+  }
+
+  resetAttachmentState(): void {
+    this.selectedFile.set(null);
+    this.currentPhotoPreviewUrl.set(this.data.attachmentData?.downloadUrl || null);
   }
 }

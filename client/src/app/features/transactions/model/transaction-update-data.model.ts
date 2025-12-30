@@ -6,5 +6,6 @@ export interface TransactionUpdateData {
     description: string,
     categories: CategorySummary[],
     categoryId: number,
-    isRecurring: boolean
+    isRecurring: boolean,
+    attachmentData: {originalFileName: string, downloadUrl: string} | null
 }

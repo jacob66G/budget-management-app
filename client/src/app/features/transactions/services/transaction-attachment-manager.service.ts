@@ -29,7 +29,7 @@ export class TransactionAttachmentManager {
 
       tap((result) => {
         console.log("Received data: ", result);
-        this.attachmentStoreService.addTransactionAttachment(transactionId, result);
+        this.saveAttachmentData(transactionId, result);
       }),
     );
   }
@@ -84,5 +84,14 @@ export class TransactionAttachmentManager {
     const safetyBuffer = 2 * 60 * 1000;
 
     return now.getTime() > (expirationDate.getTime() - safetyBuffer);
+  }
+
+  private saveAttachmentData(transactionId: number, attachmentData: AttachmentViewResponse) {
+    const att = this.attachmentStoreService.getAttachmentDetailsByTransactionId(transactionId);
+      if (!att) {
+        this.attachmentStoreService.addTransactionAttachment(transactionId, attachmentData);
+      } else {
+        this.attachmentStoreService.updateAttachmentDetailsByTransactionId(transactionId, attachmentData);
+      }
   }
 }

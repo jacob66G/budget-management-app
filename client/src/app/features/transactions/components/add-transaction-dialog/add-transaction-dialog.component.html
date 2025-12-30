@@ -92,7 +92,11 @@
                   </button>
 
                   <div class="image-wrapper">
-                    <img [src]="currentPhotoPreviewUrl()" alt="Receipt preview">
+                    <img [src]="currentPhotoPreviewUrl()"
+                    alt="Receipt preview"
+                    (click)="fileInput.click()" 
+                    style="cursor: pointer" 
+                    title="Click to change image">
                   </div>
 
                   <p class="file-name">{{ selectedFile()?.name }}</p>

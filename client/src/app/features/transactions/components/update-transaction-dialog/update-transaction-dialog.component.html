@@ -1,5 +1,4 @@
 <div class="dialog-container">
-  
   <div class="dialog-header">
     <div class="header-content">
       <h2 class="title">Edit Transaction</h2>
@@ -9,7 +8,7 @@
       <mat-icon>close</mat-icon>
     </button>
   </div>
-
+  <mat-divider></mat-divider>
   <mat-dialog-content>
     <form [formGroup]="updateTransactionForm" class="custom-form">
 
@@ -60,7 +59,7 @@
 
       <mat-divider></mat-divider>
 
-      <h3 class="section-header spacer-top">NOTE</h3>
+      <h3 class="section-header spacer-top">Additional</h3>
 
       <div class="input-group">
         <label class="custom-label">Transaction Note</label>
@@ -71,6 +70,53 @@
             placeholder="Add a note for this transaction..." 
             rows="2"></textarea>
         </mat-form-field>
+      </div>
+
+      <div class="input-group">
+        <label class="custom-label">Attachment</label>
+  
+        <input 
+          type="file" 
+          #fileInput 
+          hidden 
+          accept="image/png, image/jpeg, image/jpg"
+          (change)="onFileSelected($event)">
+
+        <div class="receipt-container">
+
+        @if (!currentPhotoPreviewUrl()) {
+          <div class="upload-zone" (click)="fileInput.click()">
+            <div class="upload-content">
+              <mat-icon class="upload-icon">vertical_align_top</mat-icon> 
+              <span class="upload-text">Click to upload</span>
+              <span class="upload-hint">PNG, JPG or JPEG (max 5MB)</span>
+            </div>
+          </div>
+        }
+
+        @if (currentPhotoPreviewUrl()) {
+          <div class="preview-zone">
+            <button mat-icon-button type="button" class="remove-btn" (click)="onFileRemove()">
+              <mat-icon>close</mat-icon>
+            </button>
+
+            <div class="image-wrapper">
+              <img 
+                [src]="currentPhotoPreviewUrl()" 
+                alt="Receipt preview" 
+                (click)="fileInput.click()" 
+                style="cursor: pointer" 
+                title="Click to change image">
+            </div>
+
+            @if (selectedFile()) {
+              <p class="file-name">{{ selectedFile()?.name }}</p>
+            } @else {
+              <p class="file-name"> {{data.attachmentData?.originalFileName}}</p>
+            }
+          </div>
+        }
+        </div>
       </div>
 
     </form>

@@ -99,8 +99,6 @@ export class AddTransactionDialogComponent implements OnInit{
     const file = input.files[0];
     this.resetState();
 
-    // validation to add
-
     this.selectedFile.set(file);
 
     const reader = new FileReader();
@@ -115,7 +113,7 @@ export class AddTransactionDialogComponent implements OnInit{
 
     if (this.fileInput?.nativeElement) {
     this.fileInput.nativeElement.value = '';
-  }
+    }
   }
 
   onFileRemove(): void {
