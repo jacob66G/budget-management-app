@@ -182,6 +182,27 @@ public class TransactionServiceImpl implements TransactionService {
         transactionDao.delete(transaction);
     }
 
+    /**
+     * @param id
+     * @param userId
+     * @return
+     */
+    @Override
+    public Transaction findByIdAndUserId(Long id, Long userId) {
+        return this.transactionDao.findByIdAndUserId(id, userId)
+                .orElseThrow( () -> new NotFoundException(Transaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
+    }
+
+    /**
+     * @param id
+     * @param userId
+     * @return
+     */
+    @Override
+    public boolean existsByIdAndUserId(Long id, Long userId) {
+        return this.transactionDao.existsByIdAndUserId(id, userId);
+    }
+
     private void validateAccountsIds(List<Long> accountIds, Long userId) {
 
         Set<Long> userAccountIdsSet = new HashSet<>(accountDao.getUserAccountIds(userId));

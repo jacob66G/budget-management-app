@@ -446,7 +446,7 @@ export class TransactionPageComponent implements OnInit{
 
   upcomingNextPage(): void {
     if (!this.upcomingPagination) return;
-    if (this.upcomingPagination.page < this.pagination.totalPages) {
+    if (this.upcomingPagination.page < this.upcomingPagination.totalPages) {
       this.upcomingTransactionsFilter = {
         ...this.upcomingTransactionsFilter,
         page: this.upcomingPagination.page + 1,

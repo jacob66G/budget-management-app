@@ -4,6 +4,7 @@ import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
+import com.example.budget_management_app.transaction_receipts.domain.TransactionPhoto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -50,6 +51,10 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recurring_transaction_id")
     private RecurringTransaction recurringTransaction;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "photo_id")
+    private TransactionPhoto transactionPhoto;
 
     public Transaction(BigDecimal amount, String title, TransactionType type, String description, LocalDateTime transactionDate) {
         this.amount = amount;

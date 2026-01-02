@@ -53,7 +53,8 @@ public class TransactionMapper {
                                 tuple.get("categoryName", String.class),
                                 storageService.getPublicUrl(tuple.get("iconKey", String.class))
                         ),
-                        tuple.get("recId", Long.class)
+                        tuple.get("recId", Long.class),
+                        tuple.get("transactionPhotoId", Long.class) != null
                 ))
                 .toList();
     }

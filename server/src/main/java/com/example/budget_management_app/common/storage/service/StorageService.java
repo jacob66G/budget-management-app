@@ -1,7 +1,5 @@
 package com.example.budget_management_app.common.storage.service;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 
 public interface StorageService {
@@ -9,7 +7,9 @@ public interface StorageService {
 
     String extractKey(String publicUrl);
 
-    String upload(String pathPrefix, Long resourceId, MultipartFile file);
+    String generatePresignedPutUrl(String key, String contentType, Long fileSize);
+
+    String generatePresignedGetUrl(String key, Long validityPeriod);
 
     void delete(String key);
 

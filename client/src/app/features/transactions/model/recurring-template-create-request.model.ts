@@ -6,7 +6,7 @@ export interface RecurringTransactionCreateRequest {
     title: string,
     type: TransactionType,
     description: string,
-    startDate: Date,
+    startDate: string,
     recurringInterval: RecurringInterval,
     recurringValue: number,
     accountId: number,

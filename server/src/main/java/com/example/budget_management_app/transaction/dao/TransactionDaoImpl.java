@@ -8,6 +8,7 @@ import com.example.budget_management_app.transaction.domain.*;
 import com.example.budget_management_app.transaction.dto.TransactionFilterParams;
 import com.example.budget_management_app.transaction.dto.TransactionPaginationParams;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
+import com.example.budget_management_app.transaction_receipts.domain.TransactionPhoto;
 import com.example.budget_management_app.user.domain.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -45,6 +46,7 @@ public class TransactionDaoImpl implements TransactionDao {
         Join<Transaction, Account> account = root.join("account", JoinType.INNER);
         Join<Account, User> user = account.join("user", JoinType.INNER);
         Join<Transaction, RecurringTransaction> recTransaction = root.join("recurringTransaction", JoinType.LEFT);
+        Join<Transaction, TransactionPhoto> transactionPhoto = root.join("transactionPhoto", JoinType.LEFT);
 
         cq.multiselect(
                 root.get("id").alias("transactionId"),
@@ -59,7 +61,8 @@ public class TransactionDaoImpl implements TransactionDao {
                 category.get("id").alias("categoryId"),
                 category.get("name").alias("categoryName"),
                 category.get("iconKey").alias("iconKey"),
-                recTransaction.get("id").alias("recId")
+                recTransaction.get("id").alias("recId"),
+                transactionPhoto.get("id").alias("transactionPhotoId")
         );
 
         List<Predicate> predicates = this.setPredicates(
@@ -195,6 +198,26 @@ public class TransactionDaoImpl implements TransactionDao {
                         """, Transaction.class)
                 .setParameter("recurringTransactionId", id)
                 .getResultList();
+    }
+
+    /**
+     * @param id
+     * @param userId
+     * @return
+     */
+    @Override
+    public boolean existsByIdAndUserId(Long id, Long userId) {
+        Long count = em.createQuery("""
+                    SELECT COUNT (t) FROM Transaction t
+                    WHERE t.id = :id
+                    AND
+                    t.account.user.id = :userId
+                """, Long.class)
+                .setParameter("id", id)
+                .setParameter("userId", userId)
+                .getSingleResult();
+
+        return count > 0;
     }
 
     @Override

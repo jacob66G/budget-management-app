@@ -21,7 +21,7 @@ public class Config {
     @Bean
     public ChatClient openAIChatClient(ChatClient.Builder builder,
                                        JdbcChatMemoryRepository jdbcChatMemoryRepository,
-                                       SpendingAnalysisService analysisServicel){
+                                       SpendingAnalysisService analysisService){
 
         ChatMemory chatMemory = MessageWindowChatMemory.builder()
                 .chatMemoryRepository(jdbcChatMemoryRepository)
@@ -31,7 +31,7 @@ public class Config {
         return builder
                 .defaultSystem(financialAssistantSystemMessage)
                 .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
-                .defaultTools(analysisServicel)
+                .defaultTools(analysisService)
                 .build();
     }
 }

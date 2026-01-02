@@ -3,11 +3,14 @@ import { RecurringTransactionCreateRequest } from "../model/recurring-template-c
 export class RecurringTemplateMapper {
 
     public static toCreateRequest(formData: any): RecurringTransactionCreateRequest {
+
+        const date: string = formData.startDate.toLocaleDateString('sv-SE');
+
         return {
             amount: formData.amount,
             title: formData.title,
             type: formData.type,
-            startDate: formData.startDate,
+            startDate: date,
             recurringInterval: formData.recurringInterval,
             recurringValue: formData.recurringValue,
             description: formData.description,

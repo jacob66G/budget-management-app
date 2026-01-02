@@ -23,6 +23,10 @@ public interface TransactionService {
 
     void delete(Long id, Long userId);
 
+    Transaction findByIdAndUserId(Long id, Long userId);
+
+    boolean existsByIdAndUserId(Long id, Long userId);
+
     boolean existsByCategoryAndUser(Long categoryId, Long userId);
 
     boolean existsByAccountAndUser(Long accountId, Long userId);

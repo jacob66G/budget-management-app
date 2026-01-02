@@ -36,8 +36,11 @@
             
             <div class="card-header">
               <div class="left-group">
-                <div class="icon-box" [class.income]="isIncome(template)" [class.expense]="!isIncome(template)">
-                  <mat-icon>{{ template.categorySummary.iconKey }}</mat-icon>
+                <div class="icon-box">
+                  <div class="icon-wrapper" [class.type-income]="isIncome(template)" [class.type-expense]="!isIncome(template)">
+                    <img [src]="template.categorySummary.iconKey" alt="icon" class="category-icon" 
+                      onerror="this.onerror=null; this.src='/assets/icons/default-category.png'"> 
+                  </div>
                 </div>
                 
                 <div class="title-section">
