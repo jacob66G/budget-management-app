@@ -150,7 +150,7 @@ public class RecurringTransactionsServiceIntegrationTest {
 
     @Test
     @Order(6)
-    public void shouldCreateRecurringTransactionTemplateWhichStartsAtTheCurrentDayAfterNoon() {
+    public void shouldCreateRecurringTransactionTemplateWhichStartsAtTheCurrentDay() {
 
         // given
         Long userId = 2L;
@@ -167,6 +167,7 @@ public class RecurringTransactionsServiceIntegrationTest {
         // when
         RecurringTransactionCreateResponse createResponse =
                 recTransactionService.create(createReq, userId);
+        em.flush();
         em.clear();
 
         // then
@@ -189,7 +190,7 @@ public class RecurringTransactionsServiceIntegrationTest {
         assertThat(createdTransaction.getAccount().getId()).isEqualTo(accountId);
         assertThat(createdTransaction.getCategory().getId()).isEqualTo(categoryId);
 
-        Account account = createdTransaction.getAccount();
+        Account account = em.find(Account.class, accountId);
         assertThat(account).isNotNull();
         assertThat(account.getBalance()).isEqualTo(new BigDecimal("1750.00"));
         assertThat(account.getTotalExpense()).isEqualTo(new BigDecimal("2949.50"));
@@ -198,7 +199,7 @@ public class RecurringTransactionsServiceIntegrationTest {
     @Test
     @Order(7)
     @Disabled
-    public void shouldCreateRecurringTransactionTemplateWhichStartsAtTheCurrentDayBeforeNoonTest() {
+    public void shouldCreateRecurringTransactionTemplateWhichStartsAtTheCurrentDayTest() {
 
         // given
         Long userId = 3L;
@@ -573,7 +574,7 @@ public class RecurringTransactionsServiceIntegrationTest {
 
     @Test
     @Order(22)
-    public void changeRecurringTransactionTemplateStatusToActiveWhereNextOccurrenceIsTodayAfterNoonTest() {
+    public void changeRecurringTransactionTemplateStatusToActiveWhereNextOccurrenceIsTodayTest() {
 
         // given
         Long userId = 5L;
@@ -590,24 +591,6 @@ public class RecurringTransactionsServiceIntegrationTest {
         assertThat(recTransaction).isNotNull();
         assertThat(recTransaction.isActive()).isEqualTo(isActive);
 
-    }
-
-    @Test
-    @Order(23)
-    public void changeRecurringTransactionTemplateStatusToActiveWhereNextOccurrenceIsTodayBeforeNoonTest() {
-
-        // given
-        Long userId = 5L;
-        Long recTransactionTemplateId = 12L;
-        Boolean isActive = true;
-
-        // when
-        recTransactionService.changeStatus(recTransactionTemplateId, isActive, userId);
-
-        // then
-        RecurringTransaction recTransaction = em.find(RecurringTransaction.class, recTransactionTemplateId);
-        assertThat(recTransaction).isNotNull();
-        assertThat(recTransaction.isActive()).isEqualTo(isActive);
     }
 
     @Test
@@ -630,7 +613,7 @@ public class RecurringTransactionsServiceIntegrationTest {
 
     @Test
     @Order(25)
-    public void changeRecurringTransactionTemplateToActiveWhereNextOccurrenceFromBeforeToCurrentDayBeforeNoonTest() {
+    public void changeRecurringTransactionTemplateToActiveWhereNextOccurrenceFromBeforeToCurrentDayTest() {
 
         // given
         Long userId = 5L;
@@ -645,24 +628,6 @@ public class RecurringTransactionsServiceIntegrationTest {
         assertThat(recTransaction).isNotNull();
         assertThat(recTransaction.isActive()).isEqualTo(isActive);
 
-    }
-
-    @Test
-    @Order(26)
-    public void changeRecurringTransactionTemplateToActiveWhereNextOccurrenceFromBeforeToCurrentDayAfterNoonTest() {
-
-        // given
-        Long userId = 5L;
-        Long recTransactionTemplateId = 15L;
-        Boolean isActive = true;
-
-        // when
-        recTransactionService.changeStatus(recTransactionTemplateId, isActive, userId);
-
-        // then
-        RecurringTransaction recTransaction = em.find(RecurringTransaction.class, recTransactionTemplateId);
-        assertThat(recTransaction).isNotNull();
-        assertThat(recTransaction.isActive()).isEqualTo(isActive);
     }
 
     @Test

@@ -5,7 +5,6 @@ import com.example.budget_management_app.account.domain.Account;
 import com.example.budget_management_app.category.dao.CategoryDao;
 import com.example.budget_management_app.category.domain.Category;
 import com.example.budget_management_app.common.exception.ErrorCode;
-import com.example.budget_management_app.common.exception.InternalException;
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.common.exception.StatusAlreadySetException;
 import com.example.budget_management_app.recurring_transaction.dao.RecurringTransactionDao;
@@ -16,8 +15,10 @@ import com.example.budget_management_app.recurring_transaction.domain.UpdateRang
 import com.example.budget_management_app.recurring_transaction.dto.*;
 import com.example.budget_management_app.recurring_transaction.mapper.RecurringTransactionMapper;
 import com.example.budget_management_app.transaction.domain.Transaction;
-import com.example.budget_management_app.transaction_common.dto.PaginationParams;
+import com.example.budget_management_app.transaction.dto.TransactionSummary;
+import com.example.budget_management_app.transaction.service.TransactionService;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
+import com.example.budget_management_app.transaction_common.dto.PaginationParams;
 import com.example.budget_management_app.transaction_common.service.AccountUpdateService;
 import com.example.budget_management_app.transaction_common.service.CategoryValidatorService;
 import jakarta.persistence.Tuple;
@@ -29,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,7 +37,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class RecurringTransactionServiceImpl implements RecurringTransactionService{
+public class RecurringTransactionServiceImpl implements RecurringTransactionService {
 
     private final RecurringTransactionDao recurringTransactionDao;
     private final CategoryValidatorService transactionValidator;
@@ -45,6 +45,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
     private final AccountDao accountDao;
     private final CategoryDao categoryDao;
     private final RecurringTransactionMapper mapper;
+    private final TransactionService transactionService;
 
     /**
      * @param userId
@@ -71,7 +72,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
     public RecurringTransactionDetailsResponse getDetails(Long id, Long userId) {
 
         RecurringTransaction recurringTransaction = recurringTransactionDao.findByIdAndUserId(id, userId)
-                .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
         return mapper.toDetails(recurringTransaction);
     }
@@ -111,72 +112,52 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
 
         long accountId = createReq.accountId();
         Account account = accountDao.findByIdAndUser(accountId, userId)
-                .orElseThrow( () -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
 
         long categoryId = createReq.categoryId();
         Category category = categoryDao.findByIdAndUser(categoryId, userId)
-                .orElseThrow( () -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
 
         transactionValidator.validateCategoryType(category.getType(), createReq.type());
 
-        RecurringInterval interval = createReq.recurringInterval();
-        int recurringValue = createReq.recurringValue();
-        LocalDate startDate = createReq.startDate();
-        LocalDate nextOccurrence;
-        if (startDate.isEqual(LocalDate.now()) && LocalTime.now().isAfter(LocalTime.NOON)) {
-            nextOccurrence = calculateNextOccurrence(interval, recurringValue, LocalDate.now());
-            RecurringTransaction recurringTransaction = new RecurringTransaction(
-                    createReq.amount(), createReq.title(), createReq.type(), createReq.description(), startDate, createReq.endDate(),
-                    interval, recurringValue, nextOccurrence, true, LocalDateTime.now()
-            );
-            Transaction transaction = new Transaction(
-                          createReq.amount(), createReq.title(), createReq.type(), createReq.description(), LocalDateTime.now()
-            );
-            transaction.setAccount(account);
-            transaction.setCategory(category);
+        RecurringTransaction recurringTransaction = new RecurringTransaction(
+                createReq.amount(),
+                createReq.title(),
+                createReq.type(),
+                createReq.description(),
+                createReq.startDate(),
+                createReq.endDate(),
+                createReq.recurringInterval(),
+                createReq.recurringValue(),
+                createReq.startDate(),
+                true,
+                LocalDateTime.now()
+        );
 
-            recurringTransaction.addTransaction(transaction);
-            recurringTransaction.setAccount(account);
-            recurringTransaction.setCategory(category);
+        recurringTransaction.setAccount(account);
+        recurringTransaction.setCategory(category);
 
-            this.accountUpdateService.calculateBalanceAfterTransactionCreation(account, createReq.amount(), createReq.type());
+        RecurringTransaction savedRecurring = recurringTransactionDao.save(recurringTransaction);
 
-            RecurringTransaction createdRecurringTransaction = recurringTransactionDao.save(recurringTransaction);
+        TransactionSummary createdTransactionView = null;
+        boolean executedNow = false;
+        if (!createReq.startDate().isAfter(LocalDate.now())) {
+            Transaction transaction = transactionService.create(savedRecurring);
 
-            Transaction createdTransaction = createdRecurringTransaction.getTransactions()
-                    .stream()
-                    .findFirst()
-                    .orElseThrow( () -> new InternalException("No assign transaction to recurring transaction"));
+            createdTransactionView = mapper.toTransactionView(transaction, savedRecurring.getId());
+            executedNow = true;
 
-            return new RecurringTransactionCreateResponse(
-                    createdRecurringTransaction.getId(),
-                    createdRecurringTransaction.getNextOccurrence(),
-                    true,
-                    true,
-                    mapper.toTransactionView(createdTransaction, createdRecurringTransaction.getId())
-            );
-
-        } else {
-
-            nextOccurrence = startDate;
-            RecurringTransaction recurringTransaction = new RecurringTransaction(
-                    createReq.amount(), createReq.title(), createReq.type(), createReq.description(), startDate, createReq.endDate(),
-                    interval, recurringValue, nextOccurrence, true, LocalDateTime.now()
-            );
-
-            recurringTransaction.setAccount(account);
-            recurringTransaction.setCategory(category);
-
-            RecurringTransaction createdRecurringTransaction = recurringTransactionDao.save(recurringTransaction);
-
-            return new RecurringTransactionCreateResponse(
-                    createdRecurringTransaction.getId(),
-                    createdRecurringTransaction.getNextOccurrence(),
-                    true,
-                    false,
-                    null
-            );
+            LocalDate nextOccurrence = calculateNextOccurrence(createReq.recurringInterval(), createReq.recurringValue(), LocalDate.now());
+            recurringTransaction.setNextOccurrence(nextOccurrence);
         }
+
+        return new RecurringTransactionCreateResponse(
+                savedRecurring.getId(),
+                savedRecurring.getNextOccurrence(),
+                true,
+                executedNow,
+                createdTransactionView
+        );
     }
 
     /**
@@ -187,32 +168,15 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
     @Transactional
     @Override
     public void changeStatus(Long id, Boolean isActive, Long userId) {
-
         RecurringTransaction recurringTransaction = recurringTransactionDao.findByIdAndUserId(id, userId)
-                .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
         if (recurringTransaction.isActive() == isActive) {
-            throw new StatusAlreadySetException(RecurringTransaction.class.getSimpleName(), recurringTransaction.getId(), (isActive) ? "active" : "not active" , ErrorCode.STATUS_ALREADY_SET);
+            throw new StatusAlreadySetException(RecurringTransaction.class.getSimpleName(), recurringTransaction.getId(), (isActive) ? "active" : "not active", ErrorCode.STATUS_ALREADY_SET);
         }
 
         if (isActive) {
-
-            if (recurringTransaction.getNextOccurrence().isEqual(LocalDate.now()) && LocalTime.now().isAfter(LocalTime.NOON)) {
-                LocalDate nextOccurrence = this.calculateNextOccurrence(recurringTransaction.getRecurringInterval(), recurringTransaction.getRecurringValue(), LocalDate.now());
-                recurringTransaction.setNextOccurrence(nextOccurrence);
-            } else if (recurringTransaction.getNextOccurrence().isBefore(LocalDate.now())) {
-                LocalDate incrementDate = recurringTransaction.getNextOccurrence();
-                while(!(incrementDate.isAfter(LocalDate.now()) || incrementDate.isEqual(LocalDate.now()))) {
-                    incrementDate = this.calculateNextOccurrence(recurringTransaction.getRecurringInterval(), recurringTransaction.getRecurringValue(), incrementDate);
-                }
-
-                if (incrementDate.isAfter(LocalDate.now()) || (incrementDate.isEqual(LocalDate.now()) && LocalTime.now().isBefore(LocalTime.NOON))){
-                    recurringTransaction.setNextOccurrence(incrementDate);
-                } else {
-                    LocalDate nextOccurrence = this.calculateNextOccurrence(recurringTransaction.getRecurringInterval(), recurringTransaction.getRecurringValue(), LocalDate.now());
-                    recurringTransaction.setNextOccurrence(nextOccurrence);
-                }
-            }
+            updateNextOccurrenceForActivation(recurringTransaction);
         }
 
         recurringTransaction.setActive(isActive);
@@ -228,7 +192,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
     public void delete(Long id, RemovalRange range, Long userId) {
 
         RecurringTransaction recurringTransaction = recurringTransactionDao.findByIdAndUserId(id, userId)
-                .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
         if (range.equals(RemovalRange.TEMPLATE)) {
             recurringTransaction.detachTransactions();
@@ -259,7 +223,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
     public void update(Long id, RecurringTransactionUpdateRequest updateReq, UpdateRange range, Long userId) {
 
         RecurringTransaction recurringTransaction = recurringTransactionDao.findByIdAndUserId(id, userId)
-                .orElseThrow( () -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(RecurringTransaction.class.getSimpleName(), id, ErrorCode.NOT_FOUND));
 
         recurringTransaction.setTitle(updateReq.title());
         recurringTransaction.setDescription(updateReq.description());
@@ -279,7 +243,7 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
                             currentTotalAmount,
                             recurringTransaction.getType()
                     );
-                    transactions.forEach( transaction -> {
+                    transactions.forEach(transaction -> {
                         transaction.setAmount(updateReq.amount());
                         transaction.setTitle(updateReq.title());
                         transaction.setDescription(updateReq.description());
@@ -292,24 +256,16 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
     @Transactional
     @Override
     public void generateRecurringTransactions() {
-
         List<RecurringTransaction> recurringTransactionsToCreate = recurringTransactionDao.searchForRecurringTransactionsToCreate();
 
-        if (!recurringTransactionsToCreate.isEmpty()) {
-            recurringTransactionsToCreate.forEach(
-                    recTransaction -> {
-                        LocalDate nextOccurrence = this.calculateNextOccurrence(recTransaction.getRecurringInterval(), recTransaction.getRecurringValue(), LocalDate.now());
-                        recTransaction.setNextOccurrence(nextOccurrence);
-                        Transaction transaction = new Transaction(
-                                recTransaction.getAmount(), recTransaction.getTitle(), recTransaction.getType(),
-                                recTransaction.getDescription(), LocalDateTime.now()
-                        );
-                        this.accountUpdateService.calculateBalanceAfterTransactionCreation(recTransaction.getAccount(), recTransaction.getAmount(), recTransaction.getType());
-                        transaction.setAccount(recTransaction.getAccount());
-                        transaction.setCategory(recTransaction.getCategory());
-                        recTransaction.addTransaction(transaction);
-                    }
-            );
+        for (RecurringTransaction recTransaction : recurringTransactionsToCreate) {
+            transactionService.create(recTransaction);
+            LocalDate nextOccurrence = this.calculateNextOccurrence(recTransaction.getRecurringInterval(), recTransaction.getRecurringValue(), recTransaction.getNextOccurrence());
+            recTransaction.setNextOccurrence(nextOccurrence);
+
+            if (recTransaction.getEndDate() != null && nextOccurrence.isAfter(recTransaction.getEndDate())) {
+                recTransaction.setActive(false);
+            }
         }
     }
 
@@ -386,5 +342,26 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
         if (!differences.isEmpty()) {
             throw new NotFoundException(Account.class.getSimpleName(), differences, ErrorCode.NOT_FOUND);
         }
+    }
+
+    private void updateNextOccurrenceForActivation(RecurringTransaction transaction) {
+        LocalDate today = LocalDate.now();
+        LocalDate nextOccurrence = transaction.getNextOccurrence();
+
+        if (nextOccurrence.isAfter(today)) {
+            return;
+        }
+
+        LocalDate newDate = nextOccurrence;
+
+        while (!newDate.isAfter(today)) {
+            newDate = calculateNextOccurrence(
+                    transaction.getRecurringInterval(),
+                    transaction.getRecurringValue(),
+                    newDate
+            );
+        }
+
+        transaction.setNextOccurrence(newDate);
     }
 }

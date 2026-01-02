@@ -187,6 +187,7 @@ public class TransactionServiceIntegrationTest {
                 );
         // when
         TransactionCreateResponse response = transactionService.create(createReq, userId);
+        em.flush();
         em.clear();
 
         // then
@@ -223,6 +224,7 @@ public class TransactionServiceIntegrationTest {
 
         // when
         TransactionCreateResponse response = transactionService.create(createReq, userId);
+        em.flush();
         em.clear();
 
         // then

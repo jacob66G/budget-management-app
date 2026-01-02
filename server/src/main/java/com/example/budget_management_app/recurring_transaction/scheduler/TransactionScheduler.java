@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ApplicationScheduler {
+public class TransactionScheduler {
 
     private final RecurringTransactionService recurringTransactionService;
 
-    @Scheduled(cron = "0 0 12 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     public void generateRecurringTransactions() {
         this.recurringTransactionService.generateRecurringTransactions();
     }

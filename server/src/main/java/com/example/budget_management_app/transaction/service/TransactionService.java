@@ -1,5 +1,7 @@
 package com.example.budget_management_app.transaction.service;
 
+import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
+import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction.dto.*;
 import com.example.budget_management_app.transaction_common.dto.PagedResponse;
 
@@ -12,6 +14,8 @@ public interface TransactionService {
     );
 
     TransactionCreateResponse create(TransactionCreateRequest transactionCreate, Long userId);
+
+    Transaction create(RecurringTransaction recTransaction);
 
     TransactionCategoryChangeResponse changeCategory(Long id, TransactionCategoryChangeRequest updateReq, Long userId);
 

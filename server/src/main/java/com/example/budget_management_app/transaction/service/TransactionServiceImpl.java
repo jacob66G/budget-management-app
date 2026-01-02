@@ -9,6 +9,7 @@ import com.example.budget_management_app.common.exception.CategoryChangeNotAllow
 import com.example.budget_management_app.common.exception.ErrorCode;
 import com.example.budget_management_app.common.exception.NotFoundException;
 import com.example.budget_management_app.notification.domain.NotificationType;
+import com.example.budget_management_app.recurring_transaction.domain.RecurringTransaction;
 import com.example.budget_management_app.transaction.dao.TransactionDao;
 import com.example.budget_management_app.transaction.domain.Transaction;
 import com.example.budget_management_app.transaction.dto.*;
@@ -92,16 +93,44 @@ public class TransactionServiceImpl implements TransactionService {
         Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException(Account.class.getSimpleName(), accountId, ErrorCode.NOT_FOUND));
 
-        accountUpdateService.calculateBalanceAfterTransactionCreation(account, createReq.amount(), createReq.type());
         Transaction transaction = mapper.fromDto(createReq);
         transaction.setCategory(category);
         transaction.setAccount(account);
 
         Transaction savedTransaction = transactionDao.save(transaction);
 
+        accountUpdateService.calculateBalanceAfterTransactionCreation(account, createReq.amount(), createReq.type());
+
         checkBudgetAndPublishEvent(account, savedTransaction);
 
         return new TransactionCreateResponse(savedTransaction.getId(), savedTransaction.getTransactionDate());
+    }
+
+    @Transactional
+    @Override
+    public Transaction create(RecurringTransaction recTransaction) {
+        Account account = recTransaction.getAccount();
+
+        Transaction transaction = new Transaction(
+                recTransaction.getAmount(),
+                recTransaction.getTitle(),
+                recTransaction.getType(),
+                recTransaction.getDescription(),
+                LocalDateTime.now()
+        );
+        transaction.setAccount(account);
+        transaction.setCategory(recTransaction.getCategory());
+
+        transaction.setRecurringTransaction(recTransaction);
+
+        Transaction savedTransaction = transactionDao.save(transaction);
+
+        this.accountUpdateService.calculateBalanceAfterTransactionCreation(recTransaction.getAccount(), recTransaction.getAmount(), recTransaction.getType());
+        accountDao.update(account);
+
+        checkBudgetAndPublishEvent(account, savedTransaction);
+
+        return savedTransaction;
     }
 
     @Transactional

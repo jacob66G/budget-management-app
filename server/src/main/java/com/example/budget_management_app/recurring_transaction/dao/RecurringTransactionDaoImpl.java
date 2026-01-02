@@ -12,7 +12,6 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.*;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -29,7 +28,6 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
      * @param userId
      * @return
      */
-    @Transactional(readOnly = true)
     @Override
     public List<Tuple> getSummaryTuplesByUserId(PaginationParams paginationParams, Long userId) {
 
@@ -75,7 +73,6 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
      * @param userId
      * @return
      */
-    @Transactional(readOnly = true)
     @Override
     public Long getSummaryTuplesCountByUserId(Long userId) {
 
@@ -98,7 +95,6 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
      * @param userId
      * @return
      */
-    @Transactional(readOnly = true)
     @Override
     public Optional<RecurringTransaction> findByIdAndUserId(Long id, Long userId) {
 
@@ -118,7 +114,6 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
      * @param recurringTransaction
      * @return
      */
-    @Transactional
     @Override
     public RecurringTransaction save(RecurringTransaction recurringTransaction) {
         em.persist(recurringTransaction);
@@ -129,7 +124,6 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
     /**
      * @param recurringTransaction
      */
-    @Transactional
     @Override
     public void delete(RecurringTransaction recurringTransaction) {
         em.remove(recurringTransaction);
@@ -138,7 +132,6 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
     /**
      * @return
      */
-    @Transactional(readOnly = true)
     @Override
     public List<RecurringTransaction> searchForRecurringTransactionsToCreate() {
 
@@ -153,7 +146,6 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
     /**
      * @return List of Tuples for upcoming transactions
      */
-    @Transactional(readOnly = true)
     @Override
     public List<Tuple> getUpcomingTransactionsTuples(PaginationParams paginationParams,
                                                      UpcomingTransactionFilterParams filterParams,
@@ -206,7 +198,6 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
      * @param filterParams
      * @return
      */
-    @Transactional(readOnly = true)
     @Override
     public Long getUpcomingTransactionsCount(UpcomingTransactionFilterParams filterParams, Long userId) {
 
