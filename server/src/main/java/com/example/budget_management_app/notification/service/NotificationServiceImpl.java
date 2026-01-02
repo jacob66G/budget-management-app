@@ -32,7 +32,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void createAndSend(Long userId, String title, String message, NotificationType type, String targetUrl) {
         User user = userDao.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User with not found", ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("User not found", ErrorCode.NOT_FOUND));
 
         Notification notification = new Notification();
         notification.setUser(user);

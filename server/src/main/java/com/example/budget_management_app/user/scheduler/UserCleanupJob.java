@@ -13,7 +13,7 @@ public class UserCleanupJob {
 
     private final UserService userService;
 
-    @Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     public void performUserDeletion() {
         log.info("Starting the UserCleanupJob task...");
         userService.deleteUsersPendingDeletion();
