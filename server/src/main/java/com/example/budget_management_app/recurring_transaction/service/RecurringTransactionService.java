@@ -39,4 +39,6 @@ public interface RecurringTransactionService {
     void deleteAllByAccount(Long accountId, Long userId);
 
     void deleteAllByUser(Long userId);
+
+    boolean existsByCategoryAndUser(Long categoryId, Long userId);
 }

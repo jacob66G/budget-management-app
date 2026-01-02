@@ -87,7 +87,12 @@ public class CategoryServiceImpl implements CategoryService {
             category.setName(dto.name());
         }
         if (dto.type() != null && category.getType() != dto.type()) {
-            validateCategoryTypeChange(categoryId, userId);
+            if (isCategoryUsed(categoryId, userId)) {
+                throw new ValidationException(
+                        "Cannot change the type of a category that already has transactions assigned to it.",
+                        ErrorCode.CATEGORY_IS_IN_USE
+                );
+            }
             category.setType(dto.type());
         }
         if (StringUtils.hasText(dto.iconPath()) && !category.getIconKey().equals(dto.iconPath())) {
@@ -107,7 +112,12 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new NotFoundException(Category.class.getSimpleName(), categoryId, ErrorCode.NOT_FOUND));
 
         validateCategoryCanBeModify(category);
-        validateCategoryCanBeDeleted(categoryId, userId);
+        if (isCategoryUsed(categoryId, userId)) {
+            throw new ValidationException(
+                    "Cannot delete a category that already has transactions assigned to it.",
+                    ErrorCode.CATEGORY_IS_IN_USE
+            );
+        }
 
         categoryDao.delete(category);
         log.info("User: {} has deleted category: {}", userId, categoryId);
@@ -152,22 +162,8 @@ public class CategoryServiceImpl implements CategoryService {
         recurringTransactionService.reassignCategoryForUser(userId, oldCategoryId, newCategoryId);
     }
 
-    private void validateCategoryTypeChange(Long categoryId, Long userId) {
-        if (transactionService.existsByCategoryAndUser(categoryId, userId)) {
-            throw new ValidationException(
-                    "Cannot change the type of a category that already has transactions assigned to it.",
-                    ErrorCode.CATEGORY_IS_IN_USE
-            );
-        }
-    }
-
-    private void validateCategoryCanBeDeleted(Long categoryId, Long userId) {
-        if (transactionService.existsByCategoryAndUser(categoryId, userId)) {
-            throw new ValidationException(
-                    "Cannot delete a category that already has transactions assigned to it.",
-                    ErrorCode.CATEGORY_IS_IN_USE
-            );
-        }
+    private boolean isCategoryUsed(Long categoryId, Long userId) {
+        return transactionService.existsByCategoryAndUser(categoryId, userId) || recurringTransactionService.existsByCategoryAndUser(categoryId, userId);
     }
 
     private void validateCategoryReassignment(CategoryType oldType, CategoryType newType) {
@@ -214,7 +210,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     private void validateCategoryCanBeModify(Category category) {
         if (category.isDefault()) {
-            throw new ValidationException("This category is default and cannot be modify", ErrorCode.MODIFY_DEFAULT_CATEGORY);
+            throw new ValidationException("This category is default and cannot be modified", ErrorCode.MODIFY_DEFAULT_CATEGORY);
         }
     }
 }

@@ -280,6 +280,20 @@ public class RecurringTransactionDaoImpl implements RecurringTransactionDao {
                 .executeUpdate();
     }
 
+    @Override
+    public boolean existsByCategoryIdAndUserId(Long categoryId, Long userId) {
+        List<Long> result = em.createQuery(
+                        "SELECT t.id FROM RecurringTransaction t " +
+                                "WHERE t.category.id = :categoryId AND t.account.user.id = :userId",
+                        Long.class)
+                .setParameter("categoryId", categoryId)
+                .setParameter("userId", userId)
+                .setMaxResults(1)
+                .getResultList();
+
+        return !result.isEmpty();
+    }
+
     private List<Predicate> setUpcomingTransactionsPredicates(
             UpcomingTransactionsTimeRange range,
             List<Long> accountIds,

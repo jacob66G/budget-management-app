@@ -318,6 +318,12 @@ public class RecurringTransactionServiceImpl implements RecurringTransactionServ
         log.info("User: {} has deleted recurring transactions.", userId);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public boolean existsByCategoryAndUser(Long categoryId, Long userId) {
+        return recurringTransactionDao.existsByCategoryIdAndUserId(categoryId, userId);
+    }
+
     private LocalDate calculateNextOccurrence(RecurringInterval interval, int recurringValue, LocalDate relativeDate) {
         LocalDate nextOccurrence;
         if (interval.equals(RecurringInterval.DAY)) {

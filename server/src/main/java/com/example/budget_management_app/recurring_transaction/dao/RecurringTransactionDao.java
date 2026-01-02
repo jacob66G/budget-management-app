@@ -42,4 +42,5 @@ public interface RecurringTransactionDao {
 
     void deleteAllByUser(Long userId);
 
+    boolean existsByCategoryIdAndUserId(Long categoryId, Long userId);
 }
