@@ -57,6 +57,12 @@ export class AnalyticsService {
         return this.http.get<FinancialSummaryResponse>(`${ApiPaths.Analytics.GLOBAL_FINANCIAL_SUMMARY}`, { params });
     }
 
+    generateAccountReport(accountId: number, from: Date, to: Date): Observable<void> {
+        const params = this.getDateParams(from, to);
+
+        return this.http.get<void>(`${ApiPaths.Analytics.ANALYTICS_ACCOUNT}/${accountId}/generate-report`, { params });
+    }
+
     private getDateParams(from: Date, to: Date): HttpParams {
         const fromStr = formatDate(from, 'yyyy-MM-dd', 'en-US');
         const toStr = formatDate(to, 'yyyy-MM-dd', 'en-US');

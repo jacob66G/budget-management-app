@@ -54,7 +54,15 @@
 
 .header-actions {
   display: flex;
-  gap: 4px;
+  flex-direction: column;
+  gap: 15px;
+  align-items: flex-start;
+
+  .actions-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
 
   button {
     border: 1px solid transparent;
@@ -82,19 +90,11 @@
 
   .change-status-btn {
     margin-right: 5px;
-  }
-
-  .change-status-btn:hover {
-    background-color: #ececec;
-
-    .change-status-icon {
-      color: var(--primary-color);
-    }
+    width: 7rem;
   }
 
   .edit-btn:hover {
     background-color: #dddcff;
-
     .edit-icon {
       color: var(--primary-color);
     }
@@ -102,9 +102,18 @@
 
   .delete-btn:hover {
     background-color: var(--default-light-red);
-
     .delete-icon {
       color: var(--error-color);
+    }
+  }
+
+  .generate-report-btn {
+    background-color: var(--primary-color);
+    color: white;
+    width: 10rem;
+
+    &:hover {
+      filter: brightness(0.9);
     }
   }
 }

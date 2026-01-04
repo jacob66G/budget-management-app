@@ -21,7 +21,6 @@
     <button
       mat-flat-button
       color="warn" 
-      class="submit-button"
       (click)="onSubmit()"
       [disabled]="tfaForm.invalid || isLoading()">
       @if (!isLoading()) {
@@ -75,7 +74,6 @@
     <button
       mat-flat-button
       color="primary"
-      class="submit-button"
       (click)="onSubmit()"
       [disabled]="tfaForm.invalid || isLoading() || isQrLoading()">
       @if (!isLoading()) {

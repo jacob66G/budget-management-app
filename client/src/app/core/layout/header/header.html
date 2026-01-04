@@ -9,7 +9,7 @@
 
   @if (currentUser(); as user) {
 
-<button mat-icon-button [matMenuTriggerFor]="notificationMenu" matTooltip="Powiadomienia">
+<button mat-icon-button [matMenuTriggerFor]="notificationMenu" matTooltip="Notifications">
       <mat-icon 
          [matBadge]="unreadCount()" 
          [matBadgeHidden]="unreadCount() === 0"
@@ -18,14 +18,11 @@
       </mat-icon>
     </button>
 
-    <!-- MENU POWIADOMIEŃ -->
     <mat-menu #notificationMenu="matMenu" class="notification-menu">
       
-      <!-- Nagłówek Menu -->
       <div class="notification-header" (click)="$event.stopPropagation()">
         <span class="header-title">Notifications</span>
         
-        <!-- Przycisk "Mark all as read" (widoczny tylko gdy są nieprzeczytane) -->
         @if (unreadCount() > 0) {
           <button mat-button color="primary" class="mark-all-btn" (click)="onMarkAllAsRead($event)">
             Mark all as read
@@ -34,7 +31,6 @@
       </div>
       <mat-divider></mat-divider>
       
-      <!-- Lista Powiadomień -->
       <div class="notification-list">
         @for (n of notifications(); track n.id) {
           <button mat-menu-item class="notification-item" 
@@ -51,7 +47,6 @@
               <span class="notif-date">{{ n.createdAt | date:'shortTime' }}</span>
             </div>
             
-            <!-- Kropka dla nieprzeczytanych -->
             @if (!n.isRead) {
               <div class="unread-dot"></div>
             }

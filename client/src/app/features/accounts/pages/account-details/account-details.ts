@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -30,6 +30,7 @@ import { CategorySumChartComponent } from "../../../../shared/components/charts/
 import { CashFlowChartComponent } from "../../../../shared/components/charts/cash-flow-chart.component";
 import { ToastService } from '../../../../core/services/toast-service';
 import { AmountFormatPipe } from "../../../../shared/pipes/amount-format-pipe";
+import { ReportDialog } from '../../components/dialogs/report-dialog';
 
 @Component({
   selector: 'app-account-details',
@@ -68,6 +69,7 @@ export class AccountDetailsPage {
   private transactionService = inject(TransactionService);
   private analyticsService = inject(AnalyticsService);
   private toastService = inject(ToastService);
+  private dialog = inject(MatDialog);
 
   account = signal<AccountDetails | null>(null);
   lastTransactions = signal<TransactionSummary[] | null>(null)
@@ -236,6 +238,24 @@ export class AccountDetailsPage {
       error: (err: HttpErrorResponse) => {
         this.isChartLoading.set(false);
         this.errorService.handle(err);
+      }
+    });
+  }
+
+  openGenerateReportDialog(): void {
+    const dialogRef = this.dialog.open(ReportDialog, {
+      width: '450px'
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.analyticsService.generateAccountReport(this.account()!.id, result.start, result.end).subscribe({
+          next: () => {
+            this.toastService.showSuccess('The report has been sent to your email address!');
+          },
+          error: (err: HttpErrorResponse) => {
+            this.errorService.handle(err, 'Report could not be generated. Please try again later.');
+          }
+        });
       }
     });
   }

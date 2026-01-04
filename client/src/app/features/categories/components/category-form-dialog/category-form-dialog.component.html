@@ -57,11 +57,9 @@
 
 <mat-dialog-actions>
   <button mat-button mat-dialog-close>Cancel</button>
-  
   <button 
     mat-flat-button 
     color="primary" 
-    class="submit-button"
     (click)="onSubmit()" 
     [disabled]="form.invalid || (data.mode === 'UPDATE' && !hasChanges())">
     Save

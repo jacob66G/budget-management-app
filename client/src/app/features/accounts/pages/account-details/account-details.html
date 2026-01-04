@@ -27,22 +27,27 @@
     </div>
 
     <div class="header-actions">
-      <button mat-flat-button class="change-status-btn"
-        [style.background-color]="acc.status.toUpperCase() === 'ACTIVE' ? 'var(--error-color)' : 'var(--primary-color)'"
-        style="color: white;"
-        (click)="onStatusToggle(acc)">
-        {{ getToggleStatusText(acc.status) }}
-      </button>
+      <div class="actions-row">
+        <button mat-flat-button class="change-status-btn"
+          [style.background-color]="acc.status.toUpperCase() === 'ACTIVE' ? 'var(--error-color)' : 'var(--primary-color)'"
+          style="color: white;" (click)="onStatusToggle(acc)">
+          {{ getToggleStatusText(acc.status) }}
+        </button>
 
-      <button mat-icon-button class="edit-btn" (click)="onEditClick(acc.id)">
-        <mat-icon class="edit-icon">edit_square</mat-icon>
-      </button>
+        <button mat-icon-button class="edit-btn" (click)="onEditClick(acc.id)">
+          <mat-icon class="edit-icon">edit_square</mat-icon>
+        </button>
 
-      @if (!acc.isDefault) {
-      <button mat-icon-button class="delete-btn" (click)="onDeleteClick(acc)">
-        <mat-icon class="delete-icon">delete</mat-icon>
+        @if (!acc.isDefault) {
+        <button mat-icon-button class="delete-btn" (click)="onDeleteClick(acc)">
+          <mat-icon class="delete-icon">delete</mat-icon>
+        </button>
+        }
+      </div>
+
+      <button mat-flat-button class="generate-report-btn" (click)="openGenerateReportDialog()">
+        Generate Report
       </button>
-      }
 
     </div>
   </header>
@@ -149,7 +154,7 @@
           </div>
           <div class="detail-row">
             <span class="label">Limit</span>
-            <span class="value">{{ acc.budget != null  ? (acc.budget | amountFormat: acc.currency) : '-' }}</span>
+            <span class="value">{{ acc.budget != null ? (acc.budget | amountFormat: acc.currency) : '-' }}</span>
           </div>
           <div class="detail-row">
             <span class="label">Alert treshold</span>

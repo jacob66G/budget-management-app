@@ -1,5 +1,6 @@
 :host {
   font-family: var(--font-family-default);
+  display: block;
 }
 
 h2[mat-dialog-title] {
@@ -8,47 +9,29 @@ h2[mat-dialog-title] {
   color: #333;
   border-bottom: 1px solid #eee;
   text-align: center;
-  margin-bottom: 20px;
+  margin: 0 0 20px 0;
 }
 
 mat-dialog-content {
   padding: 20px 24px;
-  overflow-y: visible; 
+  overflow-y: visible;
+  min-width: 380px;
 }
 
-.dialog-form {
+.report-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
   padding-top: 20px;
-}
 
-.form-field {
-  width: 100%;
-}
-
-.icon-option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  
-  .icon-preview {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-  }
-  
-  span {
-    font-size: 1rem;
-    color: #333;
+  mat-form-field {
+    width: 100%;
   }
 }
 
-.form-error {
+mat-error {
   text-align: center;
-  padding: 8px 0;
-  font-size: 13px;
-  color: var(--warn-color, #d93025);
+  font-size: 12px;
 }
 
 mat-dialog-actions {

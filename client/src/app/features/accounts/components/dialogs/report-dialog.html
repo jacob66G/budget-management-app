@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>Genereate Report</h2>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="form" class="report-form">
+    
+    <mat-form-field appearance="outline">
+      <mat-label>Dates range</mat-label>
+      <mat-select formControlName="rangeType">
+        @for (option of rangeOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Selected period</mat-label>
+      <mat-date-range-input [formGroup]="form.controls.dateRange" [rangePicker]="picker">
+        <input matStartDate formControlName="start" placeholder="Od">
+        <input matEndDate formControlName="end" placeholder="Do">
+      </mat-date-range-input>
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+      
+      @if (form.controls.dateRange.invalid && (form.controls.dateRange.touched || form.controls.dateRange.dirty)) {
+        <mat-error>Enter valid date range</mat-error>
+      }
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button 
+    mat-flat-button 
+    color="primary"
+    (click)="generate()" 
+    [disabled]="form.invalid">
+    Generate
+  </button>
+</mat-dialog-actions>

@@ -53,13 +53,6 @@ mat-dialog-actions {
     gap: 30px;
 }
 
-.submit-button {
-  min-height: 40px;
-  font-size: 14px;
-  border-radius: 8px;
-  min-width: 120px;
-}
-
 mat-dialog-content {
   padding: 20px 24px;
 }
@@ -71,4 +64,12 @@ h2[mat-dialog-title] {
   border-bottom: 1px solid #eee;
   text-align: center;
   margin-bottom: 20px;
+}
+
+button[mat-flat-button], 
+button[mat-button] {
+  min-height: 40px;
+  font-size: 14px;
+  border-radius: 8px;
+  min-width: 120px;
 }
