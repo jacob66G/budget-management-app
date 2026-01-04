@@ -1,0 +1,11 @@
+Hello [(${userName})],
+
+Your financial report for the selected period has been successfully generated.
+
+Please find the detailed analysis attached to this email as a PDF file.
+
+If you have trouble opening the attachment, please ensure you have a PDF reader installed.
+
+---
+This email was generated automatically.
+The MyApp Team

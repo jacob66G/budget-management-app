@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Your Financial Report</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333333; margin: 0; padding: 0;">
+
+<div style="background-color: #f4f4f4; padding: 20px;">
+
+  <div style="background-color: #ffffff; padding: 30px; border-radius: 5px; max-width: 600px; margin: 0 auto; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+
+    <h2 style="color: #2c3e50; margin-top: 0;">Hello <span th:text="${userName}">User</span>,</h2>
+
+    <p>Your financial report for the selected period has been successfully generated.</p>
+
+    <p>You will find the detailed analysis, including charts and balance history, in the <b>PDF file attached to this email</b>.</p>
+
+    <p style="font-size: 14px; color: #666;">
+      If you have trouble opening the attachment, please ensure you have a PDF reader installed.
+    </p>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+    <p style="font-size: 12px; color: #999;">
+      This email was generated automatically. Please do not reply to this message.<br />
+      The MyApp Team
+    </p>
+
+  </div>
+</div>
+</body>
+</html>
