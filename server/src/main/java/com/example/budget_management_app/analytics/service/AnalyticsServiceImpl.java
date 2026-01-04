@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,20 +43,9 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         Account account = accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException("Account with id: " + accountId + "  not found.", ErrorCode.NOT_FOUND));
 
-        LocalDateTime createdAt = account.getCreatedAt().atZone(ZoneId.of("UTC")).toLocalDateTime();
+        LocalDateTime effectiveTo = getEffectiveTo(to);
 
-        LocalDateTime effectiveFrom = from;
-        if (from.isBefore(createdAt)) {
-            effectiveFrom = createdAt;
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime effectiveTo = to;
-        if (to.isAfter(now)) {
-            effectiveTo = now;
-        }
-
-        if (effectiveFrom.isAfter(effectiveTo)) {
+        if (from.isAfter(effectiveTo)) {
             return new ArrayList<>();
         }
 
@@ -66,12 +54,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         BigDecimal changesAfterPeriod = analyticsDao.sumAccountNetChangeAfterDate(accountId, effectiveTo);
         BigDecimal balanceAtEnd = currentBalance.subtract(changesAfterPeriod);
 
-        long daysDiff = ChronoUnit.DAYS.between(effectiveFrom, effectiveTo);
+        long daysDiff = ChronoUnit.DAYS.between(from, effectiveTo);
 
         if (daysDiff > 90) {
-            return getMonthlyHistory(accountId, effectiveFrom, effectiveTo, balanceAtEnd);
+            return getMonthlyHistory(accountId, from, effectiveTo, balanceAtEnd);
         } else {
-            return getDailyHistory(accountId, effectiveFrom, effectiveTo, balanceAtEnd);
+            return getDailyHistory(accountId, from, effectiveTo, balanceAtEnd);
         }
     }
 
@@ -80,7 +68,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException("Account with id: " + accountId + "  not found.", ErrorCode.NOT_FOUND));
 
-        return analyticsDao.getAccountCategoryBreakdown(accountId, from, to, type);
+        LocalDateTime effectiveTo = getEffectiveTo(to);
+
+        if (from.isAfter(effectiveTo)) {
+            return new ArrayList<>();
+        }
+        return analyticsDao.getAccountCategoryBreakdown(accountId, from, effectiveTo, type);
     }
 
     @Override
@@ -88,14 +81,20 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         accountDao.findByIdAndUser(accountId, userId)
                 .orElseThrow(() -> new NotFoundException("Account with id: " + accountId + "  not found.", ErrorCode.NOT_FOUND));
 
-        long daysDiff = ChronoUnit.DAYS.between(from, to);
+        LocalDateTime effectiveTo = getEffectiveTo(to);
+
+        if (from.isAfter(effectiveTo)) {
+            return new ArrayList<>();
+        }
+
+        long daysDiff = ChronoUnit.DAYS.between(from, effectiveTo);
 
         if (daysDiff <= 90) {
-            List<CashFlowPointDto> rawData = analyticsDao.getAccountDailyCashFlow(accountId, from, to);
-            return getDailyCashFlowFilled(rawData, from, to);
+            List<CashFlowPointDto> rawData = analyticsDao.getAccountDailyCashFlow(accountId, from, effectiveTo);
+            return getDailyCashFlowFilled(rawData, from, effectiveTo);
         } else {
-            List<PeriodSumCashFlowDto> rawData = analyticsDao.getAccountMonthlyCashFlow(accountId, from, to);
-            return getMonthlyCashFlowFilled(rawData, from, to);
+            List<PeriodSumCashFlowDto> rawData = analyticsDao.getAccountMonthlyCashFlow(accountId, from, effectiveTo);
+            return getMonthlyCashFlowFilled(rawData, from, effectiveTo);
         }
     }
 
@@ -127,6 +126,16 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         }
 
         return new MultiSeriesChartDto(labels, seriesList);
+    }
+
+    @Override
+    public BigDecimal getNetChangeAfterDate(Long accountId, LocalDateTime date) {
+        return analyticsDao.sumAccountNetChangeAfterDate(accountId, date);
+    }
+
+    @Override
+    public BigDecimal getTotalByType(Long accountId, LocalDateTime from, LocalDateTime to, TransactionType type) {
+        return analyticsDao.sumAccountTotalByType(accountId, from, to, type);
     }
 
     private List<LocalDate> generateMasterTimeline(LocalDate from, LocalDate to) {
@@ -320,5 +329,13 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         }
 
         return result;
+    }
+
+    private LocalDateTime getEffectiveTo(LocalDateTime to) {
+        LocalDateTime now = LocalDateTime.now();
+        if (to.isAfter(now)) {
+            return now;
+        }
+        return to;
     }
 }

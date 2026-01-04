@@ -156,4 +156,15 @@ public class AnalyticsDao {
                 .getResultList();
     }
 
+    public BigDecimal sumAccountTotalByType(Long accountId, LocalDateTime startDate, LocalDateTime endDate, TransactionType type) {
+        String query = "SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.account.id = :accountId AND t.type = :type AND t.transactionDate BETWEEN :startDate AND :endDate";
+
+        return em.createQuery(query, BigDecimal.class)
+                .setParameter("accountId", accountId)
+                .setParameter("startDate", startDate)
+                .setParameter("endDate", endDate)
+                .setParameter("type", type)
+                .getSingleResult();
+    }
+
 }

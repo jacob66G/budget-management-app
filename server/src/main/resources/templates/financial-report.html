@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Financial Report</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+            @bottom-center {
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: sans-serif;
+                font-size: 10px;
+                color: #7f8c8d;
+            }
+        }
+
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #2c3e50;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .header-table {
+            width: 100%;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .report-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2980b9;
+            text-transform: uppercase;
+        }
+
+        .meta-info {
+            text-align: right;
+            color: #7f8c8d;
+        }
+
+        .kpi-section {
+            width: 100%;
+            margin-bottom: 30px;
+            border-collapse: separate;
+            border-spacing: 10px;
+        }
+
+        .kpi-card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+            width: 33%;
+        }
+
+        .kpi-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .kpi-value {
+            font-size: 18px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .kpi-sub {
+            font-size: 10px;
+            color: #95a5a6;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .text-green {
+            color: #27ae60;
+        }
+
+        .text-red {
+            color: #c0392b;
+        }
+
+        .text-blue {
+            color: #2980b9;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #ecf0f1;
+            padding: 8px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-left: 5px solid #3498db;
+            page-break-after: avoid;
+        }
+
+        .chart-container {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+
+        .chart-img {
+            max-width: 100%;
+            max-height: 400px;
+            height: auto;
+        }
+
+        .category-wrapper {
+            margin-top: 20px;
+            text-align: center;
+            page-break-inside: avoid;
+            margin-bottom: 40px;
+        }
+
+        .category-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .category-img {
+            width: 90%;
+            max-width: 600px;
+            max-height: 500px;
+            height: auto;
+        }
+
+        .title-expense {
+            color: #c0392b;
+        }
+
+        .title-income {
+            color: #27ae60;
+        }
+
+        .gen-info {
+            margin-top: 40px;
+            font-size: 9px;
+            color: #bdc3c7;
+            text-align: right;
+            border-top: 1px solid #ecf0f1;
+            padding-top: 5px;
+        }
+
+        .category-table {
+            width: 90%;
+            margin: 15px auto;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        .category-table th {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 2px solid #ddd;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-size: 10px;
+        }
+
+        .category-table td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            color: #2c3e50;
+        }
+
+        .category-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .amount-col {
+            text-align: right;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<table class="header-table">
+    <tr>
+        <td>
+            <div class="report-title">Financial Report</div>
+            <div style="font-size: 14px; margin-top: 5px;">
+                Account: <span th:text="${accountName}" style="font-weight:bold;"></span>
+            </div>
+        </td>
+        <td class="meta-info">
+            <div>Report Period:</div>
+            <div style="font-weight: bold; color: #34495e;">
+                <span th:text="${#temporals.format(fromDate, 'dd.MM.yyyy')}"></span> -
+                <span th:text="${#temporals.format(toDate, 'dd.MM.yyyy')}"></span>
+            </div>
+            <div style="margin-top: 5px;">Currency: <span th:text="${currency}"></span></div>
+        </td>
+    </tr>
+</table>
+
+<table class="kpi-section">
+    <tr>
+        <td class="kpi-card">
+            <span class="kpi-label">Closing Balance</span>
+            <span class="kpi-value text-blue"
+                  th:text="${#numbers.formatDecimal(closingBalance, 1, 'DEFAULT', 2, 'DEFAULT')} + ' ' + ${currency}">
+                </span>
+        </td>
+
+        <td class="kpi-card">
+            <span class="kpi-label">Net Flow</span>
+            <span class="kpi-value"
+                  th:classappend="${balanceInPeriod >= 0} ? 'text-green' : 'text-red'"
+                  th:text="${(balanceInPeriod >= 0 ? '+' : '') + #numbers.formatDecimal(balanceInPeriod, 1, 'DEFAULT', 2, 'DEFAULT')} + ' ' + ${currency}">
+                </span>
+            <span class="kpi-sub">Income - Expenses</span>
+        </td>
+
+        <td class="kpi-card">
+            <span class="kpi-label">Savings Rate</span>
+            <span class="kpi-value"
+                  th:classappend="${savingsRatio >= 0} ? 'text-green' : 'text-red'"
+                  th:text="${#numbers.formatDecimal(savingsRatio, 1, 'DEFAULT', 1, 'DEFAULT')} + '%'">
+                    15.5%
+                </span>
+            <span class="kpi-sub">
+                    Avg. Spend: <span
+                    th:text="${#numbers.formatDecimal(averageDailyExpenses, 1, 'DEFAULT', 0, 'DEFAULT')}"></span> <span
+                    th:text="${currency}">PLN</span> / day
+                </span>
+        </td>
+    </tr>
+</table>
+
+<table style="width: 100%; margin-bottom: 20px; border-collapse: collapse;">
+    <tr style="background-color: #ecf0f1;">
+        <td style="padding: 10px; border-bottom: 2px solid #bdc3c7;">
+            <strong>Total Income</strong>
+        </td>
+        <td style="padding: 10px; text-align: right; border-bottom: 2px solid #bdc3c7;" class="text-green">
+            <strong th:text="${'+' + #numbers.formatDecimal(totalIncome, 1, 'DEFAULT', 2, 'DEFAULT')} + ' ' + ${currency}"></strong>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 10px; border-bottom: 1px solid #ecf0f1;">
+            <strong>Total Expenses</strong>
+        </td>
+        <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ecf0f1;" class="text-red">
+            <strong th:text="${'-' + #numbers.formatDecimal(totalExpense, 1, 'DEFAULT', 2, 'DEFAULT')} + ' ' + ${currency}"></strong>
+        </td>
+    </tr>
+</table>
+
+<div class="section-title">Balance History</div>
+<div class="chart-container" th:if="${balanceHistoryChartData != null}">
+    <img th:src="'data:image/png;base64,' + ${balanceHistoryChartData}" class="chart-img"/>
+</div>
+
+<div class="section-title">Cash Flow (Income vs Expenses)</div>
+<div class="chart-container" th:if="${cashFlowChartData != null}">
+    <img th:src="'data:image/png;base64,' + ${cashFlowChartData}" class="chart-img"/>
+</div>
+
+<div class="section-title">Category Breakdown</div>
+
+<div class="category-wrapper">
+    <div class="category-title title-expense">Expenses Structure</div>
+    <div th:if="${expenseCategoryChartData != null}">
+        <img th:src="'data:image/png;base64,' + ${expenseCategoryChartData}" class="category-img"/>
+    </div>
+    <div th:if="${expenseCategoryChartData == null}" style="color: #ccc; padding: 20px;">No data available</div>
+
+    <table class="category-table" th:if="${expenseList != null and !expenseList.empty}">
+        <thead>
+        <tr>
+            <th>Category Name</th>
+            <th class="amount-col">Amount</th>
+            <th class="amount-col" style="width: 15%">%</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="cat : ${expenseList}">
+            <td>
+                <span style="display:inline-block; width:8px; height:8px; background-color:#c0392b; border-radius:50%; margin-right:5px;"></span>
+                <span th:text="${cat.categoryName}"></span>
+            </td>
+            <td class="amount-col"
+                th:text="${#numbers.formatDecimal(cat.amount, 1, 'DEFAULT', 2, 'DEFAULT')} + ' ' + ${currency}">
+            </td>
+            <td class="amount-col" style="color: #95a5a6; font-size: 10px;">
+                <span th:text="${totalExpense != 0 ? #numbers.formatDecimal((cat.amount / totalExpense) * 100, 1, 1) : 0} + '%'"></span>
+            </td>
+        </tr>
+        <tr style="font-weight: bold; background-color: #fceceb;">
+            <td>TOTAL</td>
+            <td class="amount-col"
+                th:text="${#numbers.formatDecimal(totalExpense, 1, 'DEFAULT', 2, 'DEFAULT')} + ' ' + ${currency}"></td>
+            <td class="amount-col"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${expenseCategoryChartData == null}" style="color: #ccc; padding: 20px;">No expense data available</div>
+</div>
+
+<div class="category-wrapper">
+    <div class="category-title title-income">Income Structure</div>
+    <div th:if="${incomeCategoryChartData != null}">
+        <img th:src="'data:image/png;base64,' + ${incomeCategoryChartData}" class="category-img"/>
+    </div>
+    <div th:if="${incomeCategoryChartData == null}" style="color: #ccc; padding: 20px;">No data available</div>
+
+    <table class="category-table" th:if="${incomeList != null and !incomeList.empty}">
+        <thead>
+        <tr>
+            <th>Category Name</th>
+            <th class="amount-col">Amount</th>
+            <th class="amount-col" style="width: 15%">%</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="cat : ${incomeList}">
+            <td>
+                <span style="display:inline-block; width:8px; height:8px; background-color:#27ae60; border-radius:50%; margin-right:5px;"></span>
+                <span th:text="${cat.categoryName}"></span>
+            </td>
+            <td class="amount-col"
+                th:text="${#numbers.formatDecimal(cat.amount, 1, 'DEFAULT', 2, 'DEFAULT')} + ' ' + ${currency}">
+            </td>
+            <td class="amount-col" style="color: #95a5a6; font-size: 10px;">
+                <span th:text="${totalIncome != 0 ? #numbers.formatDecimal((cat.amount / totalIncome) * 100, 1, 1) : 0} + '%'"></span>
+            </td>
+        </tr>
+        <tr style="font-weight: bold; background-color: #eafaf1;">
+            <td>TOTAL</td>
+            <td class="amount-col"
+                th:text="${#numbers.formatDecimal(totalIncome, 1, 'DEFAULT', 2, 'DEFAULT')} + ' ' + ${currency}"></td>
+            <td class="amount-col"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${incomeCategoryChartData == null}" style="color: #ccc; padding: 20px;">No income data available</div>
+</div>
+
+<div class="gen-info">
+    Generated automatically on: <span th:text="${#temporals.format(generatedAt, 'dd.MM.yyyy HH:mm')}"></span>
+</div>
+
+</body>
+</html>

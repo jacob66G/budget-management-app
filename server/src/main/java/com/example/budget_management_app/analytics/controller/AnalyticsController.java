@@ -2,6 +2,7 @@ package com.example.budget_management_app.analytics.controller;
 
 import com.example.budget_management_app.analytics.dto.*;
 import com.example.budget_management_app.analytics.service.AnalyticsService;
+import com.example.budget_management_app.analytics.service.FinancialReportService;
 import com.example.budget_management_app.security.service.CustomUserDetails;
 import com.example.budget_management_app.transaction_common.domain.TransactionType;
 import jakarta.validation.Valid;
@@ -18,6 +19,7 @@ import java.util.List;
 public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
+    private final FinancialReportService financialReportService;
 
     @GetMapping("/accounts/{accountId}/balance-history")
     public ResponseEntity<List<BalanceHistoryPointDto>> getAccountBalanceHistory(
@@ -75,5 +77,15 @@ public class AnalyticsController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ResponseEntity.ok(analyticsService.getGlobalCashFlow(userDetails.getId(), dto.getFromDateTime(), dto.getToDateTime()));
+    }
+
+    @GetMapping("/accounts/{accountId}/generate-report")
+    public ResponseEntity<Void> generateReport(
+            @PathVariable Long accountId,
+            @Valid DateRange dto,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        financialReportService.generateFinancialReport(userDetails.getId(), accountId, dto.getFromDateTime(), dto.getToDateTime());
+        return ResponseEntity.ok().build();
     }
 }

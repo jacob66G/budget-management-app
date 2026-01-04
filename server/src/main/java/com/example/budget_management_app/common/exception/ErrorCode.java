@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
     INTERNAL_EXCEPTION("INTERNAL_EXCEPTION", HttpStatus.INTERNAL_SERVER_ERROR),
-    EMAIL_SEND_FAIL("EMAIL_SEND_FAIL", HttpStatus.INTERNAL_SERVER_ERROR),
+    EMAIL_SEND_FAILED("EMAIL_SEND_FAILED", HttpStatus.INTERNAL_SERVER_ERROR),
     STORAGE_ERROR("STORAGE_ERROR", HttpStatus.INTERNAL_SERVER_ERROR),
 
     NOT_FOUND("NOT_FOUND", HttpStatus.NOT_FOUND),
