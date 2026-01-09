@@ -12,7 +12,7 @@ export class AccountService {
     http = inject(HttpClient);
 
     getAccount(id: number): Observable<AccountDetails> {
-        return this.http.get<AccountDetails>(`${ApiPaths.Account.ACCOUNT}/${id}`);
+        return this.http.get<AccountDetails>(`${ApiPaths.Account.BY_ID(id)}`);
     }
 
     getAccounts(criteria?: SearchCriteria): Observable<Account[]> {
@@ -34,26 +34,26 @@ export class AccountService {
             });
         }
 
-        return this.http.get<Account[]>(ApiPaths.Account.ACCOUNT, { params });
+        return this.http.get<Account[]>(ApiPaths.Account.BASE, { params });
     }
 
     createAccount(createData: CreateAccount): Observable<AccountDetails> {
-        return this.http.post<AccountDetails>(ApiPaths.ACCOUNT_BASE, createData);
+        return this.http.post<AccountDetails>(ApiPaths.Account.BASE, createData);
     }
 
     updateAccount(id: number, updateData: UpdateAccount): Observable<AccountDetails> {
-        return this.http.patch<AccountDetails>(`${ApiPaths.ACCOUNT_BASE}/${id}`, updateData);
+        return this.http.patch<AccountDetails>(`${ApiPaths.Account.BASE}/${id}`, updateData);
     }
 
     deleteAccount(id: number): Observable<void> {
-        return this.http.delete<void>(`${ApiPaths.Account.ACCOUNT}/${id}`);
+        return this.http.delete<void>(`${ApiPaths.Account.BY_ID(id)}`);
     }
 
     activateAccount(id: number): Observable<AccountDetails> {
-        return this.http.post<AccountDetails>(`${ApiPaths.Account.ACCOUNT}/${id}/activate`, {});
+        return this.http.post<AccountDetails>(`${ApiPaths.Account.ACTICATE(id)}`, {});
     }
 
     deactivateAccount(id: number): Observable<AccountDetails> {
-        return this.http.post<AccountDetails>(`${ApiPaths.Account.ACCOUNT}/${id}/deactivate`, {});
+        return this.http.post<AccountDetails>(`${ApiPaths.Account.DEACTIVATE(id)}`, {});
     }
 }

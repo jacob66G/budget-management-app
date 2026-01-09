@@ -1,35 +1,35 @@
 <mat-card class="category-card">
-      <div class="card-content">
-        
-        <div class="icon-wrapper" [ngClass]="typeClass()">
-           <img [src]="category().iconPath" alt="icon" class="category-icon" 
-                onerror="this.onerror=null; this.src='/assets/icons/default-category.png'"> 
-        </div>
+  <div class="card-content">
 
-        <div class="info">
-          <span class="name">{{ category().name }}</span>
-          <span class="type-label">{{ category().type }}</span> 
-        </div>
+    <app-category-icon 
+      [iconUrl]="category().iconPath" 
+      [type]="category().type">
+    </app-category-icon>
 
-        <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Actions">
-          <mat-icon>more_vert</mat-icon>
-        </button>
-        
-        <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="edit.emit(category())">
-            <mat-icon>edit</mat-icon>
-            <span>Edit</span>
-          </button>
-          <button mat-menu-item (click)="reassign.emit(category())">
-            <mat-icon>swap_horiz</mat-icon>
-            <span>Transfer transactions</span>
-          </button>
-          @if (!category().isDefault) {
-            <button mat-menu-item class="delete-item" (click)="delete.emit(category())">
-              <mat-icon color="warn">delete</mat-icon>
-              <span class="warn-text">Delete</span>
-            </button>
-          }
-        </mat-menu>
-      </div>
-    </mat-card> 
+    <div class="info">
+      <span class="name">{{ category().name }}</span>
+      <span class="type-label">{{ category().type }}</span>
+    </div>
+
+    <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Actions">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="edit.emit(category())">
+        <mat-icon>edit</mat-icon>
+        <span>Edit</span>
+      </button>
+      <button mat-menu-item (click)="reassign.emit(category())">
+        <mat-icon>swap_horiz</mat-icon>
+        <span>Transfer transactions</span>
+      </button>
+      @if (!category().isDefault) {
+      <button mat-menu-item class="delete-item" (click)="delete.emit(category())">
+        <mat-icon color="warn">delete</mat-icon>
+        <span class="warn-text">Delete</span>
+      </button>
+      }
+    </mat-menu>
+  </div>
+</mat-card>

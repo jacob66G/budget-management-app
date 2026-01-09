@@ -18,7 +18,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
 public class CategoryController {
 
@@ -49,6 +49,7 @@ public class CategoryController {
 
         CategoryResponse response = categoryService.createCategory(userDetails.getId(), requestDto);
         return ResponseEntity.created(UriComponentsBuilder.fromPath(ApiPaths.BASE_API)
+                        .pathSegment(ApiPaths.VERSIONING)
                         .pathSegment(ApiPaths.CATEGORIES)
                         .pathSegment(String.valueOf(response.id()))
                         .build().toUri()

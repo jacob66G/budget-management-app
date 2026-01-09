@@ -18,7 +18,7 @@ import { CommonModule } from '@angular/common';
 import { AccountDetails } from '../../models/account.model';
 import { AccountActionService } from '../../services/account-actions.service';
 import { ApiErrorService } from '../../../../core/services/api-error.service';
-import { TransactionService } from '../../../transactions/services/transaction.service';
+import { TransactionService } from '../../../../core/services/transaction.service';
 import { TransactionSummary } from '../../../transactions/model/transaction-summary.model';
 import { AnalyticsService } from '../../../../core/services/analytics.service';
 import { CashFlowChartPoint, CategoryChartPoint, ChartPoint } from '../../../../core/models/analytics.model';
@@ -31,6 +31,7 @@ import { CashFlowChartComponent } from "../../../../shared/components/charts/cas
 import { ToastService } from '../../../../core/services/toast-service';
 import { AmountFormatPipe } from "../../../../shared/pipes/amount-format-pipe";
 import { ReportDialog } from '../../components/dialogs/report-dialog';
+import { CategoryIconComponent } from "../../../../shared/components/category-icon/category-icon.component/category-icon.component";
 
 @Component({
   selector: 'app-account-details',
@@ -55,7 +56,8 @@ import { ReportDialog } from '../../components/dialogs/report-dialog';
     MatNativeDateModule,
     CategorySumChartComponent,
     CashFlowChartComponent,
-    AmountFormatPipe
+    AmountFormatPipe,
+    CategoryIconComponent
 ],
   templateUrl: './account-details.html',
   styleUrl: './account-details.scss'

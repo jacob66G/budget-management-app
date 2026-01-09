@@ -25,7 +25,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     ApiPaths.Auth.RESEND_VERIFICATION,
     ApiPaths.Auth.RESET_PASSWORD_REQUEST,
     ApiPaths.Auth.RESET_PASSWORD_CONFIRM,
-    ApiPaths.ReferenceData.REFERENCE_DATA
+    ApiPaths.ReferenceData.BASE
   ]
 
   const isPublicEndpoint = excludedUrls.some(url => req.url.includes(url));

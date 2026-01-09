@@ -16,51 +16,51 @@ export class AnalyticsService {
 
     getAccountBalanceHistory(accountId: number, from: Date, to: Date): Observable<ChartPoint[]> {
         const params = this.getDateParams(from, to);
-        return this.http.get<ChartPoint[]>(`${ApiPaths.Analytics.ANALYTICS_ACCOUNT}/${accountId}/balance-history`, { params });
+        return this.http.get<ChartPoint[]>(`${ApiPaths.Analytics.Account.BALANCE_HISTORY(accountId)}`, { params });
     }
 
     getAccountCategoryBreakdown(accountId: number, from: Date, to: Date, type: string): Observable<CategoryChartPoint[]> {
         let params = this.getDateParams(from, to);
         params = params.set("type", type);
 
-        return this.http.get<CategoryChartPoint[]>(`${ApiPaths.Analytics.ANALYTICS_ACCOUNT}/${accountId}/categories`, { params });
+        return this.http.get<CategoryChartPoint[]>(`${ApiPaths.Analytics.Account.CATEGORY_BREAKDOWN(accountId)}`, { params });
     }
 
     getAccountCashFlow(accountId: number, from: Date, to: Date): Observable<CashFlowChartPoint[]> {
         const params = this.getDateParams(from, to);
 
-        return this.http.get<CashFlowChartPoint[]>(`${ApiPaths.Analytics.ANALYTICS_ACCOUNT}/${accountId}/cash-flow`, { params });
+        return this.http.get<CashFlowChartPoint[]>(`${ApiPaths.Analytics.Account.CASH_FLOW(accountId)}`, { params });
     }
 
     getGlobalBalanceHistory(from: Date, to: Date): Observable<MultiSeriesChart> {
         const params = this.getDateParams(from, to);
 
-        return this.http.get<MultiSeriesChart>(`${ApiPaths.Analytics.GLOBAL_BALANCE_HISTORY}`, { params });
+        return this.http.get<MultiSeriesChart>(`${ApiPaths.Analytics.Global.BALANCE_HISTORY}`, { params });
     }
 
     getGlobalCategoryBreakdown(from: Date, to: Date, type: string): Observable<CategoryChartPoint[]> {
         let params = this.getDateParams(from, to);
         params = params.set("type", type);
 
-        return this.http.get<CategoryChartPoint[]>(`${ApiPaths.Analytics.GLOBAL_CATEGORY_BREAKDOWN}`, { params });
+        return this.http.get<CategoryChartPoint[]>(`${ApiPaths.Analytics.Global.CATEGORY_BREAKDOWN}`, { params });
     }
 
     getGlobalCashFlow(from: Date, to: Date): Observable<CashFlowChartPoint[]> {
         const params = this.getDateParams(from, to);
 
-        return this.http.get<CashFlowChartPoint[]>(`${ApiPaths.Analytics.GLOBAL_CASH_FLOW}`, { params });
+        return this.http.get<CashFlowChartPoint[]>(`${ApiPaths.Analytics.Global.CASH_FLOW}`, { params });
     }
 
     getGlobalFinancial(from: Date, to: Date): Observable<FinancialSummaryResponse> {
         const params = this.getDateParams(from, to);
 
-        return this.http.get<FinancialSummaryResponse>(`${ApiPaths.Analytics.GLOBAL_FINANCIAL_SUMMARY}`, { params });
+        return this.http.get<FinancialSummaryResponse>(`${ApiPaths.Analytics.Global.SUMMARY}`, { params });
     }
 
     generateAccountReport(accountId: number, from: Date, to: Date): Observable<void> {
         const params = this.getDateParams(from, to);
 
-        return this.http.get<void>(`${ApiPaths.Analytics.ANALYTICS_ACCOUNT}/${accountId}/generate-report`, { params });
+        return this.http.get<void>(`${ApiPaths.Analytics.Account.REPORT(accountId)}`, { params });
     }
 
     private getDateParams(from: Date, to: Date): HttpParams {

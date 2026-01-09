@@ -8,6 +8,7 @@ import { UpcomingTransactionsTimeRange } from '../../constants/upcoming-transact
 import { Pagination } from '../../model/pagination.model';
 import { MatIconModule } from '@angular/material/icon';
 import { AmountFormatPipe } from '../../../../shared/pipes/amount-format-pipe';
+import { CategoryIconComponent } from "../../../../shared/components/category-icon/category-icon.component/category-icon.component";
 
 @Component({
   selector: 'app-upcoming-transactions',
@@ -17,8 +18,9 @@ import { AmountFormatPipe } from '../../../../shared/pipes/amount-format-pipe';
     DatePipe,
     MatButtonModule,
     MatIconModule,
-    AmountFormatPipe
-  ],
+    AmountFormatPipe,
+    CategoryIconComponent
+],
   templateUrl: './upcoming-transactions.component.html',
   styleUrl: './upcoming-transactions.component.scss'
 })

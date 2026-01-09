@@ -21,6 +21,7 @@ import { ApiErrorService } from '../../../core/services/api-error.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AmountFormatPipe } from "../../../shared/pipes/amount-format-pipe";
+import { CategoryIconComponent } from "../../../shared/components/category-icon/category-icon.component/category-icon.component";
 
 @Component({
   selector: 'app-dashboard-page',
@@ -36,7 +37,8 @@ import { AmountFormatPipe } from "../../../shared/pipes/amount-format-pipe";
     CashFlowChartComponent,
     BalanceChartComponent,
     CategorySumChartComponent,
-    AmountFormatPipe
+    AmountFormatPipe,
+    CategoryIconComponent
 ],
   templateUrl: './dashboard.page.html',
   styleUrl: './dashboard.page.scss'
@@ -147,14 +149,5 @@ export class DashboardPage implements OnInit {
 
   onViewTransactions(): void {
       this.router.navigate(['/app/transactions']);
-  }
-
-  getTypeClass(type: string): string {
-    switch (type) {
-      case 'INCOME': return 'type-income';
-      case 'EXPENSE': return 'type-expense';
-      case 'GENERAL': return 'type-general';
-      default: return '';
-    }
   }
 }

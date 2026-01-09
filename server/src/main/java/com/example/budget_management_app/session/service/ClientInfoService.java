@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import nl.basjes.parse.useragent.UserAgent;
 import nl.basjes.parse.useragent.UserAgentAnalyzer;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -34,7 +33,6 @@ public class ClientInfoService {
         UserAgent agent = userAgentAnalyzer.parse(userAgentString);
 
         String deviceClass = agent.getValue(UserAgent.DEVICE_CLASS);
-
         String deviceName = agent.getValue(UserAgent.DEVICE_NAME);
         String osName = agent.getValue(UserAgent.OPERATING_SYSTEM_NAME);
         String browserName = agent.getValue(UserAgent.AGENT_NAME);
@@ -65,17 +63,12 @@ public class ClientInfoService {
     }
 
     private DeviceType mapToDeviceType(String yauaaDeviceClass) {
-        switch (yauaaDeviceClass) {
-            case "Desktop":
-                return DeviceType.DESKTOP;
-            case "Phone":
-            case "Mobile":
-                return DeviceType.MOBILE;
-            case "Tablet":
-                return DeviceType.TABLET;
-            default:
-                return DeviceType.UNKNOWN;
-        }
+        return switch (yauaaDeviceClass) {
+            case "Desktop" -> DeviceType.DESKTOP;
+            case "Phone", "Mobile" -> DeviceType.MOBILE;
+            case "Tablet" -> DeviceType.TABLET;
+            default -> DeviceType.UNKNOWN;
+        };
     }
 
     private String formatDeviceInfo(DeviceType type, String deviceName, String osName, String browserName) {

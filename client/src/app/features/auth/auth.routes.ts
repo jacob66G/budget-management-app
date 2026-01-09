@@ -1,7 +1,12 @@
 import { Routes } from "@angular/router";
 
 export const AUTH_ROUTES: Routes = [
-    {
+  {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full'
+  },
+  {
     path: 'login/2fa',
     loadComponent: () =>
       import('./pages/login2fa/login2fa').then((m) => m.Login2fa),
@@ -11,8 +16,7 @@ export const AUTH_ROUTES: Routes = [
     path: 'login',
     loadComponent: () =>
       import('./pages/login/login').then((m) => m.Login),
-    title: 'Login',
-    pathMatch: 'full'
+    title: 'Login'
   },
   {
     path: 'register',
@@ -29,7 +33,7 @@ export const AUTH_ROUTES: Routes = [
   {
     path: 'verifi-pending',
     loadComponent: () =>
-        import('./pages/verification-email-sent/verification-email-sent').then((m) => m.VerificationEmailSent),
+      import('./pages/verification-email-sent/verification-email-sent').then((m) => m.VerificationEmailSent),
     title: 'Verification Email'
   },
   {

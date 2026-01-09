@@ -12,7 +12,6 @@ const WEBSOCKET_URL = 'http://localhost:8080/ws';
 export class WebSocketService {
     private authService = inject(AuthService);
     private client: Client;
-    private isConnected = false;
     private notificationSubject = new Subject<any>();
     public notification$ = this.notificationSubject.asObservable();
 
@@ -22,21 +21,13 @@ export class WebSocketService {
             reconnectDelay: 5000,
         });
 
-        this.client.onConnect = (frame) => {
-            this.isConnected = true;
-            console.log('WebSocket Connected:', frame);
-
+        this.client.onConnect = () => {
             this.client.subscribe('/user/queue/notifications', (message: Message) => {
                 if (message.body) {
                     const notification = JSON.parse(message.body);
                     this.notificationSubject.next(notification);
                 }
             });
-        };
-
-        this.client.onStompError = (frame) => {
-            console.error('Broker reported error: ' + frame.headers['message']);
-            console.error('Additional details: ' + frame.body);
         };
     }
 
@@ -56,8 +47,6 @@ export class WebSocketService {
     public disconnect(): void {
         if (this.client.active) {
             this.client.deactivate();
-            this.isConnected = false;
-            console.log('WebSocket Disconnected');
         }
     }
 }

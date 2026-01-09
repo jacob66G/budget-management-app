@@ -1,8 +1,8 @@
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { ApiPaths } from '../../../constans/api-paths';
-import { IS_S3_REQUEST } from '../../../core/tokens/tokens';
+import { ApiPaths } from '../../constans/api-paths';
+import { IS_S3_REQUEST } from '../tokens/tokens';
 
 export interface ReceiptUploadUrlRequest {
   fileName: string,

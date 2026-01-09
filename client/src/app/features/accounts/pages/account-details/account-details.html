@@ -106,14 +106,8 @@
           @if (lastTransactions() && lastTransactions()?.length) {
           @for (tx of lastTransactions(); track tx.id) {
           <div class="transaction-item">
-
-            <div class="tx-icon-wrapper">
-              @if (tx.category.iconKey) {
-              <img [src]="tx.category.iconKey" alt="icon" class="tx-icon-img">
-              } @else {
-              <mat-icon>category</mat-icon>
-              }
-            </div>
+            <app-category-icon [iconUrl]="tx.category.iconKey" [type]="tx.type">
+            </app-category-icon>
 
             <div class="tx-info">
               <div class="tx-title">{{ tx.title }}</div>

@@ -17,22 +17,22 @@ export class CategoryService {
             params = new HttpParams().set('type', type);
         }
 
-        return this.http.get<Category[]>(ApiPaths.Categories.CATEGORIES, { params });
+        return this.http.get<Category[]>(ApiPaths.Categories.BASE, { params });
     }
 
     public createCategory(data: UpdateCategory): Observable<Category> {
-        return this.http.post<Category>(ApiPaths.Categories.CATEGORIES, data);
+        return this.http.post<Category>(ApiPaths.Categories.BASE, data);
     }
 
     public updateCategory(id: number, data: UpdateCategory): Observable<Category> {
-        return this.http.patch<Category>(`${ApiPaths.Categories.CATEGORIES}/${id}`, data);
+        return this.http.patch<Category>(`${ApiPaths.Categories.BY_ID(id)}`, data);
     }
 
     public deleteCategory(id: number): Observable<void> {
-        return this.http.delete<void>(`${ApiPaths.Categories.CATEGORIES}/${id}`);
+        return this.http.delete<void>(`${ApiPaths.Categories.BY_ID(id)}`);
     }
 
      public reassignCategory(oldId: number, newId: number): Observable<void> {
-        return this.http.post<void>(`${ApiPaths.Categories.CATEGORIES}/${oldId}/reassign`, {newCategoryId: newId});
+        return this.http.post<void>(`${ApiPaths.Categories.REASSIGN(oldId)}`, {newCategoryId: newId});
     }
 }

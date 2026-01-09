@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { catchError, concatMap, lastValueFrom, map, Observable, of, tap } from 'rxjs';
-import { AttachmentViewResponse, TransactionAttachmentService } from './transaction-attachment.service';
+import { AttachmentViewResponse, TransactionAttachmentService } from '../../../core/services/transaction-attachment.service';
 import { TransactionAttachmentStore } from './transaction-attachment-store.service';
 
 @Injectable({

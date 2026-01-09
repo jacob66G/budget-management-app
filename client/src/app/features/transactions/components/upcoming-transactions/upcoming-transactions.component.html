@@ -37,10 +37,10 @@
       <div class="transaction-card">
         
         <div class="icon-box" >
-          <div class="icon-wrapper"  [class.type-income]="isIncome(t)" [class.type-expense]="!isIncome(t)">
-              <img [src]="t.categorySummary.iconKey" alt="icon" class="category-icon" 
-                onerror="this.onerror=null; this.src='/assets/icons/default-category.png'"> 
-            </div>
+          <app-category-icon 
+            [iconUrl]="t.categorySummary.iconKey" 
+            [type]="t.type">
+          </app-category-icon>
         </div>
 
         <div class="details-section">

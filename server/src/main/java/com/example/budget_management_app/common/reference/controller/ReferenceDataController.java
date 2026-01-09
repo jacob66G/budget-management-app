@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/reference-data")
+@RequestMapping("/api/v1/reference-data")
 @RequiredArgsConstructor
 public class ReferenceDataController {
 

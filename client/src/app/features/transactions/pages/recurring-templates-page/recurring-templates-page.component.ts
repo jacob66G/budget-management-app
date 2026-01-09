@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AmountFormatPipe } from '../../../../shared/pipes/amount-format-pipe';
-import { TransactionService } from '../../services/transaction.service';
+import { TransactionService } from '../../../../core/services/transaction.service';
 import { Pagination } from '../../model/pagination.model';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDivider } from "@angular/material/divider";
@@ -24,6 +24,7 @@ import { RecurringTransactionCreateRequest } from '../../model/recurring-templat
 import { RecurringTemplateMapper } from '../../mappers/recurring-template.mapper';
 import { AccountService } from '../../../../core/services/account.service';
 import { CategoryService } from '../../../../core/services/category.service';
+import { CategoryIconComponent } from "../../../../shared/components/category-icon/category-icon.component/category-icon.component";
 
 @Component({
   selector: 'app-recurring-templates-page',
@@ -36,7 +37,8 @@ import { CategoryService } from '../../../../core/services/category.service';
     MatButtonModule,
     AmountFormatPipe,
     MatProgressSpinnerModule,
-    MatDivider
+    MatDivider,
+    CategoryIconComponent
 ],
   templateUrl: './recurring-templates-page.component.html',
   styleUrl: './recurring-templates-page.component.scss'

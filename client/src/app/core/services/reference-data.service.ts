@@ -17,7 +17,7 @@ export class ReferenceDataService {
     loadData(): Observable<void> {
     if (this.data()) return of(void 0);
 
-    return this.http.get<ReferenceData>(ApiPaths.ReferenceData.REFERENCE_DATA).pipe(
+    return this.http.get<ReferenceData>(ApiPaths.ReferenceData.BASE).pipe(
       tap(response => this.data.set(response)),
       map(() => void 0)
     );

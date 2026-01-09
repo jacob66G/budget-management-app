@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ChatMessage } from '../../models/chat-message.model';
-import { ChatService } from '../../services/chat.service';
+import { ChatService } from '../../../../core/services/chat.service';
 import { MessageType } from '../../models/message-type.enum';
 import { ChatCreateResponse } from '../../models/chat-create-response.model';
 import { MarkdownToHtmlPipe } from '../../pipes/markdown-to-html-pipe';

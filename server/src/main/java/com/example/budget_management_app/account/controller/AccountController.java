@@ -14,7 +14,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/accounts")
+@RequestMapping("/api/v1/accounts")
 @RequiredArgsConstructor
 public class AccountController {
 
@@ -40,6 +40,7 @@ public class AccountController {
     ) {
         AccountDetailsResponse response = accountService.createAccount(userDetails.getId(), dto);
         return ResponseEntity.created(UriComponentsBuilder.fromPath(ApiPaths.BASE_API)
+                        .pathSegment(ApiPaths.VERSIONING)
                         .pathSegment(ApiPaths.ACCOUNTS)
                         .pathSegment(String.valueOf(response.id()))
                         .build().toUri()

@@ -154,10 +154,10 @@
       <div class="transactions-list">
         @for (tx of d.recentTransactions; track $index) {
         <div class="transaction-item">
-          <div class="tx-icon-wrapper" [ngClass]="getTypeClass(tx.type)">
-            <img [src]="tx.categoryIconPath" class="tx-icon-img" onerror="this.style.display='none'">
-            <mat-icon class="fallback-icon">category</mat-icon>
-          </div>
+          <app-category-icon 
+            [iconUrl]="tx.categoryIconPath"
+            [type]="tx.type">
+          </app-category-icon>
 
           <div class="tx-info">
             <div class="tx-title">{{ tx.title }}</div>

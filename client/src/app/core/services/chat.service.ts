@@ -1,9 +1,9 @@
 import { HttpClient, httpResource } from '@angular/common/http';
-import { ElementRef, inject, Injectable, signal, viewChild } from '@angular/core';
-import { Observable, single } from 'rxjs';
-import { ChatCreateResponse } from '../models/chat-create-response.model';
-import { ApiPaths } from '../../../constans/api-paths';
-import { ChatMessage } from '../models/chat-message.model';
+import { inject, Injectable, signal } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ChatCreateResponse } from '../../features/assistant/models/chat-create-response.model';
+import { ApiPaths } from '../../constans/api-paths';
+import { ChatMessage } from '../../features/assistant/models/chat-message.model';
 
 @Injectable({
   providedIn: 'root'
@@ -15,16 +15,16 @@ export class ChatService {
   selectedChatId = signal<string | undefined>(undefined);
 
   createNewChat(message: string): Observable<ChatCreateResponse> {
-    return this.http.post<ChatCreateResponse>(ApiPaths.CHATS, {message})
+    return this.http.post<ChatCreateResponse>(ApiPaths.Chats.BASE, {message})
   }
 
   continueChat(chatId: string, message: string): Observable<ChatMessage> {
-    return this.http.post<ChatMessage>(`${ApiPaths.CHATS}/${chatId}`, {message});
+    return this.http.post<ChatMessage>(`${ApiPaths.Chats.BY_ID(Number(chatId))}`, {message});
   }
 
   chatMessagesResource = httpResource<ChatMessage[]>(() => {
     const chatId = this.selectedChatId();
-    return chatId ? `${ApiPaths.CHATS}/${chatId}` : undefined;
+    return chatId ? `${ApiPaths.Chats.BY_ID(Number(chatId))}` : undefined;
   });
 
   selectChat(chatId: string): void {

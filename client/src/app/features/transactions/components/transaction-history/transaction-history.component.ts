@@ -9,6 +9,7 @@ import { Pagination } from '../../model/pagination.model';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDivider } from "@angular/material/divider";
 import { AmountFormatPipe } from '../../../../shared/pipes/amount-format-pipe';
+import { CategoryIconComponent } from "../../../../shared/components/category-icon/category-icon.component/category-icon.component";
 
 @Component({
   selector: 'app-transaction-history',
@@ -21,8 +22,9 @@ import { AmountFormatPipe } from '../../../../shared/pipes/amount-format-pipe';
     DatePipe,
     MatTooltipModule,
     MatDivider,
-    AmountFormatPipe
-  ],
+    AmountFormatPipe,
+    CategoryIconComponent
+],
   templateUrl: './transaction-history.component.html',
   styleUrl: './transaction-history.component.scss'
 })

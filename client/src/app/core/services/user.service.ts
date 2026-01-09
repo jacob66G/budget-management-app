@@ -5,7 +5,6 @@ import { User } from "../models/user.model";
 import { Observable } from "rxjs";
 import { ApiPaths } from "../../constans/api-paths";
 import { ResponseMessage } from "../models/response-message.model";
-import { A } from "@angular/cdk/keycodes";
 
 @Injectable({
   providedIn: 'root'
@@ -23,15 +22,15 @@ export class UserService {
   }
 
   tfaDisable(tfaVerifyData: TfaVerifyRequest): Observable<void> {
-    return this.http.post<void>(ApiPaths.User.TFA_DISABLE, tfaVerifyData);
+    return this.http.post<void>(ApiPaths.User.Tfa.DISABLE, tfaVerifyData);
   }
 
   verifyTfaSetup(tfaVerifyData: TfaVerifyRequest): Observable<void> {
-    return this.http.post<void>(ApiPaths.User.TFA_VERIFY, tfaVerifyData);
+    return this.http.post<void>(ApiPaths.User.Tfa.VERIFY, tfaVerifyData);
   }
 
   tfaSetup(): Observable<TfaQRCode> {
-    return this.http.get<TfaQRCode>(ApiPaths.User.TFA_SETUP);
+    return this.http.get<TfaQRCode>(ApiPaths.User.Tfa.SETUP);
   }
 
   closeAccount(): Observable<ResponseMessage> {

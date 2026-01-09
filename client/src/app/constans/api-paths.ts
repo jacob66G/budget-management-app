@@ -1,98 +1,95 @@
 export class ApiPaths {
-    public static readonly BASE_URL = 'http://localhost:4200';
-    public static readonly BASE_API = '/api';
-    public static readonly AUTH = '/api/auth';
-    public static readonly REGISTER = '/api/auth/register';
-    public static readonly LOGIN = '/api/auth/login';
-    public static readonly LOGIN_2FA = '/api/auth/login/2fa';
-    public static readonly REFRESH_TOKEN = '/api/auth/refresh';
-    public static readonly LOGOUT = '/api/auth/logout';
-    public static readonly VERIFY_EMAIL = '/api/auth/verify';
-    public static readonly RESEND_VERIFICATION_EMAIL = '/api/auth/resend-verification';
-    public static readonly RESET_PASSWORD = '/api/auth/password-reset-request';
-    public static readonly REST_PASSWORD_CONFIRM = '/api/auth/password-reset-confirm';
+  private static readonly API_ROOT = '/api';
+  
+  private static readonly API_V1 = `${ApiPaths.API_ROOT}/v1`;
 
-    // chat
-    public static readonly CHATS = '/api/v1/chats';
+  public static readonly Auth = {
+    BASE: `${ApiPaths.API_V1}/auth`,
+    LOGIN: `${ApiPaths.API_V1}/auth/login`,
+    LOGIN_2FA: `${ApiPaths.API_V1}/auth/login/2fa`,
+    REGISTER: `${ApiPaths.API_V1}/auth/register`,
+    REFRESH_TOKEN: `${ApiPaths.API_V1}/auth/refresh`,
+    LOGOUT: `${ApiPaths.API_V1}/auth/logout`,
+    VERIFY_EMAIL: `${ApiPaths.API_V1}/auth/verify`,
+    RESEND_VERIFICATION: `${ApiPaths.API_V1}/auth/resend-verification`,
+    RESET_PASSWORD_REQUEST: `${ApiPaths.API_V1}/auth/password-reset-request`,
+    RESET_PASSWORD_CONFIRM: `${ApiPaths.API_V1}/auth/password-reset-confirm`,
+  };
 
-    // recurring transactions
-    public static readonly RECURRING_TEMPLATES = '/api/v1/recurring-transactions';
-
-    private static readonly API = '/api';
-    private static readonly VERSION = 'v1'
-
-        // transactions
-    public static readonly TRANSACTIONS = `${ApiPaths.API}/${ApiPaths.VERSION}/transactions`;
-
-    public static readonly AUTH_BASE = `${ApiPaths.API}/auth`;
-    public static readonly USERS_BASE = `${ApiPaths.API}/users`;
-    public static readonly ACCOUNT_BASE = `${ApiPaths.API}/accounts`;
-    public static readonly ANALYTICS_ACCOUNT_BASE = `${ApiPaths.API}/analytics/accounts`;
-    public static readonly ANALYTICS_GLOBAL_BASE = `${ApiPaths.API}/analytics/global`;
-    public static readonly REFERENCE_DATA_BASE = `${ApiPaths.API}/reference-data`;
-    public static readonly CATEGORIES_BASE = `${ApiPaths.API}/categories`;
-    public static readonly NOTIFICATIONS_BASE = `${ApiPaths.API}/notifications`;
-
-    public static readonly Auth = {
-        LOGIN: `${ApiPaths.AUTH_BASE}/login`,
-        LOGIN_2FA: `${ApiPaths.AUTH_BASE}/login/2fa`,
-        REGISTER: `${ApiPaths.AUTH_BASE}/register`,
-        REFRESH_TOKEN: `${ApiPaths.AUTH_BASE}/refresh`,
-        LOGOUT: `${ApiPaths.AUTH_BASE}/logout`,
-        VERIFY_EMAIL: `${ApiPaths.AUTH_BASE}/verify`,
-        RESEND_VERIFICATION: `${ApiPaths.AUTH_BASE}/resend-verification`,
-        RESET_PASSWORD_REQUEST: `${ApiPaths.AUTH_BASE}/password-reset-request`,
-        RESET_PASSWORD_CONFIRM: `${ApiPaths.AUTH_BASE}/password-reset-confirm`,
-    };
-
-    public static readonly User = {
-        ME: `${ApiPaths.USERS_BASE}/me`,
-
-        CHANGE_PASSWORD: `${ApiPaths.USERS_BASE}/me/change-password`,
-        CLOSE_ACCOUNT: `${ApiPaths.USERS_BASE}/me/close-account`,
-
-        TFA_SETUP: `${ApiPaths.USERS_BASE}/me/2fa/setup`,
-        TFA_VERIFY: `${ApiPaths.USERS_BASE}/me/2fa/verify`,
-        TFA_DISABLE: `${ApiPaths.USERS_BASE}/me/2fa/disable`,
-
-        SESSIONS: `${ApiPaths.USERS_BASE}/me/sessions`,
-    };
-
-    public static readonly Account = {
-        ACCOUNT: `${ApiPaths.ACCOUNT_BASE}`,
+  public static readonly User = {
+    BASE: `${ApiPaths.API_V1}/users`,
+    ME: `${ApiPaths.API_V1}/users/me`,
+    CHANGE_PASSWORD: `${ApiPaths.API_V1}/users/me/change-password`,
+    CLOSE_ACCOUNT: `${ApiPaths.API_V1}/users/me/close-account`,
+    SESSIONS: `${ApiPaths.API_V1}/users/me/sessions`,
+    
+    Tfa: {
+      SETUP: `${ApiPaths.API_V1}/users/me/2fa/setup`,
+      VERIFY: `${ApiPaths.API_V1}/users/me/2fa/verify`,
+      DISABLE: `${ApiPaths.API_V1}/users/me/2fa/disable`,
     }
+  };
 
-    public static readonly Analytics = {
-        ANALYTICS_ACCOUNT: `${ApiPaths.ANALYTICS_ACCOUNT_BASE}`,
-        GLOBAL_FINANCIAL_SUMMARY: `${ApiPaths.ANALYTICS_GLOBAL_BASE}/summary`,
-        GLOBAL_BALANCE_HISTORY: `${ApiPaths.ANALYTICS_GLOBAL_BASE}/balance-history`,
-        GLOBAL_CATEGORY_BREAKDOWN: `${ApiPaths.ANALYTICS_GLOBAL_BASE}/categories`,
-        GLOBAL_CASH_FLOW: `${ApiPaths.ANALYTICS_GLOBAL_BASE}/cash-flow`
+  public static readonly Account = {
+    BASE: `${ApiPaths.API_V1}/accounts`,
+    BY_ID: (id: number) => `${ApiPaths.API_V1}/accounts/${id}`,
+    ACTICATE: (id: number) => `${ApiPaths.API_V1}/accounts/${id}/activate`,
+    DEACTIVATE: (id: number) => `${ApiPaths.API_V1}/accounts/${id}/deactivate`,
+  };
+
+  public static readonly Transactions = {
+    BASE: `${ApiPaths.API_V1}/transactions`,
+    BY_ID: (id: number) => `${ApiPaths.API_V1}/transactions/${id}`,
+    Attachments: {
+      INIT_UPLOAD: (id: number) => `${ApiPaths.API_V1}/transactions/${id}/attachment/presigned-upload-url`,
+      CONFIRM_UPLOAD: (id: number) => `${ApiPaths.API_V1}/transactions/${id}/attachment`,
+      GET_DOWNLOAD_URL: (id: number) => `${ApiPaths.API_V1}/transactions/${id}/attachment`,
     }
+  };
 
-    public static readonly ReferenceData = {
-        REFERENCE_DATA: `${ApiPaths.REFERENCE_DATA_BASE}`
+  public static readonly RecurringTemplates = {
+    BASE: `${ApiPaths.API_V1}/recurring-transactions`,
+    BY_ID: (id: number) => `${ApiPaths.API_V1}/recurring-transactions/${id}`,
+    STATUS: (id: number) => `${ApiPaths.API_V1}/recurring-transactions/${id}/status`,
+    UPPCOMMING: `${ApiPaths.API_V1}/recurring-transactions/upcoming`,
+  };
+
+  public static readonly Chats = {
+    BASE: `${ApiPaths.API_V1}/chats`,
+    BY_ID: (id: number) => `${ApiPaths.API_V1}/chats/${id}`,
+  };
+
+  public static readonly Analytics = {
+    Account: {
+      BASE: `${ApiPaths.API_V1}/analytics/accounts`,
+      BALANCE_HISTORY: (id: number) => `${ApiPaths.API_V1}/analytics/accounts/${id}/balance-history`,
+      CATEGORY_BREAKDOWN: (id: number) => `${ApiPaths.API_V1}/analytics/accounts/${id}/categories`,
+      CASH_FLOW: (id: number)  => `${ApiPaths.API_V1}/analytics/accounts/${id}/cash-flow`,
+      REPORT: (id: number) => `${ApiPaths.API_V1}/analytics/accounts/${id}/generate-report`,
+    },
+    Global: {
+      BASE: `${ApiPaths.API_V1}/analytics/global`,
+      SUMMARY: `${ApiPaths.API_V1}/analytics/global/summary`,
+      BALANCE_HISTORY: `${ApiPaths.API_V1}/analytics/global/balance-history`,
+      CATEGORY_BREAKDOWN: `${ApiPaths.API_V1}/analytics/global/categories`,
+      CASH_FLOW: `${ApiPaths.API_V1}/analytics/global/cash-flow`,
     }
+  };
 
-    public static readonly Categories = {
-        CATEGORIES: `${ApiPaths.CATEGORIES_BASE}`
-    }
+  public static readonly Categories = {
+    BASE: `${ApiPaths.API_V1}/categories`,
+    BY_ID: (id: number) => `${ApiPaths.API_V1}/categories/${id}`,
+    REASSIGN: (id: number) => `${ApiPaths.API_V1}/categories/${id}/reassign`,
+  };
 
-    public static readonly Notifications = {
-        UNREAD_NOTIFICATIONS: `${ApiPaths.NOTIFICATIONS_BASE}/unread`,
-        MARK_AS_READ: (id: number) => `${ApiPaths.NOTIFICATIONS_BASE}/${id}/mark-as-read`,
-        MARK_ALL_AS_READ: `${ApiPaths.NOTIFICATIONS_BASE}/mark-as-read`
-    }
+  public static readonly ReferenceData = {
+    BASE: `${ApiPaths.API_V1}/reference-data`,
+  };
 
-    public static readonly Transactions = {
-        BASE: ApiPaths.TRANSACTIONS,
-
-        BY_ID: (id: number) => `${ApiPaths.TRANSACTIONS}/${id}`,
-
-        Attachments: {
-            INIT_UPLOAD: (transactionId: number) => `${ApiPaths.TRANSACTIONS}/${transactionId}/attachment/presigned-upload-url`,
-            CONFIRM_UPLOAD: (transactionId: number) => `${ApiPaths.TRANSACTIONS}/${transactionId}/attachment`,
-            GET_DOWNLOAD_URL: (transactionId: number) => `${ApiPaths.TRANSACTIONS}/${transactionId}/attachment`
-        }
-    }
+  public static readonly Notifications = {
+    BASE: `${ApiPaths.API_V1}/notifications`,
+    UNREAD: `${ApiPaths.API_V1}/notifications/unread`,
+    MARK_ALL_READ: `${ApiPaths.API_V1}/notifications/mark-as-read`,
+    MARK_ONE_READ: (id: number) => `${ApiPaths.API_V1}/notifications/${id}/mark-as-read`,
+  };
 }

@@ -29,7 +29,7 @@ export class NotificationService {
   }
 
   public loadUnreadNotifications(): void {
-    this.http.get<NotificationDto[]>(ApiPaths.Notifications.UNREAD_NOTIFICATIONS).subscribe(data => {
+    this.http.get<NotificationDto[]>(ApiPaths.Notifications.UNREAD).subscribe(data => {
       this.notifications.set(data);
       this.updateUnreadCount();
     });
@@ -53,7 +53,7 @@ export class NotificationService {
 
 
   markAsRead(id: number): void {
-    this.http.post(ApiPaths.Notifications.MARK_AS_READ(id), {}).subscribe(() => {
+    this.http.post(ApiPaths.Notifications.MARK_ONE_READ(id), {}).subscribe(() => {
       this.notifications.update(current => current.map(n => {
         if (n.id === id) {
           return { ...n, isRead: true };
@@ -65,7 +65,7 @@ export class NotificationService {
   }
 
   markAllAsRead(): void {
-    this.http.post(ApiPaths.Notifications.MARK_ALL_AS_READ, {}).subscribe(() => {
+    this.http.post(ApiPaths.Notifications.MARK_ALL_READ, {}).subscribe(() => {
       this.notifications.update(current => current.map(n => ({
         ...n,
         isRead: true

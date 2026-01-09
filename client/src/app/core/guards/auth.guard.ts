@@ -10,8 +10,11 @@ export const AuthGuard: CanActivateFn = (route, state) => {
   return authService.checkAuth().pipe(
     map(isAuthenticated => {
       if (isAuthenticated) {
+                console.log('Not authenticated, redirecting to login');
+
         return true;
       } else {
+        console.log('Not authenticated, redirecting to login');
         return router.createUrlTree(['/login']);
       }
     })

@@ -13,31 +13,6 @@
   gap: 16px;
 }
 
-.icon-wrapper {
-  width: 54px; height: 54px;
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  background-color: var(--default-light-gray);
-}
-
-.icon-wrapper.type-expense {
-  background-color: var(--default-light-red);
-  border: 1px solid #ffcdd2;
-}
-
-.icon-wrapper.type-income {
-  background-color: var(--default-light-green);
-  border: 1px solid #c8e6c9;
-}
-
-.icon-wrapper.type-general {
-  background-color: var(--default-light-gray);
-  border: 1px solid #e0e0e0;
-}
-
-.category-icon { width: 34px; height: 34px; object-fit: contain; }
-
 .info {
   flex-grow: 1;
   display: flex;
