@@ -19,8 +19,8 @@
   align-items: center;
 
   h3 {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 20px;
+    font-weight: 550;
     color: #111827;
     margin: 0 0 6px 0;
   }
@@ -40,6 +40,7 @@
 
 .transaction-card {
   display: flex;
+  gap: 15px;
   align-items: center;
   background: #fff;
   border: 1px solid #dadbdd;
@@ -115,12 +116,12 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 7px;
   overflow: hidden;
 }
 
 .note-row {
-  font-size: 13px !important;
+  font-size: 14px !important;
   color: #515661 !important;
   margin-top: 6px !important;
   white-space: nowrap;
@@ -135,8 +136,8 @@
   gap: 8px;
 
   .transaction-title {
-    font-weight: 600;
-    font-size: 17px;
+    font-weight: 550;
+    font-size: 18px;
     color: #111827;
     white-space: nowrap;
     overflow: hidden;

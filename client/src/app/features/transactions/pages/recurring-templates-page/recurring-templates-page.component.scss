@@ -15,10 +15,10 @@
 
   .header-text {
     h1 {
-      font-size: 28px;
-      font-weight: 700;
+      font-size: 2rem;
+      font-weight: 500;
       margin: 0 0 8px 0;
-      color: #111;
+      color: var(--default-dark-gray);
     }
     p {
       color: #6b7280;
@@ -29,8 +29,8 @@
 
   .back-btn {
     height: 48px;
-    border-radius: 12px !important;
-    font-size: 16px;
+    border-radius: 24px !important;
+    font-size: 1rem;
     font-weight: 500;
     background-color: #fff;
     border: 2px solid #e5e7eb;
@@ -55,10 +55,10 @@
   .new-template-btn {
     
     height: 48px;
-    border-radius: 12px !important;
+    border-radius: 24px !important;
     background-color: var(--primary-color);
     color: white;
-    font-size: 16px;
+    font-size: 1rem;
     padding: 0 24px !important;
     border-radius: 12px;
     font-weight: 500;
@@ -76,7 +76,7 @@
   margin-bottom: 24px;
   h3 {
     font-size: 20px;
-    font-weight: 600;
+    font-weight: 550;
     margin: 0 0 8px 0;
   }
   p {
@@ -163,8 +163,8 @@
         gap: 5px;
 
         .t-title {
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 19px;
+            font-weight: 550;
             color: #111;
             letter-spacing: 0.6px;
         }
@@ -228,8 +228,8 @@
             font-weight: 500;
         }
         .date-val {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 18px;
+            font-weight: 550;
             color: #000000;
             letter-spacing: 0.6px;
         }
