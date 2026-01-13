@@ -14,6 +14,9 @@ import { TransactionCategoryChangeResponse } from '../../features/transactions/m
 import { RecurringTemplateSummary } from '../../features/transactions/model/recurring-template-summary.model';
 import { RecurringTransactionCreateRequest } from '../../features/transactions/model/recurring-template-create-request.model';
 import { RecurringTransactionCreateResponse } from '../../features/transactions/model/recurring-template-create-response.model';
+import { RecurringTemplateUpdateRequest } from '../../features/transactions/model/recurring-template-update-request.model';
+import { UpdateRange } from '../../features/transactions/constants/update-range.enum';
+import { RemovalRange } from '../../features/transactions/constants/removal-range.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -43,6 +46,18 @@ export class TransactionService {
 
   createRecurringTemplate(templateData: RecurringTransactionCreateRequest): Observable<RecurringTransactionCreateResponse> {
     return this.http.post<RecurringTransactionCreateResponse>(ApiPaths.RecurringTemplates.BASE, templateData);
+  }
+
+  updateRecurringTemplate(id: number, request: RecurringTemplateUpdateRequest, updateRange: UpdateRange): Observable<void> {
+    const url = ApiPaths.RecurringTemplates.BY_ID(id);
+    const params = new HttpParams().set('range', updateRange);
+    return this.http.patch<void>(url, request, {params: params});
+  }
+
+  deleteRecurringTemplate(id: number, removalRange: RemovalRange): Observable<void> {
+    const url = ApiPaths.RecurringTemplates.BY_ID(id);
+    const params = new HttpParams().set('range', removalRange);
+    return this.http.delete<void>(url, {params: params});
   }
 
   deleteTransaction(id: number): Observable<void> {

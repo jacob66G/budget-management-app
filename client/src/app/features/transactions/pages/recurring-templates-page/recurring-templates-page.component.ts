@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { UpdateRecurringTemplateDialogComponent } from '../../components/update-recurring-template-dialog/update-recurring-template-dialog.component';
 import { TransactionType } from '../../constants/transaction-type.enum';
 import { RecurringInterval } from '../../constants/recurring-interval.enum';
 import { RecurringTemplateSummary } from '../../model/recurring-template-summary.model';
@@ -25,6 +26,10 @@ import { RecurringTemplateMapper } from '../../mappers/recurring-template.mapper
 import { AccountService } from '../../../../core/services/account.service';
 import { CategoryService } from '../../../../core/services/category.service';
 import { CategoryIconComponent } from "../../../../shared/components/category-icon/category-icon.component/category-icon.component";
+import { RecurringTemplateUpdateRequest } from '../../model/recurring-template-update-request.model';
+import { UpdateRange } from '../../constants/update-range.enum';
+import { ConfirmDialog } from '../../../../shared/components/dialogs/confirm-dialog/confirm-dialog';
+import { RemovalRange } from '../../constants/removal-range.enum';
 
 @Component({
   selector: 'app-recurring-templates-page',
@@ -112,6 +117,7 @@ export class RecurringTemplatesPageComponent implements OnInit{
 
     const dialogRef = this.dialog.open(AddRecurringTemplateDialogComponent, {
       width: '600px',
+      maxHeight: '85vh',
       data: {
         accounts: this.accounts,
         categories: this.categories
@@ -135,6 +141,38 @@ export class RecurringTemplatesPageComponent implements OnInit{
   }
 
   onEditTemplate(template: RecurringTemplateSummary) {
+    const dialogRef = this.dialog.open(UpdateRecurringTemplateDialogComponent, {
+      width: '500px',
+      maxHeight: '90vh',
+      data: template
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {        
+        const updateRequest: RecurringTemplateUpdateRequest = {
+          title: result.title,
+          amount: result.amount,
+          description: result.description
+        };
+
+        this.transactionService.updateRecurringTemplate(result.id, updateRequest, UpdateRange.FUTURE).subscribe({
+          next: () => {
+            this.loadTemplates();
+            this.snackBar.open('Template updated successfully', 'Close', {
+              duration: 3000
+            });
+          },
+          error: (error) => {
+            console.error("Error occurred when updating template: ", error);
+            this.snackBar.open('Failed to update template', 'Close', {
+              duration: 3000,
+              panelClass: ['error-snackbar']
+            });
+          }
+        });
+      }
+    });
+
   }
 
   onChangeStatus(template: RecurringTemplateSummary) {
@@ -160,6 +198,40 @@ export class RecurringTemplatesPageComponent implements OnInit{
   }
 
   onDeleteTemplate(template: RecurringTemplateSummary) {
+        const dialogRef = this.dialog.open(ConfirmDialog, {
+          width: '400px',
+          data: {
+            title: 'Delete Recurring Template',
+            message: 'Are you sure you want to delete this template? This action cannot be undone.',
+            confirmButtonText: 'Delete',
+            confirmButtonColor: 'warn'
+          }
+        });
+    
+        dialogRef.afterClosed().subscribe((result: boolean) => {
+    
+          if (result === true) {
+    
+            this.transactionService.deleteRecurringTemplate(template.id, RemovalRange.TEMPLATE).subscribe({
+    
+              next: () => {
+                this.loadTemplates();
+    
+                this.snackBar.open('Transaction deleted successfully', 'Close', {
+                  duration: 3000
+                });
+              },
+    
+              error: (err) => {
+                console.error('Error deleting transaction', err);
+                this.snackBar.open('Failed to delete transaction', 'Close', {
+                  duration: 3000,
+                  panelClass: ['error-snackbar']
+                });
+              }
+            });
+          }
+        });
   }
 
   private loadCategories(): void {

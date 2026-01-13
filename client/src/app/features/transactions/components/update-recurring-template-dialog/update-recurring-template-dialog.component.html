@@ -1,0 +1,65 @@
+<div class="dialog-container">
+  
+  <div class="dialog-header">
+    <div class="header-content">
+      <h2 class="title">Edit Template</h2>
+      <p class="subtitle">Update recurring transaction details</p>
+    </div>
+    <button mat-icon-button (click)="onCancel()" class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <mat-dialog-content>
+    <form [formGroup]="updateTemplateForm" class="custom-form">
+
+      <h3 class="section-header">GENERAL</h3>
+
+      <div class="input-group">
+        <label class="custom-label">Template Title</label>
+        <mat-form-field appearance="outline" class="no-label-field">
+          <input matInput formControlName="title" placeholder="e.g., Salary Payment">
+        </mat-form-field>
+      </div>
+
+      <div class="input-group">
+        <label class="custom-label">Amount</label>
+        <mat-form-field appearance="outline" class="no-label-field short">
+          <input matInput type="number" formControlName="amount">
+        </mat-form-field>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <h3 class="section-header spacer-top">DETAILS</h3>
+
+      <div class="input-group">
+        <label class="custom-label">Description</label>
+        <mat-form-field appearance="outline" class="no-label-field">
+          <textarea 
+            matInput 
+            formControlName="description" 
+            placeholder="Optional notes about this template"
+            rows="3"></textarea>
+        </mat-form-field>
+      </div>
+
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-footer">
+    <button mat-button class="btn-secondary" (click)="onCancel()">Cancel</button>
+    <button mat-button class="btn-secondary" (click)="onReset()">Reset</button>
+    <button 
+      mat-flat-button 
+      color="primary" 
+      class="btn-primary" 
+      (click)="onSubmit()" 
+      [disabled]="updateTemplateForm.invalid || updateTemplateForm.pristine">
+      Save Changes
+    </button>
+  </mat-dialog-actions>
+
+</div>
