@@ -302,7 +302,7 @@ public class TransactionDaoImpl implements TransactionDao {
 
         predicates.add(cb.equal(root.get("type"), TransactionType.EXPENSE));
         predicates.add(cb.equal(user.get("id"), userId));
-        predicates.add(cb.equal(account.get("name"), accountName));
+        predicates.add(cb.equal(cb.lower(account.get("name")), accountName.toLowerCase()));
 
         if (startDate != null) {
             predicates.add(cb.greaterThanOrEqualTo(root.get("transactionDate"), startDate));

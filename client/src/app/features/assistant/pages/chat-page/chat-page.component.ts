@@ -107,6 +107,13 @@ export class ChatPageComponent implements OnInit{
     }
   }
 
+  private readonly syncMessagesEffect = effect(() => {
+    const resourceMessages = this.chatService.chatMessagesResource.value();
+    if (resourceMessages) {
+      this.messages.set(resourceMessages);
+    }
+  });
+
   private updateMessages(content: string, type: MessageType): void {
     this.messages.update( (msgs) => [...msgs, {content, type}]);
   }

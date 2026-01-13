@@ -56,7 +56,7 @@ export class ApiPaths {
 
   public static readonly Chats = {
     BASE: `${ApiPaths.API_V1}/chats`,
-    BY_ID: (id: number) => `${ApiPaths.API_V1}/chats/${id}`,
+    BY_ID: (id: string) => `${ApiPaths.API_V1}/chats/${id}`,
   };
 
   public static readonly Analytics = {

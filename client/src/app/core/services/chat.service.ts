@@ -19,12 +19,12 @@ export class ChatService {
   }
 
   continueChat(chatId: string, message: string): Observable<ChatMessage> {
-    return this.http.post<ChatMessage>(`${ApiPaths.Chats.BY_ID(Number(chatId))}`, {message});
+    return this.http.post<ChatMessage>(`${ApiPaths.Chats.BY_ID(chatId)}`, {message});
   }
 
   chatMessagesResource = httpResource<ChatMessage[]>(() => {
     const chatId = this.selectedChatId();
-    return chatId ? `${ApiPaths.Chats.BY_ID(Number(chatId))}` : undefined;
+    return chatId ? `${ApiPaths.Chats.BY_ID(chatId)}` : undefined;
   });
 
   selectChat(chatId: string): void {
