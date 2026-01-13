@@ -65,21 +65,16 @@ export class RecurringTemplatesPageComponent implements OnInit{
 
   private loadTemplates(): void {
 
-    console.log("Loading templates");
-
     this.transactionService.getRecurringTemplates().subscribe({
       next: (response) => {
         if (response) {
-          console.log("Response body data: ", response);
-
           this.paginationInfo = response.pagination;
           this.templates = response.data;
-
           this.isLoading.set(false);
         }
       },
       error: (error) => {
-        console.log("Error occurred when fetching templates", error);
+        console.error("Error occurred when fetching templates", error);
       }
     });
   }
@@ -115,8 +110,6 @@ export class RecurringTemplatesPageComponent implements OnInit{
 
   onAddRecurringTemplate(): void {
 
-    console.log("Opening add template dialog");
-
     const dialogRef = this.dialog.open(AddRecurringTemplateDialogComponent, {
       width: '600px',
       data: {
@@ -126,38 +119,27 @@ export class RecurringTemplatesPageComponent implements OnInit{
     });
 
     dialogRef.afterClosed().subscribe( formData => {
-      
-      console.log("closing dialog");
       if (formData) {
-        console.log("Gathered data: ", formData);
         const createReq: RecurringTransactionCreateRequest = RecurringTemplateMapper.toCreateRequest(formData);
-        console.log("Data after mapping: ", createReq);
-
         this.transactionService.createRecurringTemplate(createReq).subscribe({
           next: () => {
             this.loadTemplates();
           },
           error: (error) => {
-            console.log("Error occurred when creating transaction: ", error);
+            console.error("Error occurred when creating transaction: ", error);
           }
         });
-      } else {
-        console.log("Dialog close without any data");
       }
     });
 
   }
 
   onEditTemplate(template: RecurringTemplateSummary) {
-    console.log('Edit template:', template.id);
   }
 
   onChangeStatus(template: RecurringTemplateSummary) {
-    console.log('Toggle status for:', template.id);
-
     this.transactionService.changeTemplateStatus(template.id, !template.isActive).subscribe({
       next: () => {
-        console.log("Status changed for: ", !template.isActive);
         template.isActive = !template.isActive;
         let confirmInfo;
         if (template.isActive) {
@@ -170,7 +152,6 @@ export class RecurringTemplatesPageComponent implements OnInit{
         });
       },
       error: (error) => {
-        console.log("Error occurred when changing status: ", error);
         this.snackBar.open('Changing template status went wrong. Please try again.', 'close', {
           duration: 3000
         });
@@ -179,7 +160,6 @@ export class RecurringTemplatesPageComponent implements OnInit{
   }
 
   onDeleteTemplate(template: RecurringTemplateSummary) {
-    console.log('Delete template:', template.id);
   }
 
   private loadCategories(): void {
@@ -188,11 +168,10 @@ export class RecurringTemplatesPageComponent implements OnInit{
     )
     .subscribe({
       next: (data) => {
-        console.log('fetching categories', data);
         this.categories = data;
       },
       error: (error) => {
-        console.log("error occurred when fetching categories", error);
+        console.error("error occurred when fetching categories", error);
       }
     });
   }
@@ -203,11 +182,10 @@ export class RecurringTemplatesPageComponent implements OnInit{
     )
     .subscribe({
       next: (data) => {
-        console.log("fetching accounts", data);
         this.accounts = data;
       },
       error: (error) => {
-        console.log("error occured when fetching accounts", error);
+        console.error("error occured when fetching accounts", error);
       }
     });
   }

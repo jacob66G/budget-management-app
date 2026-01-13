@@ -107,13 +107,6 @@ export class ChatPageComponent implements OnInit{
     }
   }
 
-  private readonly syncMessagesEffect = effect(() => {
-    const resourceMessages = this.chatService.chatMessagesResource.value();
-    if (resourceMessages) {
-      this.messages.set(resourceMessages);
-    }
-  });
-
   private updateMessages(content: string, type: MessageType): void {
     this.messages.update( (msgs) => [...msgs, {content, type}]);
   }
@@ -123,10 +116,6 @@ export class ChatPageComponent implements OnInit{
     setTimeout(() => this.scrollToBottom(), 50);
   });
 
-  private readonly logChatIdChange = effect( () => {
-    console.log("Chat id changed: ", this.chatService.selectedChatId());
-  });
-
   private scrollToBottom(): void {
     try {
       const chatElement = this.chat();
@@ -134,7 +123,7 @@ export class ChatPageComponent implements OnInit{
         chatElement.nativeElement.scrollTop = chatElement.nativeElement.scrollHeight;
       }
     } catch (err) {
-      console.log("Failder to scroll down", err);
+      console.error("Failder to scroll down", err);
     }
   }
 }

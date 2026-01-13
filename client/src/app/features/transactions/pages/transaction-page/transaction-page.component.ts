@@ -145,45 +145,33 @@ export class TransactionPageComponent implements OnInit{
   }
 
   onTypeChange(event: MatSelectChange): void {
-    console.log("Type changed: ", event.value);
     this.updateFilter({type: event.value});
   }
 
   onModeChange(event: MatSelectChange): void {
-    console.log("Mode change: ", event.value);
     this.updateFilter({mode: event.value});
   }
 
   onCategoryChange(event: MatSelectChange): void {
-    console.log("Category change: ", event.value);
     const value = event.value;
-
     const categoryIds = value === 'ALL' ? undefined : [value];
     this.updateFilter({categoryIds});
   }
 
   onAccountChange(event: MatSelectChange): void {
-    console.log("Account change: ", event.value);
-
     const value = event.value;
     const accountIds = value === 'ALL' ? undefined : [value];
     this.updateFilter({accountIds});
   }
 
   onSortByChange(event: MatSelectChange): void {
-    console.log("Sort by field changed: ", event.value);
-
     this.updateFilter({sortedBy: event.value});
   }
 
   onSortDirectionChange(): void {
-    console.log("Sort direction changed");
-
     const newDirection = this.selectedSortingDirection === TransactionSortingDirection.DESC
       ? TransactionSortingDirection.DESC
       : TransactionSortingDirection.ASC;
-
-      console.log("New direction: ", newDirection);
 
     this.selectedSortingDirection = newDirection;
     this.updateFilter({sortDirection: newDirection});
@@ -201,14 +189,11 @@ export class TransactionPageComponent implements OnInit{
       default:
         newValue = TransactionTypeFilter.ALL;
     }
-    console.log("Type changed: ", newValue);
     this.selectedType.set(newValue);
     this.updateFilter({type: newValue});
   }
 
   onDateSelect(range: DateRange) {
-    console.log("Selected range: ", range);
-
     this.selectedPeriod.set(this.formatDateRangeToString(range));
 
     if (range.start !== null && range.end !== null) {
@@ -219,7 +204,6 @@ export class TransactionPageComponent implements OnInit{
   }
 
   onUpcomingRangeChange(range: UpcomingTransactionsTimeRange): void {
-    console.log("upcoming date range change: ", range);
     this.updateUpcomingFilter({range});
   }
 
@@ -235,8 +219,6 @@ export class TransactionPageComponent implements OnInit{
       ...changes,
       page: 1
     };
-
-    console.log('Nowy stan filtra:', this.upcomingTransactionsFilter);
     this.loadUpcomingTransactions();
   }
 
@@ -246,8 +228,6 @@ export class TransactionPageComponent implements OnInit{
       ...changes,
       page: 1
     };
-
-    console.log('Nowy stan filtra:', this.transactionsfilter);
     this.loadTransactions();
   }
 
@@ -336,14 +316,12 @@ export class TransactionPageComponent implements OnInit{
         filter(result => !!result),
 
         concatMap((result) => {
-          console.log("Gathered form data", result);
           const {transactionData, file} = result;
 
           const reqs$ = [];
 
           if (transactionData.categoryId !== currentCategoryId) {
             if (!transactionToUpdate.recurringTransactionId) {
-              console.log("Category changed");
               const changeCategoryReq: TransactionCategoryChangeRequest = {
                 currentCategoryId: currentCategoryId,
                 newCategoryId: transactionData.categoryId,
@@ -357,7 +335,6 @@ export class TransactionPageComponent implements OnInit{
               transactionData.amount !== transactionToUpdate.amount ||
               transactionData.description !== transactionToUpdate.description
           ) {
-            console.log("General data changed");
 
             const updateReq: TransactionUpdateRequest = {
               title: transactionData.title,
@@ -368,12 +345,10 @@ export class TransactionPageComponent implements OnInit{
           }
           
           if (file) {
-            console.log("Updating attachment");
             reqs$.push(this.attachmentManager.manageAttachmentUpload(file, transactionId));
           }
 
           if (reqs$.length === 0) {
-            console.log("Nothing changed");
             return of(null);
           }
           return forkJoin(reqs$).pipe(
@@ -387,8 +362,6 @@ export class TransactionPageComponent implements OnInit{
   }
 
   onDeleteTransaction(id: number) {
-    console.log('Delete', id);
-
     const dialogRef = this.dialog.open(ConfirmDialog, {
       width: '400px',
       data: {
@@ -411,8 +384,6 @@ export class TransactionPageComponent implements OnInit{
             this.snackBar.open('Transaction deleted successfully', 'Close', {
               duration: 3000
             });
-
-            console.log(`Transaction with id: ${id} deleted`);
           },
 
           error: (err) => {
@@ -487,15 +458,12 @@ export class TransactionPageComponent implements OnInit{
 
         concatMap((result) => {
           const {transactionData, file} = result;
-          console.log("Gathered form data", result);
           
           const dto = TransactionMapper.toCreateRequest(transactionData);
 
           return this.transactionService.createTransaction(dto).pipe(
 
             concatMap((createdTransactionData) => {
-              console.log("Transaction created: ", createdTransactionData);
-
               if (file) {
                 return this.attachmentManager.manageAttachmentUpload(file, createdTransactionData.id);
               } else {
@@ -506,7 +474,6 @@ export class TransactionPageComponent implements OnInit{
         }),
 
         tap(() => {
-          console.log("Transaction added successfully");
           this.loadTransactions();
         })
       ).subscribe({
@@ -517,9 +484,6 @@ export class TransactionPageComponent implements OnInit{
   }
 
   async openAttachmentViewDialog(transactionId: number): Promise<void> {
-
-    console.log("Opening attachment view dialog for transaction with id: ", transactionId);
-
     try {
       const data = await this.attachmentManager.getTransactionAttachmentData(transactionId);
     
@@ -541,14 +505,12 @@ export class TransactionPageComponent implements OnInit{
   loadTransactions(): void {
     this.transactionService.getTransactions(this.transactionsfilter).subscribe({
       next: (response) => {
-        console.log("fetching transactions first page: ", response);
-
         this.transactions = response.data;
 
         this.pagination = response.pagination;
       },
       error: (error) => {
-        console.log("error occurred when fetching transactions", error);
+        console.error("error occurred when fetching transactions", error);
       }
     })
   }
@@ -559,11 +521,10 @@ export class TransactionPageComponent implements OnInit{
     )
     .subscribe({
       next: (data) => {
-        console.log("fetching accounts", data);
         this.accounts = data;
       },
       error: (error) => {
-        console.log("error occured when fetching accounts", error);
+        console.error("error occured when fetching accounts", error);
       }
     });
   }
@@ -575,10 +536,9 @@ export class TransactionPageComponent implements OnInit{
         this.upcomingTransactions = response.data;
 
         this.upcomingPagination = response.pagination;
-        console.log("upcoming transactions fetched: ", response);
       },
       error: (error) => {
-        console.log("error occurred when fetching upcoming transactions", error);
+        console.error("error occurred when fetching upcoming transactions", error);
       }
     })
   }
@@ -589,11 +549,10 @@ export class TransactionPageComponent implements OnInit{
     )
     .subscribe({
       next: (data) => {
-        console.log('fetching categories', data);
         this.categories = data;
       },
       error: (error) => {
-        console.log("error occurred when fetching categories", error);
+        console.error("error occurred when fetching categories", error);
     }
     });
   }
