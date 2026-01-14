@@ -11,6 +11,9 @@ import { ChatService } from '../../../../core/services/chat.service';
 import { MessageType } from '../../models/message-type.enum';
 import { ChatCreateResponse } from '../../models/chat-create-response.model';
 import { MarkdownToHtmlPipe } from '../../pipes/markdown-to-html-pipe';
+import { ApiErrorService } from '../../../../core/services/api-error.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ToastService } from '../../../../core/services/toast-service';
 
 @Component({
   selector: 'app-chat-page',
@@ -22,6 +25,8 @@ export class ChatPageComponent implements OnInit{
   
   private readonly chat = viewChild.required<ElementRef>('chat');
   private readonly chatService = inject(ChatService);
+  private errorService = inject(ApiErrorService);
+  private toastService = inject(ToastService);
 
   public messages = signal<ChatMessage[]>([]);
 
@@ -86,8 +91,9 @@ export class ChatPageComponent implements OnInit{
             }
             this.isLoading = false;
           },
-          error: () => {
+          error: (error: HttpErrorResponse) => {
             this.isLoading = false;
+            this.errorService.handle(error);
           }
         });
     } else {  // creating new conversation
@@ -100,8 +106,9 @@ export class ChatPageComponent implements OnInit{
             }
             this.isLoading = false;
           },
-          error: () => {
+          error: (error: HttpErrorResponse) => {
             this.isLoading = false;
+            this.errorService.handle(error);
           }
         });
     }
@@ -130,7 +137,7 @@ export class ChatPageComponent implements OnInit{
         chatElement.nativeElement.scrollTop = chatElement.nativeElement.scrollHeight;
       }
     } catch (err) {
-      console.error("Failder to scroll down", err);
+      this.toastService.showError("Failed do scroll down");
     }
   }
 }

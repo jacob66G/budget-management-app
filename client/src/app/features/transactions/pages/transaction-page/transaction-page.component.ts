@@ -47,6 +47,9 @@ import { AccountService } from '../../../../core/services/account.service';
 import { CategoryService } from '../../../../core/services/category.service';
 import { TransactionAttachmentManager } from '../../services/transaction-attachment-manager.service';
 import { AttachmentViewDialog } from '../../components/attachment-view-dialog/attachment-view-dialog.component';
+import { ApiErrorService } from '../../../../core/services/api-error.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ToastService } from '../../../../core/services/toast-service';
 
 @Component({
   selector: 'app-transaction-page',
@@ -94,6 +97,8 @@ export class TransactionPageComponent implements OnInit{
   private readonly datePipe = inject(DatePipe);
   private snackBar = inject(MatSnackBar);
   private attachmentManager = inject(TransactionAttachmentManager);
+  private errorService = inject(ApiErrorService);
+  private toastService = inject(ToastService);
 
   modeOptions = [
     { value: TransactionModeFilter.ALL, label: 'All' },
@@ -356,7 +361,7 @@ export class TransactionPageComponent implements OnInit{
           );
         }),
       ).subscribe({
-        error: (err) => console.error("Error occurred when saving changes", err)
+        error: (err: HttpErrorResponse) => this.errorService.handle(err)
       });
     }
   }
@@ -377,7 +382,6 @@ export class TransactionPageComponent implements OnInit{
       if (result === true) {
 
         this.transactionService.deleteTransaction(id).subscribe({
-
           next: () => {
             this.loadTransactions();
 
@@ -385,14 +389,7 @@ export class TransactionPageComponent implements OnInit{
               duration: 3000
             });
           },
-
-          error: (err) => {
-            console.error('Error deleting transaction', err);
-            this.snackBar.open('Failed to delete transaction', 'Close', {
-              duration: 3000,
-              panelClass: ['error-snackbar']
-            });
-          }
+          error: (err: HttpErrorResponse) => this.errorService.handle(err)
         });
       }
     });
@@ -476,11 +473,7 @@ export class TransactionPageComponent implements OnInit{
         tap(() => {
           this.loadTransactions();
         })
-      ).subscribe({
-        error: (err) => {
-          console.error("Error occurred when adding transaction", err);
-        }
-      });
+      ).subscribe();
   }
 
   async openAttachmentViewDialog(transactionId: number): Promise<void> {
@@ -492,12 +485,9 @@ export class TransactionPageComponent implements OnInit{
           width: '600px',
           data: data
         });
-      } else {
-        console.error("Error occurred when fetching attachment data");
       }
-
     } catch (error) {
-      console.error("Unexpected error occurred", error);
+      this.toastService.showError("Error occurred when fetching transaction attachment. Please try again.");
     }
 
   }
@@ -509,9 +499,7 @@ export class TransactionPageComponent implements OnInit{
 
         this.pagination = response.pagination;
       },
-      error: (error) => {
-        console.error("error occurred when fetching transactions", error);
-      }
+      error: (error: HttpErrorResponse) => this.errorService.handle(error)
     })
   }
 
@@ -523,9 +511,7 @@ export class TransactionPageComponent implements OnInit{
       next: (data) => {
         this.accounts = data;
       },
-      error: (error) => {
-        console.error("error occured when fetching accounts", error);
-      }
+      error: (error: HttpErrorResponse) => this.errorService.handle(error)
     });
   }
 
@@ -537,9 +523,7 @@ export class TransactionPageComponent implements OnInit{
 
         this.upcomingPagination = response.pagination;
       },
-      error: (error) => {
-        console.error("error occurred when fetching upcoming transactions", error);
-      }
+      error: (error: HttpErrorResponse) => this.errorService.handle(error)
     })
   }
 
@@ -551,9 +535,7 @@ export class TransactionPageComponent implements OnInit{
       next: (data) => {
         this.categories = data;
       },
-      error: (error) => {
-        console.error("error occurred when fetching categories", error);
-    }
+      error: (error: HttpErrorResponse) => this.errorService.handle(error)
     });
   }
 }

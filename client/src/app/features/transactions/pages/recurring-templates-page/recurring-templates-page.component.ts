@@ -30,6 +30,8 @@ import { RecurringTemplateUpdateRequest } from '../../model/recurring-template-u
 import { UpdateRange } from '../../constants/update-range.enum';
 import { ConfirmDialog } from '../../../../shared/components/dialogs/confirm-dialog/confirm-dialog';
 import { RemovalRange } from '../../constants/removal-range.enum';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ApiErrorService } from '../../../../core/services/api-error.service';
 
 @Component({
   selector: 'app-recurring-templates-page',
@@ -61,6 +63,7 @@ export class RecurringTemplatesPageComponent implements OnInit{
   private categoryService = inject(CategoryService);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
+  private errorService = inject(ApiErrorService);
 
   ngOnInit(): void {
     this.loadTemplates();
@@ -78,9 +81,7 @@ export class RecurringTemplatesPageComponent implements OnInit{
           this.isLoading.set(false);
         }
       },
-      error: (error) => {
-        console.error("Error occurred when fetching templates", error);
-      }
+      error: (error: HttpErrorResponse) => this.errorService.handle(error)
     });
   }
 
@@ -131,9 +132,7 @@ export class RecurringTemplatesPageComponent implements OnInit{
           next: () => {
             this.loadTemplates();
           },
-          error: (error) => {
-            console.error("Error occurred when creating transaction: ", error);
-          }
+          error: (error: HttpErrorResponse) => this.errorService.handle(error)
         });
       }
     });
@@ -162,13 +161,7 @@ export class RecurringTemplatesPageComponent implements OnInit{
               duration: 3000
             });
           },
-          error: (error) => {
-            console.error("Error occurred when updating template: ", error);
-            this.snackBar.open('Failed to update template', 'Close', {
-              duration: 3000,
-              panelClass: ['error-snackbar']
-            });
-          }
+          error: (error: HttpErrorResponse) => this.errorService.handle(error)
         });
       }
     });
@@ -189,11 +182,7 @@ export class RecurringTemplatesPageComponent implements OnInit{
           duration: 3000
         });
       },
-      error: (error) => {
-        this.snackBar.open('Changing template status went wrong. Please try again.', 'close', {
-          duration: 3000
-        });
-      }
+      error: (error: HttpErrorResponse) => this.errorService.handle(error)
     });
   }
 
@@ -221,14 +210,7 @@ export class RecurringTemplatesPageComponent implements OnInit{
                   duration: 3000
                 });
               },
-    
-              error: (err) => {
-                console.error('Error deleting transaction', err);
-                this.snackBar.open('Failed to delete transaction', 'Close', {
-                  duration: 3000,
-                  panelClass: ['error-snackbar']
-                });
-              }
+              error: (error: HttpErrorResponse) => this.errorService.handle(error)
             });
           }
         });
@@ -242,9 +224,7 @@ export class RecurringTemplatesPageComponent implements OnInit{
       next: (data) => {
         this.categories = data;
       },
-      error: (error) => {
-        console.error("error occurred when fetching categories", error);
-      }
+      error: (error: HttpErrorResponse) => this.errorService.handle(error)
     });
   }
 
@@ -256,9 +236,7 @@ export class RecurringTemplatesPageComponent implements OnInit{
       next: (data) => {
         this.accounts = data;
       },
-      error: (error) => {
-        console.error("error occured when fetching accounts", error);
-      }
+      error: (error: HttpErrorResponse) => this.errorService.handle(error)
     });
   }
 }
