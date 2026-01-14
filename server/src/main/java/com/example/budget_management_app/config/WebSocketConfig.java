@@ -1,6 +1,5 @@
 package com.example.budget_management_app.config;
 
-import com.example.budget_management_app.constants.ApiPaths;
 import com.example.budget_management_app.security.service.CustomUserDetails;
 import com.example.budget_management_app.security.service.CustomUserDetailsService;
 import com.example.budget_management_app.security.service.JwtService;
@@ -84,7 +83,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns(ApiPaths.CLIENT_BASE_URL)
+                .setAllowedOriginPatterns("*")
                 .withSockJS();
     }
 }

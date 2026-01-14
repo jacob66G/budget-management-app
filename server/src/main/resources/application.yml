@@ -26,7 +26,7 @@ spring:
     password: ${POSTGRES_PASSWORD:postgres}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     defer-datasource-initialization: false
     properties:
       hibernate:
@@ -37,7 +37,7 @@ spring:
           enum_type: STRING
   sql:
     init:
-      mode: ${SQL_INIT_MODE:always}
+      mode: never
   h2:
     console:
       enabled: true
@@ -90,3 +90,7 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+dotenv:
+  directory: ../
+  filename: .env

@@ -1,6 +1,5 @@
 package com.example.budget_management_app.security.config;
 
-import com.example.budget_management_app.constants.ApiPaths;
 import com.example.budget_management_app.security.exceptionsHandling.CustomAuthenticationEntryPoint;
 import com.example.budget_management_app.security.filter.JwtAuthenticationFilter;
 import com.example.budget_management_app.security.provider.CustomAuthenticationProvider;
@@ -47,9 +46,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/accounts/**").authenticated()
                         .requestMatchers("/api/v1/analytics/**").authenticated()
                         .requestMatchers("/api/v1/notifications/**").authenticated()
-                        .requestMatchers("api/v1/transactions/**").authenticated()
-                        .requestMatchers("api/v1/recurring-transactions/**").authenticated()
-                        .requestMatchers("api/v1/chats/**").authenticated()
+                        .requestMatchers("/api/v1/transactions/**").authenticated()
+                        .requestMatchers("/api/v1/recurring-transactions/**").authenticated()
+                        .requestMatchers("/api/v1/chats/**").authenticated()
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -69,7 +68,12 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         return request -> {
             CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOrigins(List.of(ApiPaths.CLIENT_BASE_URL));
+
+            config.setAllowedOrigins(List.of(
+                    "http://localhost:4200",
+                    "http://localhost",
+                    "http://localhost:80"
+            ));
             config.setAllowedMethods(List.of(
                     HttpMethod.GET.name(),
                     HttpMethod.POST.name(),

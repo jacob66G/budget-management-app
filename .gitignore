@@ -1,65 +1,53 @@
+.DS_Store
+Thumbs.db
+
 HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 
-### Environment Variables ###
-server/.env
+.env
+.env.*
+*.env
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+*.log
 
-### IntelliJ IDEA ###
 .idea
 *.iws
 *.iml
 *.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
 .vscode/
+.settings/
+.classpath
+.project
+.factorypath
+.springBeans
+.sts4-cache
 
-# Angular specific
-/dist/
-/out-tsc/
-/tmp/
-/coverage/
-/e2e/test-output/
-/.angular/
+
+target/
+out/
+build/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+node_modules/
+
+dist/
+/client/dist/
+out-tsc/
+
 .angular/
-
-# Node modules and dependency files
-/node_modules/
-/package-lock.json
-/yarn.lock
-
-# Environment files
-/.env
-
-# Angular CLI and build artefacts
-/.angular-cli.json
-/.ng/
-
-# TypeScript cache
+.ng/
 *.tsbuildinfo
 
-# Logs
+# Testy
+coverage/
+e2e/test-output/
+
+*.sql
+*.dump
+
+!db-init/*.sql
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

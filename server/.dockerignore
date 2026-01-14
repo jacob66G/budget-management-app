@@ -1,0 +1,17 @@
+.env
+.env.*
+*.env
+
+.git
+.gitignore
+
+.idea
+.vscode
+*.iml
+
+target
+out
+build
+
+*.log
+Dockerfile
